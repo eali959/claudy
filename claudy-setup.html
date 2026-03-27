@@ -1,0 +1,743 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>🍊 Claud-y Setup Guide</title>
+  <style>
+    :root {
+      --orange: #C15F3C;
+      --orange-light: #e87a52;
+      --orange-pale: #2a1a12;
+      --bg: #0f0f0f;
+      --surface: #1a1a1a;
+      --surface2: #222222;
+      --border: #333333;
+      --text: #f0f0f0;
+      --text-muted: #999999;
+      --green: #4caf7d;
+      --code-bg: #141414;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.7;
+      padding: 40px 20px 80px;
+    }
+
+    .container { max-width: 720px; margin: 0 auto; }
+
+    /* Header */
+    .header {
+      text-align: center;
+      padding: 48px 24px 40px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      margin-bottom: 40px;
+    }
+
+    .mascot {
+      font-size: 72px;
+      display: block;
+      margin-bottom: 16px;
+      animation: bob 3s ease-in-out infinite;
+    }
+
+    @keyframes bob {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-10px); }
+    }
+
+    .header h1 {
+      font-size: 32px;
+      font-weight: 700;
+      color: var(--orange);
+      margin-bottom: 8px;
+    }
+
+    .header p {
+      color: var(--text-muted);
+      font-size: 15px;
+    }
+
+    .tagline {
+      display: inline-block;
+      margin-top: 14px;
+      background: var(--orange-pale);
+      border: 1px solid var(--orange);
+      color: var(--orange-light);
+      font-size: 13px;
+      font-style: italic;
+      padding: 6px 14px;
+      border-radius: 20px;
+    }
+
+    /* Progress bar */
+    .progress-wrap {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 20px 24px;
+      margin-bottom: 32px;
+    }
+
+    .progress-wrap h3 {
+      font-size: 13px;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      margin-bottom: 10px;
+    }
+
+    .progress-bar-bg {
+      background: var(--border);
+      border-radius: 99px;
+      height: 10px;
+      overflow: hidden;
+    }
+
+    .progress-bar-fill {
+      background: linear-gradient(90deg, var(--orange), var(--orange-light));
+      height: 100%;
+      width: 0%;
+      border-radius: 99px;
+      transition: width 0.4s ease;
+    }
+
+    .progress-label {
+      font-size: 13px;
+      color: var(--text-muted);
+      margin-top: 8px;
+    }
+
+    /* Section */
+    .section {
+      margin-bottom: 32px;
+    }
+
+    .section-header {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      margin-bottom: 16px;
+    }
+
+    .section-num {
+      background: var(--orange);
+      color: white;
+      font-weight: 700;
+      font-size: 15px;
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+
+    .section-num.done-num {
+      background: var(--green);
+    }
+
+    .section-title {
+      font-size: 20px;
+      font-weight: 700;
+      color: var(--text);
+    }
+
+    /* Step cards */
+    .step {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 18px 20px;
+      margin-bottom: 12px;
+      transition: border-color 0.2s, opacity 0.2s;
+    }
+
+    .step.completed {
+      opacity: 0.5;
+      border-color: var(--green);
+    }
+
+    .step-top {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 12px;
+    }
+
+    .step-label {
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--orange);
+      margin-bottom: 6px;
+    }
+
+    .step-body { flex: 1; }
+
+    .step p, .step li {
+      font-size: 14px;
+      color: var(--text);
+      margin-bottom: 6px;
+    }
+
+    .step ul, .step ol {
+      padding-left: 20px;
+      margin: 8px 0;
+    }
+
+    .step li { margin-bottom: 4px; }
+
+    code {
+      background: var(--code-bg);
+      border: 1px solid var(--border);
+      color: var(--orange-light);
+      font-family: "SF Mono", "Fira Code", monospace;
+      font-size: 13px;
+      padding: 2px 7px;
+      border-radius: 5px;
+    }
+
+    pre {
+      background: var(--code-bg);
+      border: 1px solid var(--border);
+      border-left: 3px solid var(--orange);
+      color: #e0e0e0;
+      font-family: "SF Mono", "Fira Code", monospace;
+      font-size: 13px;
+      padding: 14px 16px;
+      border-radius: 8px;
+      margin: 10px 0;
+      white-space: pre-wrap;
+      word-break: break-all;
+      line-height: 1.6;
+    }
+
+    .check-btn {
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      color: var(--text-muted);
+      font-size: 13px;
+      padding: 6px 14px;
+      border-radius: 8px;
+      cursor: pointer;
+      white-space: nowrap;
+      flex-shrink: 0;
+      transition: background 0.2s, color 0.2s, border-color 0.2s;
+    }
+
+    .check-btn:hover {
+      background: var(--orange-pale);
+      border-color: var(--orange);
+      color: var(--orange-light);
+    }
+
+    .check-btn.done {
+      background: #1a2e1e;
+      border-color: var(--green);
+      color: var(--green);
+    }
+
+    /* Tip boxes */
+    .tip {
+      background: var(--orange-pale);
+      border: 1px solid var(--orange);
+      border-radius: 10px;
+      padding: 12px 16px;
+      font-size: 13px;
+      color: var(--orange-light);
+      margin: 10px 0;
+    }
+
+    .tip strong { color: var(--orange); }
+
+    .warn {
+      background: #1a1a0a;
+      border: 1px solid #666600;
+      border-radius: 10px;
+      padding: 12px 16px;
+      font-size: 13px;
+      color: #cccc44;
+      margin: 10px 0;
+    }
+
+    .success {
+      background: #0d1f12;
+      border: 1px solid var(--green);
+      border-radius: 10px;
+      padding: 12px 16px;
+      font-size: 13px;
+      color: var(--green);
+      margin: 10px 0;
+    }
+
+    /* Divider */
+    hr {
+      border: none;
+      border-top: 1px solid var(--border);
+      margin: 32px 0;
+    }
+
+    /* Footer */
+    .footer {
+      text-align: center;
+      padding: 32px 20px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      margin-top: 40px;
+      color: var(--text-muted);
+      font-size: 13px;
+    }
+
+    .footer span { font-size: 28px; display: block; margin-bottom: 10px; }
+  </style>
+</head>
+<body>
+<div class="container">
+
+  <!-- Header -->
+  <div class="header">
+    <em class="mascot">🍊</em>
+    <h1>Claud-y Setup Guide</h1>
+    <p>Your step-by-step checklist to get Claud-y alive on your Mac.</p>
+    <span class="tagline">"The spiritual successor to Clippy, now running on the OS that killed him."</span>
+  </div>
+
+  <!-- Progress -->
+  <div class="progress-wrap">
+    <h3>Your Progress</h3>
+    <div class="progress-bar-bg">
+      <div class="progress-bar-fill" id="progressFill"></div>
+    </div>
+    <p class="progress-label" id="progressLabel">0 of 18 steps completed</p>
+  </div>
+
+  <!-- STEP 1 -->
+  <div class="section">
+    <div class="section-header">
+      <div class="section-num" id="num1">1</div>
+      <div class="section-title">Check your files exist</div>
+    </div>
+
+    <div class="step" id="step1">
+      <div class="step-top">
+        <div class="step-body">
+          <div class="step-label">Step 1.1</div>
+          <p>Open <strong>Finder</strong> and navigate to your project folder:</p>
+          <pre>/Users/eali/Documents/App Dev/Apps/Claud-y</pre>
+          <p>You should already see two files in there:</p>
+          <ul>
+            <li><code>CLAUDE.md</code></li>
+            <li><code>claudy-system-prompt.txt</code></li>
+          </ul>
+          <div class="success">✅ You already did this part — both files are in the folder!</div>
+        </div>
+        <button class="check-btn" onclick="markDone('step1')">Mark done</button>
+      </div>
+    </div>
+  </div>
+
+  <hr />
+
+  <!-- STEP 2 -->
+  <div class="section">
+    <div class="section-header">
+      <div class="section-num" id="num2">2</div>
+      <div class="section-title">Create the Xcode project</div>
+    </div>
+
+    <div class="step" id="step2">
+      <div class="step-top">
+        <div class="step-body">
+          <div class="step-label">Step 2.1 — Open Xcode</div>
+          <p>Open <strong>Xcode</strong> on your Mac. If it isn't installed, download it free from the App Store — search "Xcode".</p>
+          <div class="tip"><strong>Tip:</strong> Use Spotlight (⌘ + Space), type "Xcode", press Return.</div>
+        </div>
+        <button class="check-btn" onclick="markDone('step2')">Mark done</button>
+      </div>
+    </div>
+
+    <div class="step" id="step3">
+      <div class="step-top">
+        <div class="step-body">
+          <div class="step-label">Step 2.2 — Start a new project</div>
+          <p>On the Xcode welcome screen, click <strong>"Create New Project"</strong>.</p>
+          <p>Or if Xcode is already open: in the menu bar go to <strong>File → New → Project…</strong></p>
+        </div>
+        <button class="check-btn" onclick="markDone('step3')">Mark done</button>
+      </div>
+    </div>
+
+    <div class="step" id="step4">
+      <div class="step-top">
+        <div class="step-body">
+          <div class="step-label">Step 2.3 — Choose the right template</div>
+          <p>A window will appear asking you to choose a template.</p>
+          <ol>
+            <li>Click the <strong>macOS</strong> tab at the top of the window (not iOS or watchOS).</li>
+            <li>Click the tile labelled <strong>App</strong>.</li>
+            <li>Click <strong>Next</strong>.</li>
+          </ol>
+        </div>
+        <button class="check-btn" onclick="markDone('step4')">Mark done</button>
+      </div>
+    </div>
+
+    <div class="step" id="step5">
+      <div class="step-top">
+        <div class="step-body">
+          <div class="step-label">Step 2.4 — Fill in project settings</div>
+          <p>A form appears. Fill it in exactly like this:</p>
+          <ul>
+            <li><strong>Product Name:</strong> <code>Claud-y</code></li>
+            <li><strong>Team:</strong> your Apple ID, or leave as <em>None</em> for now</li>
+            <li><strong>Bundle Identifier:</strong> <code>com.eali.claudy</code></li>
+            <li><strong>Interface:</strong> <code>SwiftUI</code></li>
+            <li><strong>Language:</strong> <code>Swift</code></li>
+          </ul>
+          <p>Then click <strong>Next</strong>.</p>
+          <div class="warn">⚠️ Make sure Interface is SwiftUI, NOT Storyboard. This is important.</div>
+        </div>
+        <button class="check-btn" onclick="markDone('step5')">Mark done</button>
+      </div>
+    </div>
+
+    <div class="step" id="step6">
+      <div class="step-top">
+        <div class="step-body">
+          <div class="step-label">Step 2.5 — Choose where to save</div>
+          <p>Xcode now asks where to save the project. This part is important!</p>
+          <ol>
+            <li>In the save dialog, navigate to:
+              <pre>/Users/eali/Documents/App Dev/Apps/</pre>
+            </li>
+            <li>Click on the <strong>Apps</strong> folder to select it (you want to save <em>inside</em> Apps, not inside the Claud-y subfolder).</li>
+            <li>Click <strong>Create</strong>.</li>
+          </ol>
+          <div class="tip"><strong>After this, your folder structure should look like:</strong>
+            <pre>Apps/
+  └─ Claud-y/
+     ├─ Claud-y.xcodeproj     ← Xcode created this
+     ├─ CLAUDE.md              ← you already had this
+     ├─ claudy-system-prompt.txt  ← you already had this
+     └─ Claud-y/              ← code subfolder Xcode created</pre>
+          </div>
+        </div>
+        <button class="check-btn" onclick="markDone('step6')">Mark done</button>
+      </div>
+    </div>
+  </div>
+
+  <hr />
+
+  <!-- STEP 3 -->
+  <div class="section">
+    <div class="section-header">
+      <div class="section-num" id="num3">3</div>
+      <div class="section-title">Open Claude Code in the right folder</div>
+    </div>
+
+    <div class="step" id="step7">
+      <div class="step-top">
+        <div class="step-body">
+          <div class="step-label">Step 3.1 — Open Claude Code</div>
+          <p>Open the <strong>Claude Code Mac app</strong>. You'll see a terminal-style input at the bottom where you type prompts.</p>
+        </div>
+        <button class="check-btn" onclick="markDone('step7')">Mark done</button>
+      </div>
+    </div>
+
+    <div class="step" id="step8">
+      <div class="step-top">
+        <div class="step-body">
+          <div class="step-label">Step 3.2 — Navigate to your project folder</div>
+          <p>Type the following exactly (copy-paste is fine) and press <strong>Return</strong>:</p>
+          <pre>cd "/Users/eali/Documents/App Dev/Apps/Claud-y"</pre>
+          <div class="warn">⚠️ The quotes around the path are essential because the path has spaces in it. Don't leave them out.</div>
+        </div>
+        <button class="check-btn" onclick="markDone('step8')">Mark done</button>
+      </div>
+    </div>
+
+    <div class="step" id="step9">
+      <div class="step-top">
+        <div class="step-body">
+          <div class="step-label">Step 3.3 — Confirm you're in the right place</div>
+          <p>Type this and press <strong>Return</strong>:</p>
+          <pre>ls</pre>
+          <p>You should see a list that includes:</p>
+          <ul>
+            <li><code>CLAUDE.md</code></li>
+            <li><code>claudy-system-prompt.txt</code></li>
+            <li><code>Claud-y.xcodeproj</code></li>
+            <li><code>Claud-y</code> (folder)</li>
+          </ul>
+          <div class="success">✅ If you see those four things, you're in the right place. Move on!</div>
+          <div class="warn">❌ If you see "No such file or directory" — double-check the path in step 3.2 and try again.</div>
+        </div>
+        <button class="check-btn" onclick="markDone('step9')">Mark done</button>
+      </div>
+    </div>
+  </div>
+
+  <hr />
+
+  <!-- STEP 4 -->
+  <div class="section">
+    <div class="section-header">
+      <div class="section-num" id="num4">4</div>
+      <div class="section-title">Brief Claude Code</div>
+    </div>
+
+    <div class="step" id="step10">
+      <div class="step-top">
+        <div class="step-body">
+          <div class="step-label">Step 4.1 — Tell Claude Code to read the brief</div>
+          <p>Type this in Claude Code and press <strong>Return</strong>:</p>
+          <pre>read CLAUDE.md and continue</pre>
+          <p>Wait for Claude Code to confirm it has read the file. It may summarise what it found — that's normal.</p>
+          <div class="tip"><strong>Tip:</strong> You can type this any time during a session if Claude Code seems to have forgotten the project rules.</div>
+        </div>
+        <button class="check-btn" onclick="markDone('step10')">Mark done</button>
+      </div>
+    </div>
+  </div>
+
+  <hr />
+
+  <!-- STEP 5 -->
+  <div class="section">
+    <div class="section-header">
+      <div class="section-num" id="num5">5</div>
+      <div class="section-title">Build the first scaffold</div>
+    </div>
+
+    <div class="step" id="step11">
+      <div class="step-top">
+        <div class="step-body">
+          <div class="step-label">Step 5.1 — Paste the scaffold prompt</div>
+          <p>Copy this entire block and paste it into Claude Code, then press <strong>Return</strong>:</p>
+          <pre>Build the initial Claud-y macOS app scaffold. Create the full project
+structure as defined in CLAUDE.md. Start with:
+
+1. AppDelegate.swift — floating NSPanel setup, always-on-top, transparent background
+2. ClaudyCharacterView.swift — a placeholder orange circle with eyes
+   (Lottie not integrated yet), draggable anywhere on screen, persists
+   position to UserDefaults
+3. ClaudeAPIService.swift — async Claude API POST to /v1/messages, API key
+   from Keychain, streaming support stubbed
+4. PersonalityManager.swift — enum of all personality modes, active mode
+   stored in @Observable, system prompt builder stub
+5. NSStatusItem menu — Personality submenu, Settings, Quit
+
+Do not implement animations or chat yet.
+Get the window floating and the character draggable first.</pre>
+          <p>Wait for Claude Code to finish. It will create multiple files. Don't interrupt it while it's working.</p>
+          <div class="tip"><strong>This may take 2–4 minutes.</strong> You'll see it writing files one by one. That's normal.</div>
+        </div>
+        <button class="check-btn" onclick="markDone('step11')">Mark done</button>
+      </div>
+    </div>
+  </div>
+
+  <hr />
+
+  <!-- STEP 6 -->
+  <div class="section">
+    <div class="section-header">
+      <div class="section-num" id="num6">6</div>
+      <div class="section-title">Build and test in Xcode</div>
+    </div>
+
+    <div class="step" id="step12">
+      <div class="step-top">
+        <div class="step-body">
+          <div class="step-label">Step 6.1 — Build in Xcode</div>
+          <p>Switch back to <strong>Xcode</strong>. Press <strong>⌘B</strong> (Command + B) to build.</p>
+          <p>Two possible outcomes:</p>
+          <ul>
+            <li>✅ <strong>"Build Succeeded"</strong> appears at the top → move to step 6.2.</li>
+            <li>❌ Red error icons appear → go to step 6.3.</li>
+          </ul>
+        </div>
+        <button class="check-btn" onclick="markDone('step12')">Mark done</button>
+      </div>
+    </div>
+
+    <div class="step" id="step13">
+      <div class="step-top">
+        <div class="step-body">
+          <div class="step-label">Step 6.2 — Run Claud-y</div>
+          <p>If the build succeeded, press <strong>⌘R</strong> (Command + R) to run the app.</p>
+          <p>You should see a small floating orange element appear on your screen. Try dragging it around!</p>
+          <div class="success">🎉 If it floats and drags — Claud-y is alive. That's your win for tonight!</div>
+        </div>
+        <button class="check-btn" onclick="markDone('step13')">Mark done</button>
+      </div>
+    </div>
+
+    <div class="step" id="step14">
+      <div class="step-top">
+        <div class="step-body">
+          <div class="step-label">Step 6.3 — If the build fails (red errors)</div>
+          <p>Don't try to fix the errors yourself. Just do this:</p>
+          <ol>
+            <li>Click on one of the red error lines in Xcode to see the full message.</li>
+            <li>Select all the error text and copy it.</li>
+            <li>Switch to Claude Code and type:
+              <pre>The Xcode build failed. Fix these errors:
+[PASTE YOUR ERROR TEXT HERE]</pre>
+            </li>
+            <li>Press <strong>Return</strong> and let Claude Code fix it.</li>
+            <li>Go back to Xcode and press <strong>⌘B</strong> again.</li>
+            <li>Repeat until build succeeds.</li>
+          </ol>
+          <div class="tip"><strong>Tip:</strong> If Claude Code keeps failing on the same error, type: <code>read CLAUDE.md and try again</code></div>
+        </div>
+        <button class="check-btn" onclick="markDone('step14')">Mark done</button>
+      </div>
+    </div>
+  </div>
+
+  <hr />
+
+  <!-- STEP 7 -->
+  <div class="section">
+    <div class="section-header">
+      <div class="section-num" id="num7">7</div>
+      <div class="section-title">Store your API key safely</div>
+    </div>
+
+    <div class="step" id="step15">
+      <div class="step-top">
+        <div class="step-body">
+          <div class="step-label">Step 7.1 — Get your API key</div>
+          <p>In your browser, go to:</p>
+          <pre>console.anthropic.com</pre>
+          <ol>
+            <li>Sign in with your Anthropic account.</li>
+            <li>Click <strong>API Keys</strong> in the left sidebar.</li>
+            <li>Click <strong>Create Key</strong>.</li>
+            <li>Name it <code>claudy</code>.</li>
+            <li>Copy the key — it starts with <code>sk-ant-...</code></li>
+            <li>Paste it somewhere temporary like Notes for now.</li>
+          </ol>
+          <div class="warn">⚠️ Never paste your API key into a code file. It goes into the Keychain only (next step).</div>
+        </div>
+        <button class="check-btn" onclick="markDone('step15')">Mark done</button>
+      </div>
+    </div>
+
+    <div class="step" id="step16">
+      <div class="step-top">
+        <div class="step-body">
+          <div class="step-label">Step 7.2 — Let Claude Code store it safely</div>
+          <p>In Claude Code, type this and press <strong>Return</strong>:</p>
+          <pre>Guide me through storing my Claude API key in the macOS Keychain as specified in CLAUDE.md. Walk me through each step.</pre>
+          <p>Follow exactly what it tells you. It will store the key securely so no file in your project ever contains it.</p>
+        </div>
+        <button class="check-btn" onclick="markDone('step16')">Mark done</button>
+      </div>
+    </div>
+  </div>
+
+  <hr />
+
+  <!-- STEP 8 — Future sessions -->
+  <div class="section">
+    <div class="section-header">
+      <div class="section-num" id="num8">8</div>
+      <div class="section-title">Future sessions (next nights)</div>
+    </div>
+
+    <div class="step" id="step17">
+      <div class="step-top">
+        <div class="step-body">
+          <div class="step-label">Step 8.1 — The daily loop</div>
+          <p>Every time you come back to work on Claud-y, do this at the start:</p>
+          <ol>
+            <li>Open Claude Code.</li>
+            <li>Navigate to project: <code>cd "/Users/eali/Documents/App Dev/Apps/Claud-y"</code></li>
+            <li>Type: <code>read CLAUDE.md and continue</code></li>
+            <li>Give it ONE task from the list below.</li>
+            <li>Wait → build in Xcode (⌘B) → fix errors if needed → repeat.</li>
+          </ol>
+        </div>
+        <button class="check-btn" onclick="markDone('step17')">Mark done</button>
+      </div>
+    </div>
+
+    <div class="step" id="step18">
+      <div class="step-top">
+        <div class="step-body">
+          <div class="step-label">Step 8.2 — Next build prompts (one per session)</div>
+          <p>Work through these in order. Each is a separate Claude Code session:</p>
+          <ol>
+            <li><strong>Session 2 — Chat panel:</strong>
+              <pre>Add the QuickChatView. When the user clicks the character, a compact chat panel slides in from the right side. Auto-focus the text input. Send messages to ClaudeAPIService with streaming. Show thinking animation while waiting. Stream response text word by word. Switch back to idle when done.</pre>
+            </li>
+            <li><strong>Session 3 — Personality switching:</strong>
+              <pre>Wire up PersonalityManager to the system prompt. The [PERSONALITY_BLOCK] placeholder in claudy-system-prompt.txt should be replaced at call time with the active mode's prompt block. Add a settings panel with a custom persona text field for CUSTOM mode.</pre>
+            </li>
+            <li><strong>Session 4 — Lottie animations:</strong>
+              <pre>Integrate Lottie via Swift Package Manager. Replace the placeholder character with a Lottie player. Animation states: idle (looping bob), thinking (thought bubble loop), talking, celebrating (confetti), confused (head tilt + question mark), sleeping (drooped eyes). Drive state from CharacterViewModel.animationState.</pre>
+            </li>
+            <li><strong>Session 5 — Context hooks:</strong>
+              <pre>Implement ContextMonitor.swift. Clipboard change detection using NSPasteboard.changeCount polling every 2 seconds. Idle detection using NSEvent. After 10 min idle trigger sleeping animation. Wake on any input with surprised state. Offer clipboard help for text over 50 chars (max once per 30 seconds).</pre>
+            </li>
+          </ol>
+        </div>
+        <button class="check-btn" onclick="markDone('step18')">Mark done</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <div class="footer">
+    <span>🍊</span>
+    <p><strong style="color:#c15f3c;">Claud-y</strong> — The spiritual successor to Clippy, now running on the OS that killed him.</p>
+    <p style="margin-top:8px;">Made with Claude • MIT Licence • Coming to GitHub soon</p>
+  </div>
+
+</div>
+
+<script>
+  const total = 18;
+  let done = new Set();
+
+  function markDone(id) {
+    const el = document.getElementById(id);
+    const btn = el.querySelector('.check-btn');
+    if (done.has(id)) {
+      done.delete(id);
+      el.classList.remove('completed');
+      btn.classList.remove('done');
+      btn.textContent = 'Mark done';
+    } else {
+      done.add(id);
+      el.classList.add('completed');
+      btn.classList.add('done');
+      btn.textContent = '✓ Done';
+    }
+    updateProgress();
+  }
+
+  function updateProgress() {
+    const count = done.size;
+    const pct = Math.round((count / total) * 100);
+    document.getElementById('progressFill').style.width = pct + '%';
+    document.getElementById('progressLabel').textContent = count + ' of ' + total + ' steps completed (' + pct + '%)';
+  }
+</script>
+</body>
+</html>
