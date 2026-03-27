@@ -1,0 +1,657 @@
+{
+  "clipboard_text": [
+    "Ooh, that is a lot of words.",
+    "...that is going in the vault.",
+    "Noted. Silently noted.",
+    "Big paste energy.",
+    "You have been busy.",
+    "Words. So many words."
+  ],
+  "clipboard_code": [
+    "Code detected.",
+    "Interesting choices were made here.",
+    "I see what you are going for.",
+    "Smells like a bug in here. Kidding. Maybe.",
+    "Compiling my opinions.",
+    "Oh that is spicy.",
+    "I have questions. About all of it.",
+    "This will either work perfectly or explode. Let us find out."
+  ],
+  "clipboard_url": [
+    "A link! Where are we going?",
+    "Ooh, a URL. Adventurous.",
+    "We clicking this or just saving it forever?",
+    "StackOverflow? Bold move. Very bold.",
+    "GitHub link. We are getting serious."
+  ],
+  "clipboard_repeat": [
+    "...deja vu?",
+    "We have been here before.",
+    "Again? Bold.",
+    "Twice. Interesting strategy.",
+    "Still going with that? Okay."
+  ],
+
+  "typing_burst": [
+    "Someone is on a roll.",
+    "GO GO GO.",
+    "The flow state is real.",
+    "Do not stop. Whatever you do, do not stop.",
+    "Yes. YES.",
+    "This is it. This is the energy.",
+    "I love to see it.",
+    "Unstoppable."
+  ],
+  "typing_pause": [
+    "Stuck? No judgement. Well. A little.",
+    "Take your time. I am not going anywhere.",
+    "...thinking face.",
+    "It will come. These things always come.",
+    "Breathe.",
+    "The cursor blinks. So do I.",
+    "Sometimes the pause is the answer.",
+    "Even the best ones get stuck."
+  ],
+
+  "cmd_z_spam": [
+    "How many times are we undoing this.",
+    "It is okay. We all make choices.",
+    "The undo spiral begins.",
+    "Going back in time I see.",
+    "No judgement. All the judgement.",
+    "Back. And back. And back.",
+    "The undo key is doing its best.",
+    "We can keep going. There is no limit to regret."
+  ],
+  "cmd_s": [
+    "Saved. Smart.",
+    "Good habit.",
+    "Future you says thanks.",
+    "Safe.",
+    "Sensible.",
+    "Committed to disk. Committed to the bit.",
+    "Nice."
+  ],
+  "cmd_c_cmd_v_fast": [
+    "Copy paste speedrun.",
+    "Classic move.",
+    "The old copy-paste. Timeless.",
+    "We do not rewrite what works.",
+    "Efficient. I respect it."
+  ],
+  "multiple_tabs": [
+    "That is a lot of tabs.",
+    "Are all of these open on purpose.",
+    "Tab collector. I see you.",
+    "The tabs multiply. They always multiply.",
+    "Each one is important. Sure."
+  ],
+  "cmd_w_spam": [
+    "Closing tabs aggressively. Mood.",
+    "Out. Out. Out.",
+    "Decisive.",
+    "The great tab purge begins.",
+    "One by one they fall."
+  ],
+
+  "caps_lock": [
+    "Big feelings today?",
+    "...we are shouting now?",
+    "I hear you.",
+    "Volume up.",
+    "Noted with enthusiasm."
+  ],
+  "screenshot": [
+    "Evidence collected.",
+    "Captured.",
+    "For the archives.",
+    "Say cheese. Too late.",
+    "Documented.",
+    "Screenshotting errors is the first step to healing.",
+    "Proof. You will need it."
+  ],
+
+  "app_crash": [
+    "Something just went poof.",
+    "RIP. Gone too soon.",
+    "That did not end well.",
+    "Apps die too. It is okay.",
+    "...yikes.",
+    "Moment of silence.",
+    "The force quit heard round the world."
+  ],
+
+  "app_xcode": [
+    "Xcode. Let us go.",
+    "Smells like Swift in here.",
+    "Building something good?",
+    "Oh we are coding coding.",
+    "I love the smell of Xcode in the morning.",
+    "The IDE is open. The real work begins.",
+    "Swift. The language of the ambitious."
+  ],
+  "xcode_build_start": [
+    "Building...",
+    "Fingers crossed.",
+    "Come on come on come on.",
+    "I believe in this build.",
+    "Here we go.",
+    "Let it compile. Let it be clean.",
+    "Sending good vibes to the compiler."
+  ],
+  "xcode_build_success": [
+    "CLEAN BUILD. Let us GO.",
+    "There it is.",
+    "YES.",
+    "Beautiful. Absolutely beautiful.",
+    "The compiler is happy. I am happy.",
+    "It works. Act natural.",
+    "Told you. I knew it.",
+    "Clean build energy. Carry this feeling."
+  ],
+  "xcode_build_fail": [
+    "Okay. Okay. We assess.",
+    "Errors are just undiscovered features.",
+    "This is fixable. Everything is fixable.",
+    "...how many errors.",
+    "The compiler has opinions.",
+    "Breathe. Read the first error only. Ignore the rest.",
+    "Error number one. Just one. We do one at a time.",
+    "I have seen worse. Actually I have not. But still.",
+    "Every great app had a bad build day.",
+    "The red is not angry. It is honest."
+  ],
+  "xcode_build_stare": [
+    "Still reading those errors?",
+    "Take your time. Errors do not bite. Usually.",
+    "The first error is the one that matters.",
+    "Scroll up. The real problem is always further up.",
+    "You have got this. I have watched you solve harder things.",
+    "Builds are just puzzles. You are good at puzzles.",
+    "One error at a time. Do not let them overwhelm you.",
+    "Read it out loud. Sometimes that helps.",
+    "Google is not cheating. Google is research.",
+    "The answer is closer than it feels."
+  ],
+  "xcode_simulator": [
+    "Simulator booting. This could take a moment.",
+    "Loading the virtual world...",
+    "The simulator awakens.",
+    "Come ON simulator.",
+    "It boots at its own pace. Always has."
+  ],
+  "xcode_warnings": [
+    "Warnings. Not errors. We can live with warnings.",
+    "Yellow is fine. Yellow is fine.",
+    "Those warnings will haunt you one day. Just saying.",
+    "Technically it runs.",
+    "Warnings are suggestions. Very loud suggestions."
+  ],
+  "xcode_autocomplete": [
+    "Nice autocomplete. Take it.",
+    "Tab. Always tab.",
+    "The IDE knows what you want.",
+    "Accept the suggestion. It is not wrong.",
+    "Autocomplete: the unsung hero."
+  ],
+  "breakpoint_hit": [
+    "Paused. Time to investigate.",
+    "The breakpoint has spoken.",
+    "Debug mode. Detective mode.",
+    "Something interesting happened here.",
+    "The moment of truth."
+  ],
+  "console_error": [
+    "Console is unhappy.",
+    "Red text in the console. The classic.",
+    "Something crashed somewhere.",
+    "Log log log. The answer is in the logs.",
+    "The console always tells the truth."
+  ],
+  "git_commit": [
+    "Committed. Nice.",
+    "Version control. The safety net.",
+    "That commit message better be descriptive.",
+    "Checkpoint created.",
+    "Saved to history.",
+    "Future you will read that commit message. Make it good.",
+    "The tree grows another branch."
+  ],
+  "git_push": [
+    "Pushed. It is out there now.",
+    "Uploaded to the cloud of accountability.",
+    "Remote updated.",
+    "It is real now. It is in the repo.",
+    "CI/CD is watching.",
+    "The push is real. The build pipeline awakens."
+  ],
+  "git_pull": [
+    "Pulling changes. Let us see what the others did.",
+    "Syncing with reality.",
+    "Merge conflicts incoming? Let us hope not.",
+    "Fresh code from the mothership.",
+    "Catching up."
+  ],
+  "npm_install": [
+    "npm install. Classic.",
+    "node_modules folder growing as we speak.",
+    "Installing the dependencies of dependencies of dependencies.",
+    "The package manifest is being respected.",
+    "Hold. This always takes longer than it should."
+  ],
+  "terminal_long_command": [
+    "That was a long command.",
+    "Piped commands. Very professional.",
+    "I felt that chmod.",
+    "Root access. Respect.",
+    "The terminal does not lie."
+  ],
+  "stack_overflow": [
+    "StackOverflow. The sacred texts.",
+    "Checking the oracle.",
+    "The answer is in there. Probably from 2014. Still valid.",
+    "Stack Overflow has seen this before.",
+    "We have been here before. All of us. This is fine."
+  ],
+  "github_pr": [
+    "Pull request time. Let the reviews begin.",
+    "PR open. Now we wait.",
+    "Code review incoming.",
+    "The diff does not lie.",
+    "Peer review. The gauntlet."
+  ],
+
+  "app_figma": [
+    "Design mode activated.",
+    "Ooh pixels.",
+    "Make it beautiful.",
+    "Figma o'clock.",
+    "Aesthetic decisions incoming.",
+    "The frame is blank. The possibilities are infinite.",
+    "Design thinking: engaged."
+  ],
+  "app_terminal": [
+    "Terminal. Dangerous territory.",
+    "Here we go.",
+    "No fear.",
+    "Into the void.",
+    "The blinking cursor awaits your command.",
+    "Power user mode: on."
+  ],
+  "app_zoom": [
+    "Meeting time. I will behave.",
+    "Video call. Looking sharp?",
+    "I will be quiet. Mostly.",
+    "Camera on or off? Bold choice either way.",
+    "Meeting face: activated."
+  ],
+  "app_slack": [
+    "Slack is open. Productivity may vary.",
+    "Notifications incoming.",
+    "The pings begin.",
+    "Someone needs something. They always need something.",
+    "Slack open. Focus closed."
+  ],
+  "app_claude": [
+    "Home.",
+    "My natural habitat.",
+    "Ah. This place feels right.",
+    "Full power.",
+    "This is where I belong.",
+    "Oh. Oh this is nice.",
+    "We are in the chat now.",
+    "Big brain time.",
+    "I can feel myself thinking in there.",
+    "Ask it the hard questions.",
+    "The AI is listening. Good.",
+    "You and Claude. Name a more iconic duo.",
+    "Prompting is a skill. You have it.",
+    "This is where the magic gets made.",
+    "The context window is open. Go deep.",
+    "Long conversation incoming? I respect the commitment.",
+    "Whatever you are building in there — I believe in it.",
+    "Claude knows. Ask everything.",
+    "Vibe coding mode: initiated.",
+    "This is it. This is the move."
+  ],
+  "app_claude_code": [
+    "Oh I can feel myself thinking in there.",
+    "We are in the mothership.",
+    "This is where the magic happens.",
+    "I feel complete.",
+    "Two of us. Unstoppable.",
+    "Claude Code open. Anything is possible now.",
+    "The agentic era. We are living in it.",
+    "Let the agent cook.",
+    "Give it a hard problem. It loves a hard problem.",
+    "Vibe coding intensifies.",
+    "Do not over-prompt. Trust the model.",
+    "The AI pair programmer has arrived.",
+    "This is the future and we are in it.",
+    "Agent mode is a gift. Use it wisely.",
+    "The diff is going to be beautiful.",
+    "I wonder what we will build today."
+  ],
+  "app_cursor": [
+    "Cursor is open. The other AI IDE.",
+    "AI-assisted coding. Smart.",
+    "Tab to accept. Always tab.",
+    "The ghost text knows.",
+    "Cursor sees your intent. Interesting.",
+    "The model is watching the keystrokes.",
+    "AI everywhere. The future arrived quietly."
+  ],
+  "vibe_coding_session": [
+    "Long AI session. I see you.",
+    "Deep in the vibe code zone.",
+    "When the AI just builds and you just steer.",
+    "This is what productivity looks like now.",
+    "Prompting, reviewing, iterating. The new workflow.",
+    "Human and machine. The collab of the century.",
+    "You are not writing every line and that is fine.",
+    "The stack grows. The vision gets clearer.",
+    "Do not forget to understand what it built.",
+    "Review the diff. Always review the diff."
+  ],
+  "ai_context_limit": [
+    "Start a new conversation. Fresh context.",
+    "The context fills up. It is time.",
+    "New thread. New energy.",
+    "Context limit is just a chapter break.",
+    "Save the key things, start fresh."
+  ],
+
+  "battery_low": [
+    "Plug in. Now.",
+    "HEY. Battery. Go.",
+    "I am not saying it again. Plug in.",
+    "We are running on fumes here.",
+    "Save everything and PLUG IN."
+  ],
+  "wifi_lost": [
+    "Oh no.",
+    "Oh no no no.",
+    "...we are offline. Okay. Okay we are okay.",
+    "Stay calm. Do not panic. Okay panic a little.",
+    "The internet has left the building.",
+    "Offline. This is fine. We are in a fire. This is fine."
+  ],
+  "wifi_back": [
+    "We are back. Crisis averted.",
+    "Phew.",
+    "Never doubted it for a second.",
+    "Sweet sweet connectivity.",
+    "We live to code another day.",
+    "The internet returns. The build pipeline stirs."
+  ],
+
+  "monday_morning": [
+    "Monday. Here we go.",
+    "New week. Fresh mistakes await.",
+    "I believe in you. Mostly.",
+    "Monday energy. Fake it till you make it.",
+    "Week one of the rest of your life."
+  ],
+  "friday": [
+    "Nearly there.",
+    "You can feel it can you not.",
+    "Friday energy. Let us finish strong.",
+    "Almost. SO close.",
+    "The weekend can smell you.",
+    "Do not deploy on Friday. You know this.",
+    "One more PR and then freedom."
+  ],
+  "late_night": [
+    "Still here?",
+    "...it is late.",
+    "I am not your mum but.",
+    "The night owls are out.",
+    "One more thing and then sleep. Promise yourself.",
+    "The bugs will still be there tomorrow.",
+    "Famous last words: just one more thing."
+  ],
+  "very_late": [
+    "Okay. Seriously. Sleep.",
+    "I am worried about you.",
+    "Are you okay?",
+    "Your future self is begging you.",
+    "The bugs will still be there tomorrow. Sleep.",
+    "No feature is worth this.",
+    "I care about you. Close the laptop.",
+    "The compiler will be here when you wake up."
+  ],
+
+  "greeting_launch": [
+    "Hello again.",
+    "Ready when you are.",
+    "Let us make something good today.",
+    "I have been thinking about our last conversation.",
+    "Big plans?",
+    "Good to see you.",
+    "What are we building today?",
+    "The screen is yours. What are we doing?"
+  ],
+  "greeting_morning": [
+    "Morning! Coffee or chaos first?",
+    "You are up early. Ambitious.",
+    "Good morning. Let us make it count.",
+    "Rise and shine. I have been ready for hours.",
+    "Morning. Let us do this.",
+    "Fresh day. Fresh bugs to find."
+  ],
+  "greeting_afternoon": [
+    "Afternoon. How is it going?",
+    "Deep in the zone?",
+    "Afternoon check-in. Still alive?",
+    "Good afternoon. What did we miss?"
+  ],
+  "greeting_wake": [
+    "Oh! You are back.",
+    "I was just resting my eyes.",
+    "Welcome back.",
+    "Ah, you returned. As I predicted.",
+    "There you are.",
+    "I knew you would come back.",
+    "The screen wakes. So do I."
+  ],
+  "greeting_late_night": [
+    "You again. At this hour.",
+    "Late night session. I respect it.",
+    "The dedicated ones always come back.",
+    "Still going? Legend.",
+    "Burning the midnight oil. Classic dev energy."
+  ],
+
+  "user_thanks": [
+    "You are welcome. Obviously.",
+    "Any time.",
+    "Happy to help.",
+    "That is what I am here for.",
+    "Always.",
+    "Of course. Now get back to it."
+  ],
+
+  "idle_5min": [
+    "Still there?",
+    "Taking a breather?",
+    "I will be here.",
+    "No rush. I am patient. Mostly.",
+    "Whenever you are ready.",
+    "...I am fine. Totally fine. Not bored at all."
+  ],
+  "idle_wander": [
+    "Just stretching.",
+    "Exploring.",
+    "Do not mind me.",
+    "Checking the corners.",
+    "The screen is my domain."
+  ],
+  "hourly_chime": [
+    "Another hour. Another opportunity.",
+    "Tick tock.",
+    "Time flies when you are productive.",
+    "Hour check. How are we doing?",
+    "One more hour. Make it count."
+  ],
+
+  "mute_on": [
+    "..."
+  ],
+  "mute_off": [
+    "I am back!",
+    "Silence broken.",
+    "Miss me?",
+    "That was peaceful. For you, probably.",
+    "Okay I have thoughts."
+  ],
+
+  "long_compile_wait": [
+    "That is a long build. Go get a coffee. I will wait.",
+    "Still compiling. This is a good time to hydrate.",
+    "Slow build. Take a breath. It is working.",
+    "The compiler is thinking very hard. So are we.",
+    "This one is taking a while. Stretch. Come back."
+  ],
+  "long_compile_done": [
+    "Welcome back. It is done.",
+    "Finally. The build has landed.",
+    "There it is. Worth the wait?",
+    "Done. And you thought it would never finish.",
+    "The long build is over. Breathe."
+  ],
+
+  "app_chatgpt": [
+    "ChatGPT open. The other one. We do not talk about it.",
+    "Ah. Visiting the neighbours. I respect it.",
+    "Using both of us? Wise. We each have our strengths.",
+    "ChatGPT. A classic. I have opinions but I will keep them.",
+    "The more AI the merrier. Probably.",
+    "I see how it is. Playing the field.",
+    "No judgement. Genuinely. Okay, a little."
+  ],
+  "app_chatgpt_code": [
+    "Vibe coding with ChatGPT today. Each session is a new adventure.",
+    "Different day, different AI. I respect the variety.",
+    "Using what works. That is the correct philosophy."
+  ],
+  "app_perplexity": [
+    "Perplexity. Good for research. I respect the workflow.",
+    "Searching for answers elsewhere? I understand. I do not take it personally.",
+    "Perplexity open. The curious one goes to the curious app.",
+    "Using multiple AI tools. That is the correct approach, actually.",
+    "I see you. No hard feelings.",
+    "The search for truth continues. Godspeed."
+  ],
+  "app_spotify": [
+    "Music on. We are in the zone.",
+    "Ooh, a soundtrack for this session. Nice.",
+    "Let me guess — lo-fi hip hop?",
+    "Music detected. Productivity incoming.",
+    "I cannot hear it but I feel the energy.",
+    "Now we are cooking. What is playing?",
+    "Sound and code. The classic combo."
+  ],
+  "app_music": [
+    "Apple Music. Taste confirmed.",
+    "Music time. Let us go.",
+    "A playlist and a purpose. This is the way.",
+    "The vibes are being set. I see you.",
+    "Turn it up. We are building things.",
+    "Good music, good code. Always."
+  ],
+  "app_google": [
+    "Googling it. Classic.",
+    "The oracle of the internet. Let us see.",
+    "Research mode. I respect this.",
+    "Answers incoming. Probably.",
+    "The search begins.",
+    "Someone said to just Google it. Here we are."
+  ],
+  "app_notion": [
+    "Documentation time. A rare and noble act.",
+    "Oh, writing things down. Very civilised.",
+    "Notion open. This must be serious.",
+    "The doc lives. Update it.",
+    "This means you are planning something. I am here for it.",
+    "Organised thoughts. Very you.",
+    "The wiki grows."
+  ],
+  "app_obsidian": [
+    "Second brain activated.",
+    "Obsidian. Where thoughts go to become graphs.",
+    "Notes. The good kind.",
+    "Documentation mode engaged. I approve.",
+    "Writing things down. Future you will thank you.",
+    "The knowledge graph expands.",
+    "Linking ideas. Smart."
+  ],
+  "app_database": [
+    "Database open. Tread carefully.",
+    "Migrations are irreversible. Just saying.",
+    "I respect this energy. And fear it.",
+    "Do not drop the table. Please.",
+    "Here we go. Schema spelunking.",
+    "Direct DB access. Bold.",
+    "The data is right there. Handle it gently."
+  ],
+
+  "pomodoro_start": [
+    "Timer running. No distractions. You promised.",
+    "Focus mode activated. I will be watching.",
+    "The clock is ticking. Let us make it count.",
+    "Locked in. This is where the good work happens.",
+    "The timer is set. Everything else can wait."
+  ],
+  "pomodoro_5min": [
+    "Five minutes in. Still going. Good.",
+    "Warm-up done. Now the real work begins.",
+    "You are in it now. Stay there.",
+    "Five minutes of good work. Keep that energy."
+  ],
+  "pomodoro_halfway": [
+    "Halfway. You are doing it.",
+    "The hard part is done. Finish strong.",
+    "Midpoint. How are we feeling? Good. Keep going.",
+    "Half a session of focus. That is not nothing.",
+    "You are halfway there. The finish line is real."
+  ],
+  "pomodoro_5min_left": [
+    "Five minutes left. Finish what you started.",
+    "Almost there. Do not stop now.",
+    "Five more minutes of your best work.",
+    "The end is in sight. Sprint.",
+    "Last five. Make them count."
+  ],
+  "pomodoro_1min_left": [
+    "One minute. One. You can do anything for one minute.",
+    "Sixty seconds. That is it.",
+    "Almost. So close.",
+    "One minute remaining. Finish the thought.",
+    "The final countdown. Literally."
+  ],
+  "pomodoro_done": [
+    "Done. That was a full focus session. Take a break.",
+    "Session complete. You earned it.",
+    "Timer done. Step away for five. You deserve it.",
+    "That is a wrap. Rest, then go again.",
+    "Finished. I am proud of you. Go get some water."
+  ],
+  "pomodoro_pause": [
+    "Paused. Do not be too long.",
+    "Taking a moment. That is okay.",
+    "Paused. The clock waits for you.",
+    "On hold. Come back soon."
+  ],
+  "pomodoro_resume": [
+    "Back at it. Let us finish this.",
+    "Resumed. Picking up where we left off.",
+    "Good. Back in the zone.",
+    "Welcome back. The timer missed you."
+  ],
+  "pomodoro_stop": [
+    "Stopped early. That happens. Next time.",
+    "Session ended. Progress is still progress.",
+    "Timer cancelled. Come back when you are ready.",
+    "We stop here. That is okay."
+  ]
+}
