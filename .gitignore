@@ -148,3 +148,12 @@ claudy-spec.md
 GitHub-Release/scripts/*.dmg
 SPEC.md
 claudy-system-prompt..txt
+
+# Never commit these
+*.p8
+*.p12
+*.mobileprovision
+Notary
+*credentials*
+*secrets*
+*api-key*
