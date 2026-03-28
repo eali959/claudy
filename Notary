@@ -1,6 +1,0 @@
-xcrun notarytool store-credentials "notarytool-profile" --apple-id “ehtesham_959@yahoo.com" --team-id UCH6WQ4229 --password wure-fgfc-cabq-xsms
-
-
-cd "/Users/eali/Documents/App Dev/Apps/Claud-y/GitHub-Release/scripts"
-chmod +x build-dmg.sh
-./build-dmg.sh --team-id UCH6WQ4229
