@@ -1,6 +1,9 @@
-# Claud-y 🍊
+<img width="1248" height="832" alt="Claud-y_Cover_Image" src="https://github.com/user-attachments/assets/ca3d4d6b-68b4-41f3-9ff7-c80c50842605" />
 
+# Claud-y 🍊
 **A small AI companion that lives on your Mac.**
+
+![Kapture 2026-03-28 at 05 19 25](https://github.com/user-attachments/assets/a6de61e8-d124-487a-aa03-a0296ffaa811)
 
 ---
 
@@ -74,12 +77,73 @@ Claud-y ships with seven personalities you can switch on the fly:
 
 ---
 
-## Privacy
+## Privacy & data
 
-- **Nothing stored** -- conversations live in memory only, cleared when you quit
-- **No telemetry** -- there are no servers to send anything to
-- **No analytics** -- Claud-y has no idea how many people use it
-- **API key stays local** -- stored in macOS Keychain, leaves your device only to reach Anthropic directly
+### What leaves your device
+
+In **Companion mode**: nothing. All responses come from local logic. No network calls are made.
+
+In **API mode**: your chat messages and the active personality's system prompt are sent to `https://api.anthropic.com` using the Anthropic API. That's the only outbound connection Claud-y ever makes. No other hosts. No CDN. No analytics endpoint.
+
+### API key
+
+- Stored in the **macOS Keychain** (`kSecClassGenericPassword`)
+- `kSecAttrAccessibleWhenUnlockedThisDeviceOnly` — **never synced to iCloud Keychain**, never leaves this Mac
+- Never written to `UserDefaults`, log files, or any file on disk
+- Transmitted as an `x-api-key` HTTP header — never in a URL or request body
+
+### System access
+
+Claud-y requests two permissions and uses each narrowly:
+
+**Accessibility access** (required for keyboard reactions):
+- Monitors global keyboard events via `NSEvent.addGlobalMonitorForEvents`
+- Detects: typing bursts, typing pauses, `Cmd+Z` spam, `Cmd+S`, `Cmd+C`/`Cmd+V` patterns
+- Keystrokes are **never recorded or stored** — only event timing and modifier keys are used
+- Granting this is required for keyboard reactions. Without it, Claud-y still works fully — keyboard reactions just don't fire.
+
+**No microphone, camera, location, or contacts access** — Claud-y never requests any of these.
+
+### Process inspection
+
+Claud-y detects running processes (`xcodebuild`, `npm`, `claude`) using `sysctl KERN_PROC_ALL` with `kinfo_proc`. This reads **process names only** — no process arguments, no memory, no file handles. The poll runs every 15 seconds.
+
+### Clipboard monitoring
+
+`ClipboardMonitor` watches `NSPasteboard.changeCount`. When the clipboard changes, it reads the content and classifies it as plain text, code, or URL — the classification drives the reaction type. **Clipboard content is never stored, logged, or sent anywhere.**
+
+### What's stored locally (UserDefaults)
+
+Everything except the API key is stored in `UserDefaults` on your Mac. Full table:
+
+| Key | Stored value |
+|---|---|
+| `CharacterWindowOrigin` | Last panel position `[Double, Double]` |
+| `CharacterSizePreset` | `"small"` / `"medium"` / `"large"` |
+| `ClaudyChatHeight` | Chat panel height in points |
+| `PersonalityMode` | Active personality raw value |
+| `CustomPersonaText` | Your custom persona text (if set) |
+| `SelectedModel` | Active Claude model identifier |
+| `UseComplexModel` | Bool — Opus for complex tasks |
+| `IsMuted` | Bool — mute state |
+| `SoundEffectsEnabled` | Bool — sound toggle |
+| `HasSeenOnboarding` | Bool — first launch flag |
+| `FirstLaunchDate` | `Date` — for anniversary reactions |
+| `DailySessionDates` | `[String]` ISO dates — streak tracking (90-day window) |
+| `StreakShownDate` | `String` — prevents repeat streak messages same day |
+| `QuickLaunchShortcuts` | `Data` — JSON-encoded shortcut array |
+| `PomodoroPreset` | `Int` raw value of active preset |
+| `PomodoroCustomMinutes` | `Int` — custom timer duration |
+
+**Chat history is never persisted.** It lives in memory for the session only. Use the export function to save it.
+
+### No telemetry, analytics, or crash reporting
+
+There are no analytics calls, no Sentry/Crashlytics/Firebase, no remote logging, and no usage tracking of any kind. All `OSLog` output stays on device. Claud-y has no idea how many people use it.
+
+### App Sandbox
+
+Claud-y runs **without App Sandbox** to allow `sysctl` process inspection and global `NSEvent` keyboard monitoring. This means it cannot be distributed on the Mac App Store as-is and is source-only / direct download. The trade-off is intentional and documented here so you can make an informed choice.
 
 ---
 
