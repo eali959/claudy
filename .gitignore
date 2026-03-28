@@ -146,3 +146,5 @@ claudy-spec.md
 
 # Build artifacts
 GitHub-Release/scripts/*.dmg
+SPEC.md
+claudy-system-prompt..txt
