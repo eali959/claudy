@@ -42,6 +42,7 @@ final class CharacterViewModel {
     @ObservationIgnored private var clipboardMonitor: ClipboardMonitor!
     @ObservationIgnored private var appContextMonitor: AppContextMonitor!
     @ObservationIgnored private(set) var pomodoroManager: PomodoroManager!
+    @ObservationIgnored private(set) var behaviorModeManager: BehaviorModeManager!
 
     @ObservationIgnored private var contextMonitor: ContextMonitor?
     @ObservationIgnored private var keyboardMonitor: KeyboardMonitor?
@@ -69,7 +70,8 @@ final class CharacterViewModel {
         let level = UserDefaults.standard.integer(forKey: "ChattinessLevel")
         let l = level < 1 ? 3 : min(level, 5)   // clamp to 1-5, default 3
         let multipliers: [Int: Double] = [1: 3.0, 2: 1.75, 3: 1.0, 4: 0.6, 5: 0.3]
-        return baseBubbleCooldown * (multipliers[l] ?? 1.0)
+        let chattiness = baseBubbleCooldown * (multipliers[l] ?? 1.0)
+        return chattiness * (behaviorModeManager?.ambientCooldownMultiplier ?? 1.0)
     }
     private var maxQueueDepth: Int {
         let level = UserDefaults.standard.integer(forKey: "ChattinessLevel")
@@ -85,12 +87,13 @@ final class CharacterViewModel {
     // MARK: - Init
 
     init() {
-        tickleManager     = TickleManager(viewModel: self)
-        idleMonitor       = IdleMonitor(viewModel: self)
-        clipboardMonitor  = ClipboardMonitor(viewModel: self)
-        appContextMonitor = AppContextMonitor(viewModel: self)
-        pomodoroManager   = PomodoroManager(viewModel: self)
-        roastModeManager  = RoastModeManager(viewModel: self)
+        tickleManager        = TickleManager(viewModel: self)
+        idleMonitor          = IdleMonitor(viewModel: self)
+        clipboardMonitor     = ClipboardMonitor(viewModel: self)
+        appContextMonitor    = AppContextMonitor(viewModel: self)
+        pomodoroManager      = PomodoroManager(viewModel: self)
+        roastModeManager     = RoastModeManager(viewModel: self)
+        behaviorModeManager  = BehaviorModeManager(viewModel: self)
         startBlinkLoop()
 
         NotificationCenter.default.addObserver(
@@ -317,7 +320,10 @@ final class CharacterViewModel {
 
     // MARK: - Idle reset
 
-    func resetIdleTimer() { idleMonitor.resetActivity() }
+    func resetIdleTimer() {
+        idleMonitor.resetActivity()
+        behaviorModeManager?.onActivity()
+    }
 
     // MARK: - Mute
 

@@ -64,6 +64,9 @@ final class AppContextMonitor {
     func handleActivation(bundleID: String, appName: String?) {
         terminalIsFrontmost = isTerminalBundleID(bundleID)
 
+        // Let BehaviorModeManager react to app switches (Study Mode browser nudge etc.)
+        viewModel?.behaviorModeManager.onAppSwitch(bundleID: bundleID)
+
         if isClaudeAppBundleID(bundleID) {
             handleClaudeAppActivation()
             return
@@ -238,13 +241,16 @@ final class AppContextMonitor {
                 let msg = ReactionLibraryService.shared.reaction(for: .longCompileDone)
                 if !msg.isEmpty { viewModel?.showSpeechBubble(msg, duration: 5) }
                 longCompileReacted = false
+                // Notify BehaviorModeManager — Dev Mode may add extra confetti
+                viewModel?.behaviorModeManager.onBuildComplete()
             } else if duration >= 3 {
                 // Build ran long enough to be a real compilation (not a sub-second
                 // internal Xcode tool invocation). We have no exit code from polling,
-                // so we react neutrally - no false confetti on a failed build,
+                // so we react neutrally — no false confetti on a failed build,
                 // no false alarm on a successful one.
                 let msg = ReactionLibraryService.shared.reaction(for: .xcodeBuildSuccess)
                 if !msg.isEmpty { viewModel?.showSpeechBubble(msg, duration: 5) }
+                viewModel?.behaviorModeManager.onBuildComplete()
             }
             // Mood and stare reactions removed - they relied on the unreliable
             // duration-based success/failure guess which was wrong ~50% of the time.

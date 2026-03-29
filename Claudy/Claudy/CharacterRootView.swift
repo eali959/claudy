@@ -244,6 +244,20 @@ struct CharacterRootView: View {
             }
         }
 
+        Menu("Mode") {
+            ForEach(BehaviorMode.allCases, id: \.self) { mode in
+                Button {
+                    characterViewModel.behaviorModeManager.activate(mode)
+                } label: {
+                    Label(
+                        mode.displayName,
+                        systemImage: characterViewModel.behaviorModeManager.currentMode == mode
+                            ? "checkmark" : ""
+                    )
+                }
+            }
+        }
+
         Menu("Size") {
             ForEach(WindowManager.SizePreset.allCases, id: \.self) { preset in
                 Button {
