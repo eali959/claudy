@@ -149,6 +149,22 @@ final class CharacterViewModel {
     func facepalm()    { setState(.facepalm,    duration: 2.5) }
     func sayName()     { MumbleEngine.shared.speakName() }
 
+    // MARK: - Dance mode
+
+    var danceModeManager = DanceModeManager()
+
+    func startDanceMode() {
+        baseState = .dancing
+        setState(.dancing)
+        danceModeManager.start()
+    }
+
+    func stopDanceMode() {
+        danceModeManager.stop()
+        baseState = .idle
+        setState(.idle)
+    }
+
     // MARK: - Mood system
 
     func applyMood(for context: MoodContext) {

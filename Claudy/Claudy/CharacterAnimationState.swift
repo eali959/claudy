@@ -18,6 +18,7 @@ enum CharacterAnimationState: String, Sendable {
     case drowsy     // 5-min idle: half-closed eyes, slow bob
     case waving     // greeting: right arm raised and waving, happy ^^ eyes, big smile
     case facepalm   // exasperation: squinty eyes, flat mouth, left arm raised
+    case dancing    // dance mode: big glow, pulsing bob, choreographed arm moves
 
     var accessibilityDescription: String {
         switch self {
@@ -33,6 +34,7 @@ enum CharacterAnimationState: String, Sendable {
         case .drowsy:      return "Drowsy"
         case .waving:      return "Waving"
         case .facepalm:    return "Facepalm"
+        case .dancing:     return "Dancing"
         }
     }
 }

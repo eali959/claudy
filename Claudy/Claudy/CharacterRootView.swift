@@ -121,6 +121,7 @@ struct CharacterRootView: View {
                             isBlinking:      characterViewModel.isBlinking,
                             irisOffset:      characterViewModel.irisOffset,
                             tickleIntensity: characterViewModel.tickleIntensity,
+                            danceMove:       characterViewModel.danceModeManager.currentMove,
                             onTap:           handleTap,
                             onDoubleTap:     handleDoubleTap,
                             onDragBegan:     { windowManager.beginDrag(); characterViewModel.resetIdleTimer() },
@@ -319,6 +320,14 @@ struct CharacterRootView: View {
             characterViewModel.setMuted(!characterViewModel.isMuted)
         }
         .keyboardShortcut("m", modifiers: .option)
+
+        Button(characterViewModel.danceModeManager.isActive ? "Stop Dancing" : "Dance Mode") {
+            if characterViewModel.danceModeManager.isActive {
+                characterViewModel.stopDanceMode()
+            } else {
+                characterViewModel.startDanceMode()
+            }
+        }
 
         Button(demoManager.isRunning ? "Stop Demo" : "Start Demo") {
             if demoManager.isRunning { demoManager.stop() } else { demoManager.start() }

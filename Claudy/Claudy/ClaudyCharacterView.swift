@@ -8,6 +8,7 @@ struct ClaudyCharacterView: View {
     var isBlinking: Bool = false
     var irisOffset: CGPoint = .zero
     var tickleIntensity: TickleIntensity = .none
+    var danceMove: DanceMove = .groove
     var onTap: () -> Void = {}
     var onDoubleTap: () -> Void = {}
     var onDragBegan: () -> Void = {}
@@ -33,6 +34,12 @@ struct ClaudyCharacterView: View {
     @State private var talkingTimer: Timer? = nil
     @State private var dotTimer: Timer? = nil
 
+    // Dance mode state
+    @State private var danceSpinAngle: Double = 0
+    @State private var danceJumpOffset: CGFloat = 0
+    @State private var danceGlowPulse: Bool = false
+    @State private var danceSpinTask: Task<Void, Never>? = nil
+
     // Palette - spec: #C85C38 body, #E07048 highlight, #9A3520 shadow, #A84020 limbs
     private let bodyColor  = Color(red: 0.784, green: 0.361, blue: 0.220) // #C85C38
     private let highlight  = Color(red: 0.878, green: 0.439, blue: 0.282) // #E07048
@@ -54,6 +61,19 @@ struct ClaudyCharacterView: View {
                     .foregroundStyle(bodyColor)
                     .offset(x: 22, y: -58)
                     .transition(.opacity.combined(with: .scale))
+            }
+
+            // Dance glow — pulsing orange aura, sits behind everything
+            if animationState == .dancing {
+                RoundedRectangle(cornerRadius: 22)
+                    .fill(bodyColor.opacity(danceGlowPulse ? 0.5 : 0.08))
+                    .frame(width: 122, height: 100)
+                    .blur(radius: danceGlowPulse ? 20 : 8)
+                    .animation(
+                        .easeInOut(duration: 0.38).repeatForever(autoreverses: true),
+                        value: danceGlowPulse
+                    )
+                    .allowsHitTesting(false)
             }
 
             // Character group
@@ -100,14 +120,17 @@ struct ClaudyCharacterView: View {
                 feet.offset(y: 44)
                 face
             }
-            .offset(x: wiggleOffset, y: bobOffset + jumpOffset - 10)
-            .rotationEffect(.degrees(dragTilt))
+            .offset(x: wiggleOffset, y: bobOffset + jumpOffset + danceJumpOffset - 10)
+            .rotationEffect(.degrees(dragTilt + (animationState == .dancing ? danceSpinAngle : 0)))
             .scaleEffect(
                 animationState == .celebrating ? celebrateScale :
+                animationState == .dancing     ? (danceMove == .bothArmsUp || danceMove == .bigJump ? 1.06 : 1.0) :
                 animationState == .alert       ? 1.05 : 1.0
             )
             .animation(.spring(response: 0.3, dampingFraction: 0.5), value: animationState)
             .animation(.spring(response: 0.4, dampingFraction: 0.6), value: dragTilt)
+            .animation(.easeInOut(duration: 0.924), value: danceSpinAngle)
+            .animation(.spring(response: 0.25, dampingFraction: 0.5), value: danceMove)
         }
         .frame(width: 130, height: 150)
         .contentShape(Rectangle())
@@ -157,12 +180,34 @@ struct ClaudyCharacterView: View {
             startBobAnimation()
             startCelebrationAnimation()
             if newState == .surprised { applyStartledJump() }
-            if newState == .waving {
+
+            // Arm flair: waving and dancing both use it; tickled full keeps it running
+            if newState == .waving || newState == .dancing {
                 startArmFlair()
             } else if newState != .tickled || tickleIntensity != .full {
                 stopArmFlair()
             }
+
+            // Dance glow: start when entering, clear when leaving
+            if newState == .dancing {
+                startDanceGlow()
+            } else {
+                danceGlowPulse = false
+                // Unwind any active shimmy / jump / spin cleanly
+                withAnimation(.spring(response: 0.4, dampingFraction: 0.7)) {
+                    wiggleOffset   = 0
+                    danceJumpOffset = 0
+                }
+                danceSpinTask?.cancel()
+                danceSpinTask = nil
+                danceSpinAngle = danceSpinAngle.truncatingRemainder(dividingBy: 360)
+            }
+
             if newState != .talking { mouthOpenAmount = 0 }
+        }
+        .onChange(of: danceMove) { _, move in
+            guard animationState == .dancing else { return }
+            handleDanceMove(move)
         }
         .onChange(of: tickleIntensity) { _, intensity in
             applyWiggle(intensity)
@@ -196,21 +241,66 @@ struct ClaudyCharacterView: View {
 
     // MARK: - Arms
 
+    // MARK: - Dance arm helpers
+
+    private var danceLeftArmAngle: Double {
+        switch danceMove {
+        case .bothArmsUp, .bigJump: return -72
+        case .leftArmUp:            return -82
+        case .spin:                 return -62
+        case .shimmy:               return armFlair ? -54 : 18
+        case .freeze:               return 22
+        case .groove:               return armFlair ? -50 : 22
+        case .rightArmUp:           return 32
+        }
+    }
+
+    private var danceRightArmAngle: Double {
+        switch danceMove {
+        case .bothArmsUp, .bigJump: return 72
+        case .rightArmUp:           return 82
+        case .spin:                 return 62
+        case .shimmy:               return armFlair ? 54 : -18
+        case .freeze:               return -22
+        case .groove:               return armFlair ? 50 : -22
+        case .leftArmUp:            return -32
+        }
+    }
+
+    private var danceLeftArmRaised: Bool {
+        switch danceMove {
+        case .bothArmsUp, .bigJump, .leftArmUp, .spin: return true
+        case .groove, .shimmy: return armFlair
+        default: return false
+        }
+    }
+
+    private var danceRightArmRaised: Bool {
+        switch danceMove {
+        case .bothArmsUp, .bigJump, .rightArmUp, .spin: return true
+        case .groove, .shimmy: return armFlair
+        default: return false
+        }
+    }
+
     private var leftArm: some View {
         RoundedRectangle(cornerRadius: 7)
             .fill(limbColor)
             .frame(width: 14, height: 16)
             .rotationEffect(.degrees(
+                animationState == .dancing                  ? danceLeftArmAngle :
                 animationState == .celebrating              ? -60 :
                 animationState == .thinking                 ? -18 :
                 animationState == .facepalm                 ? -48 :
                 (animationState == .tickled && armFlair)    ? -55 : 28
             ))
-            .offset(x: -52, y: (animationState == .celebrating ||
+            .offset(x: -52, y: (animationState == .dancing && danceLeftArmRaised) ? -12 :
+                                (animationState == .celebrating ||
                                  animationState == .facepalm ||
                                  (animationState == .tickled && armFlair)) ? -8 : 8)
             .animation(.spring(response: 0.3, dampingFraction: 0.5), value: animationState)
             .animation(.spring(response: 0.15, dampingFraction: 0.4), value: armFlair)
+            .animation(.spring(response: 0.2, dampingFraction: 0.45), value: danceMove)
     }
 
     private var rightArm: some View {
@@ -218,16 +308,19 @@ struct ClaudyCharacterView: View {
             .fill(limbColor)
             .frame(width: 14, height: 16)
             .rotationEffect(.degrees(
+                animationState == .dancing                  ?  danceRightArmAngle :
                 animationState == .celebrating              ?  60 :
                 (animationState == .waving && armFlair)     ? -80 :
                 animationState == .waving                   ? -65 :
                 (animationState == .tickled && armFlair)    ?  55 : -28
             ))
-            .offset(x: 52, y: (animationState == .celebrating ||
+            .offset(x: 52, y: (animationState == .dancing && danceRightArmRaised) ? -12 :
+                               (animationState == .celebrating ||
                                 animationState == .waving ||
                                 (animationState == .tickled && armFlair)) ? -8 : 8)
             .animation(.spring(response: 0.3, dampingFraction: 0.5), value: animationState)
             .animation(.spring(response: 0.15, dampingFraction: 0.4), value: armFlair)
+            .animation(.spring(response: 0.2, dampingFraction: 0.45), value: danceMove)
     }
 
     // MARK: - Face
@@ -244,7 +337,7 @@ struct ClaudyCharacterView: View {
     @ViewBuilder
     private var eyes: some View {
         switch animationState {
-        case .celebrating, .waving:
+        case .celebrating, .waving, .dancing:
             HStack(spacing: 20) { arcEyeUp; arcEyeUp }
         case .sleeping:
             HStack(spacing: 22) { sleepEye; sleepEye }
@@ -412,6 +505,15 @@ struct ClaudyCharacterView: View {
                 .strokeBorder(Color(red: 0.22, green: 0.07, blue: 0.04), lineWidth: 2)
                 .frame(width: 9, height: 9)
 
+        case .dancing:
+            // Wider, more open grin than celebrating
+            Path { p in
+                p.move(to: CGPoint(x: 0, y: 0))
+                p.addQuadCurve(to: CGPoint(x: 22, y: 0), control: CGPoint(x: 11, y: 14))
+            }
+            .stroke(darkBrown, style: StrokeStyle(lineWidth: 3, lineCap: .round))
+            .frame(width: 22, height: 15)
+
         case .celebrating, .waving:
             Path { p in
                 p.move(to: CGPoint(x: 0, y: 0))
@@ -451,10 +553,12 @@ struct ClaudyCharacterView: View {
 
     private func startBobAnimation() {
         guard !reduceMotion else { bobOffset = 0; return }
-        let duration: Double = animationState == .sleeping ? 3.2 :
-                               animationState == .drowsy   ? 2.5 : 1.9
-        let target: CGFloat  = animationState == .sleeping ? -2  :
-                               animationState == .drowsy   ? -4  : -6
+        let duration: Double = animationState == .dancing  ? 0.36 :  // fast groove bounce
+                               animationState == .sleeping ? 3.2  :
+                               animationState == .drowsy   ? 2.5  : 1.9
+        let target: CGFloat  = animationState == .dancing  ? -16  :  // big energetic bounce
+                               animationState == .sleeping ? -2   :
+                               animationState == .drowsy   ? -4   : -6
         // Reset to 0 without animation first - this cleanly cancels any existing
         // repeatForever transaction on bobOffset so the new one starts fresh
         // rather than stacking on top and causing interference.
@@ -532,6 +636,66 @@ struct ClaudyCharacterView: View {
         armFlairTask?.cancel()
         armFlairTask = nil
         armFlair = false
+    }
+
+    private func startDanceGlow() {
+        guard !reduceMotion else { return }
+        danceGlowPulse = false
+        // Small delay lets the entrance animation settle before the pulse starts
+        Task {
+            try? await Task.sleep(for: .milliseconds(60))
+            danceGlowPulse = true
+        }
+    }
+
+    /// Drives character-level effects for each incoming DanceMove.
+    ///
+    /// Arm angles and y-offsets are handled declaratively via danceLeftArmAngle /
+    /// danceRightArmAngle / danceLeftArmRaised / danceRightArmRaised. This method
+    /// handles the imperative side: shimmy wiggle, spin rotation, freeze snap, big jump.
+    private func handleDanceMove(_ move: DanceMove) {
+        switch move {
+
+        case .spin:
+            stopArmFlair()
+            danceSpinTask?.cancel()
+            withAnimation(.easeInOut(duration: 0.924)) { danceSpinAngle += 360 }
+            // Normalize angle after spin completes — 360° mod 360 = 0, same visual
+            danceSpinTask = Task {
+                try? await Task.sleep(for: .milliseconds(950))
+                guard !Task.isCancelled else { return }
+                danceSpinAngle = danceSpinAngle.truncatingRemainder(dividingBy: 360)
+                startArmFlair()
+            }
+
+        case .freeze:
+            stopArmFlair()
+            withAnimation(.spring(response: 0.15, dampingFraction: 0.55)) { wiggleOffset = 0 }
+            withAnimation(.spring(response: 0.15, dampingFraction: 0.55)) { danceJumpOffset = 0 }
+
+        case .bigJump:
+            stopArmFlair()
+            withAnimation(.spring(response: 0.18, dampingFraction: 0.42)) { danceJumpOffset = -24 }
+            Task {
+                try? await Task.sleep(for: .milliseconds(260))
+                withAnimation(.spring(response: 0.38, dampingFraction: 0.62)) { danceJumpOffset = 0 }
+                try? await Task.sleep(for: .milliseconds(150))
+                startArmFlair()
+            }
+
+        case .shimmy:
+            // Keep arm flair for shimmy sway; add fast lateral wiggle
+            startArmFlair()
+            danceJumpOffset = 0
+            withAnimation(.easeInOut(duration: 0.09).repeatForever(autoreverses: true)) {
+                wiggleOffset = 13
+            }
+
+        case .groove, .leftArmUp, .rightArmUp, .bothArmsUp:
+            startArmFlair()
+            danceJumpOffset = 0
+            withAnimation(.spring(response: 0.3, dampingFraction: 0.6)) { wiggleOffset = 0 }
+        }
     }
 
     private func applyStartledJump() {
