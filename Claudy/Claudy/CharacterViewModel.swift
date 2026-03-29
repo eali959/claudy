@@ -46,6 +46,7 @@ final class CharacterViewModel {
     @ObservationIgnored private var contextMonitor: ContextMonitor?
     @ObservationIgnored private var keyboardMonitor: KeyboardMonitor?
     @ObservationIgnored private var systemEventMonitor: SystemEventMonitor?
+    @ObservationIgnored private var spotifyMonitor: SpotifyMonitor?
 
     @ObservationIgnored private var blinkTask: Task<Void, Never>?
     @ObservationIgnored private var speechTask: Task<Void, Never>?
@@ -89,6 +90,7 @@ final class CharacterViewModel {
         clipboardMonitor  = ClipboardMonitor(viewModel: self)
         appContextMonitor = AppContextMonitor(viewModel: self)
         pomodoroManager   = PomodoroManager(viewModel: self)
+        roastModeManager  = RoastModeManager(viewModel: self)
         startBlinkLoop()
 
         NotificationCenter.default.addObserver(
@@ -123,6 +125,7 @@ final class CharacterViewModel {
         contextMonitor     = ContextMonitor(viewModel: self, windowManager: windowManager)
         keyboardMonitor    = KeyboardMonitor(viewModel: self)
         systemEventMonitor = SystemEventMonitor(viewModel: self)
+        spotifyMonitor     = SpotifyMonitor(viewModel: self)
     }
 
     // MARK: - State helpers
@@ -163,6 +166,119 @@ final class CharacterViewModel {
         danceModeManager.stop()
         baseState = .idle
         setState(.idle)
+    }
+
+    // MARK: - Roast mode
+
+    @ObservationIgnored private(set) var roastModeManager: RoastModeManager!
+
+    func roastMe() {
+        roastModeManager.startRoast()
+    }
+
+    // MARK: - Spotify reactions
+
+    /// Called when Spotify starts playing a new track.
+    func onSpotifyTrackChanged(track: String, artist: String, genre: SpotifyGenre) {
+        // Build a short speech bubble
+        let bubble: String
+        switch genre {
+        case .metal:
+            let lines = [
+                "Oh we are DOING this. \(artist). Let's go.",
+                "\(track)? Absolute weapon of a track.",
+                "Right. Headbanging commences immediately.",
+            ]
+            bubble = lines.randomElement()!
+            setState(.headbanging)
+            baseState = .headbanging
+
+        case .electronic:
+            let lines = [
+                "\(artist) just dropped. Dance mode activated.",
+                "This is my song. This is literally my song.",
+                "Oh the beat just hit. We're dancing.",
+            ]
+            bubble = lines.randomElement()!
+            startDanceMode()
+
+        case .hiphop:
+            let lines = [
+                "\(track). Good taste. Very good taste.",
+                "\(artist) on the aux? Respectable.",
+                "Okay we're vibing. I see you.",
+            ]
+            bubble = lines.randomElement()!
+            startDanceMode()
+
+        case .lofi:
+            let lines = [
+                "Lo-fi mode activated. Deep focus. Let's build something.",
+                "\(track). This is the one.",
+                "Okay. Headphones on. World off. Let's go.",
+            ]
+            bubble = lines.randomElement()!
+            setState(.vibing)
+            baseState = .vibing
+
+        case .classical:
+            let lines = [
+                "\(artist). Good. The brain works better with structure.",
+                "Classical. You're in 'solving a hard problem' mode. I respect it.",
+                "Okay we're being serious today. I can do serious.",
+            ]
+            bubble = lines.randomElement()!
+            setState(.thinking)
+            baseState = .idle
+
+        case .country:
+            let lines = [
+                "\(track)? Bold choice. No notes.",
+                "Country mode. I'm not judging. I'm a little judging.",
+                "We're doing country. Okay. Fine. Whatever makes the code compile.",
+            ]
+            bubble = lines.randomElement()!
+            wave()
+
+        case .rnb:
+            let lines = [
+                "\(artist). Smooth. The code's going to write itself.",
+                "R&B hours. Productive hours. Proven correlation.",
+                "\(track). Okay. I feel this. We feel this.",
+            ]
+            bubble = lines.randomElement()!
+            setState(.celebrating, duration: 2.5)
+
+        case .pop:
+            let lines = [
+                "\(track). Okay, no shame, this is a banger.",
+                "\(artist) in the session. Valid.",
+                "Pop hours. Productivity correlation unclear but we're here for it.",
+            ]
+            bubble = lines.randomElement()!
+            celebrate()
+
+        case .unknown:
+            let lines = [
+                "\(track) just came on. I don't know this one but I'm into it.",
+                "Oh. New track. Listening.",
+                "\(artist). Interesting choice. Tell me more.",
+            ]
+            bubble = lines.randomElement()!
+            setState(.alert, duration: 2.0)
+        }
+
+        showBubbleDirect(bubble, duration: 5.0)
+    }
+
+    /// Called when Spotify is paused or stopped.
+    func onSpotifyPaused() {
+        // Only react if we put the character in a music-driven state
+        if animationState == .headbanging || animationState == .vibing {
+            baseState = .idle
+            setState(.idle)
+        }
+        if danceModeManager.isActive { stopDanceMode() }
     }
 
     // MARK: - Mood system
@@ -263,7 +379,7 @@ final class CharacterViewModel {
     }
 
     // States where a speech bubble should trigger talking mouth animation.
-    private static let ambientStates: Set<CharacterAnimationState> = [.idle, .alert, .drowsy, .waving]
+    private static let ambientStates: Set<CharacterAnimationState> = [.idle, .alert, .drowsy, .waving, .vibing]
 
     private func displayBubble(_ text: String, duration: TimeInterval) {
         lastUnpromptedBubbleTime = Date()

@@ -39,6 +39,7 @@ struct ClaudyCharacterView: View {
     @State private var danceJumpOffset: CGFloat = 0
     @State private var danceGlowPulse: Bool = false
     @State private var danceSpinTask: Task<Void, Never>? = nil
+    @State private var danceScalePulse: CGFloat = 1.0
 
     // Palette - spec: #C85C38 body, #E07048 highlight, #9A3520 shadow, #A84020 limbs
     private let bodyColor  = Color(red: 0.784, green: 0.361, blue: 0.220) // #C85C38
@@ -123,14 +124,16 @@ struct ClaudyCharacterView: View {
             .offset(x: wiggleOffset, y: bobOffset + jumpOffset + danceJumpOffset - 10)
             .rotationEffect(.degrees(dragTilt + (animationState == .dancing ? danceSpinAngle : 0)))
             .scaleEffect(
-                animationState == .celebrating ? celebrateScale :
-                animationState == .dancing     ? (danceMove == .bothArmsUp || danceMove == .bigJump ? 1.06 : 1.0) :
-                animationState == .alert       ? 1.05 : 1.0
+                animationState == .celebrating  ? celebrateScale :
+                animationState == .dancing      ? danceScalePulse :
+                animationState == .headbanging  ? 1.0 :
+                animationState == .alert        ? 1.05 : 1.0
             )
             .animation(.spring(response: 0.3, dampingFraction: 0.5), value: animationState)
             .animation(.spring(response: 0.4, dampingFraction: 0.6), value: dragTilt)
             .animation(.easeInOut(duration: 0.924), value: danceSpinAngle)
             .animation(.spring(response: 0.25, dampingFraction: 0.5), value: danceMove)
+            .animation(.spring(response: 0.12, dampingFraction: 0.45), value: danceScalePulse)
         }
         .frame(width: 130, height: 150)
         .contentShape(Rectangle())
@@ -181,8 +184,8 @@ struct ClaudyCharacterView: View {
             startCelebrationAnimation()
             if newState == .surprised { applyStartledJump() }
 
-            // Arm flair: waving and dancing both use it; tickled full keeps it running
-            if newState == .waving || newState == .dancing {
+            // Arm flair: waving, dancing, and headbanging use it
+            if newState == .waving || newState == .dancing || newState == .headbanging {
                 startArmFlair()
             } else if newState != .tickled || tickleIntensity != .full {
                 stopArmFlair()
@@ -193,9 +196,10 @@ struct ClaudyCharacterView: View {
                 startDanceGlow()
             } else {
                 danceGlowPulse = false
+                danceScalePulse = 1.0
                 // Unwind any active shimmy / jump / spin cleanly
                 withAnimation(.spring(response: 0.4, dampingFraction: 0.7)) {
-                    wiggleOffset   = 0
+                    wiggleOffset    = 0
                     danceJumpOffset = 0
                 }
                 danceSpinTask?.cancel()
@@ -245,40 +249,46 @@ struct ClaudyCharacterView: View {
 
     private var danceLeftArmAngle: Double {
         switch danceMove {
-        case .bothArmsUp, .bigJump: return -72
-        case .leftArmUp:            return -82
-        case .spin:                 return -62
-        case .shimmy:               return armFlair ? -54 : 18
-        case .freeze:               return 22
-        case .groove:               return armFlair ? -50 : 22
-        case .rightArmUp:           return 32
+        case .bothArmsUp, .bigJump, .throwHands: return -72
+        case .leftArmUp:                          return -84
+        case .spin:                               return -62
+        case .shimmy:                             return armFlair ? -56 : 16
+        case .freeze:                             return 24
+        case .groove, .chestPop:                  return armFlair ? -52 : 22
+        case .rightArmUp:                         return 34
+        case .pointUp:                            return 20       // left at hip
+        case .lowRide:                            return armFlair ? -44 : 44  // arms wide
         }
     }
 
     private var danceRightArmAngle: Double {
         switch danceMove {
-        case .bothArmsUp, .bigJump: return 72
-        case .rightArmUp:           return 82
-        case .spin:                 return 62
-        case .shimmy:               return armFlair ? 54 : -18
-        case .freeze:               return -22
-        case .groove:               return armFlair ? 50 : -22
-        case .leftArmUp:            return -32
+        case .bothArmsUp, .bigJump, .throwHands: return 72
+        case .rightArmUp:                         return 84
+        case .spin:                               return 62
+        case .shimmy:                             return armFlair ? 56 : -16
+        case .freeze:                             return -24
+        case .groove, .chestPop:                  return armFlair ? 52 : -22
+        case .leftArmUp:                          return -34
+        case .pointUp:                            return 86       // right arm pointing up
+        case .lowRide:                            return armFlair ? 44 : -44  // arms wide
         }
     }
 
     private var danceLeftArmRaised: Bool {
         switch danceMove {
-        case .bothArmsUp, .bigJump, .leftArmUp, .spin: return true
-        case .groove, .shimmy: return armFlair
+        case .bothArmsUp, .bigJump, .leftArmUp, .spin, .throwHands: return true
+        case .groove, .shimmy, .chestPop: return armFlair
+        case .lowRide: return false
         default: return false
         }
     }
 
     private var danceRightArmRaised: Bool {
         switch danceMove {
-        case .bothArmsUp, .bigJump, .rightArmUp, .spin: return true
-        case .groove, .shimmy: return armFlair
+        case .bothArmsUp, .bigJump, .rightArmUp, .spin, .throwHands, .pointUp: return true
+        case .groove, .shimmy, .chestPop: return armFlair
+        case .lowRide: return false
         default: return false
         }
     }
@@ -339,6 +349,12 @@ struct ClaudyCharacterView: View {
         switch animationState {
         case .celebrating, .waving, .dancing:
             HStack(spacing: 20) { arcEyeUp; arcEyeUp }
+        case .headbanging:
+            // Intense squint — rock face
+            HStack(spacing: 17) { squintyEye; squintyEye }
+        case .vibing:
+            // Half-closed content eyes — in the zone
+            HStack(spacing: 17) { vibeEye(size: 27); vibeEye(size: 23) }
         case .sleeping:
             HStack(spacing: 22) { sleepEye; sleepEye }
         case .drowsy:
@@ -417,6 +433,26 @@ struct ClaudyCharacterView: View {
                 .fill(darkBrown)
                 .frame(width: size * 0.32, height: size * 0.18)
                 .offset(y: size * 0.04)
+        }
+    }
+
+    /// Vibe - half-closed but relaxed and content, slightly more open than drowsy
+    private func vibeEye(size: CGFloat) -> some View {
+        ZStack {
+            // Sclera — taller than drowsy, shorter than normal
+            Capsule()
+                .fill(Color.white)
+                .frame(width: size, height: size * 0.58)
+            // Iris — centred, visible
+            Circle()
+                .fill(darkBrown)
+                .frame(width: size * 0.38, height: size * 0.38)
+                .offset(y: size * 0.04)
+            // Catchlight
+            Circle()
+                .fill(Color.white.opacity(0.8))
+                .frame(width: size * 0.14, height: size * 0.14)
+                .offset(x: size * 0.1, y: size * 0.0)
         }
     }
 
@@ -514,6 +550,35 @@ struct ClaudyCharacterView: View {
             .stroke(darkBrown, style: StrokeStyle(lineWidth: 3, lineCap: .round))
             .frame(width: 22, height: 15)
 
+        case .headbanging:
+            // Wide open rock mouth — teeth showing
+            ZStack {
+                Path { p in
+                    p.move(to: CGPoint(x: 0, y: 0))
+                    p.addQuadCurve(to: CGPoint(x: 20, y: 0), control: CGPoint(x: 10, y: 14))
+                }
+                .stroke(darkBrown, style: StrokeStyle(lineWidth: 3, lineCap: .round))
+                .frame(width: 20, height: 14)
+                // Teeth
+                HStack(spacing: 2) {
+                    ForEach(0..<4, id: \.self) { _ in
+                        RoundedRectangle(cornerRadius: 1)
+                            .fill(Color.white)
+                            .frame(width: 3.5, height: 4)
+                    }
+                }
+                .offset(y: 2)
+            }
+
+        case .vibing:
+            // Small relaxed smile — content, not ecstatic
+            Path { p in
+                p.move(to: CGPoint(x: 0, y: 0))
+                p.addQuadCurve(to: CGPoint(x: 12, y: 0), control: CGPoint(x: 6, y: 6))
+            }
+            .stroke(darkBrown, style: StrokeStyle(lineWidth: 2, lineCap: .round))
+            .frame(width: 12, height: 7)
+
         case .celebrating, .waving:
             Path { p in
                 p.move(to: CGPoint(x: 0, y: 0))
@@ -553,12 +618,16 @@ struct ClaudyCharacterView: View {
 
     private func startBobAnimation() {
         guard !reduceMotion else { bobOffset = 0; return }
-        let duration: Double = animationState == .dancing  ? 0.36 :  // fast groove bounce
-                               animationState == .sleeping ? 3.2  :
-                               animationState == .drowsy   ? 2.5  : 1.9
-        let target: CGFloat  = animationState == .dancing  ? -16  :  // big energetic bounce
-                               animationState == .sleeping ? -2   :
-                               animationState == .drowsy   ? -4   : -6
+        let duration: Double = animationState == .dancing      ? 0.36 :  // fast groove bounce
+                               animationState == .headbanging  ? 0.13 :  // ultra-fast headbang
+                               animationState == .vibing       ? 1.10 :  // slow chill sway
+                               animationState == .sleeping     ? 3.2  :
+                               animationState == .drowsy       ? 2.5  : 1.9
+        let target: CGFloat  = animationState == .dancing      ? -16  :  // big energetic bounce
+                               animationState == .headbanging  ? -26  :  // massive headbang
+                               animationState == .vibing       ? -8   :  // gentle vibe
+                               animationState == .sleeping     ? -2   :
+                               animationState == .drowsy       ? -4   : -6
         // Reset to 0 without animation first - this cleanly cancels any existing
         // repeatForever transaction on bobOffset so the new one starts fresh
         // rather than stacking on top and causing interference.
@@ -670,31 +739,81 @@ struct ClaudyCharacterView: View {
 
         case .freeze:
             stopArmFlair()
-            withAnimation(.spring(response: 0.15, dampingFraction: 0.55)) { wiggleOffset = 0 }
-            withAnimation(.spring(response: 0.15, dampingFraction: 0.55)) { danceJumpOffset = 0 }
+            danceScalePulse = 1.0
+            withAnimation(.spring(response: 0.12, dampingFraction: 0.55)) { wiggleOffset = 0 }
+            withAnimation(.spring(response: 0.12, dampingFraction: 0.55)) { danceJumpOffset = 0 }
 
         case .bigJump:
             stopArmFlair()
-            withAnimation(.spring(response: 0.18, dampingFraction: 0.42)) { danceJumpOffset = -24 }
+            withAnimation(.spring(response: 0.16, dampingFraction: 0.38)) {
+                danceJumpOffset = -28
+                danceScalePulse = 1.08
+            }
             Task {
-                try? await Task.sleep(for: .milliseconds(260))
-                withAnimation(.spring(response: 0.38, dampingFraction: 0.62)) { danceJumpOffset = 0 }
+                try? await Task.sleep(for: .milliseconds(240))
+                withAnimation(.spring(response: 0.36, dampingFraction: 0.60)) {
+                    danceJumpOffset = 0
+                    danceScalePulse = 1.0
+                }
                 try? await Task.sleep(for: .milliseconds(150))
                 startArmFlair()
             }
 
         case .shimmy:
-            // Keep arm flair for shimmy sway; add fast lateral wiggle
             startArmFlair()
             danceJumpOffset = 0
+            danceScalePulse = 1.0
             withAnimation(.easeInOut(duration: 0.09).repeatForever(autoreverses: true)) {
-                wiggleOffset = 13
+                wiggleOffset = 14
             }
+
+        case .throwHands:
+            stopArmFlair()
+            withAnimation(.spring(response: 0.14, dampingFraction: 0.38)) {
+                danceScalePulse = 1.10
+                danceJumpOffset = -12
+            }
+            Task {
+                try? await Task.sleep(for: .milliseconds(200))
+                withAnimation(.spring(response: 0.32, dampingFraction: 0.60)) {
+                    danceScalePulse = 1.0
+                    danceJumpOffset = 0
+                }
+                try? await Task.sleep(for: .milliseconds(100))
+                startArmFlair()
+            }
+
+        case .chestPop:
+            stopArmFlair()
+            withAnimation(.spring(response: 0.10, dampingFraction: 0.40)) { danceScalePulse = 1.13 }
+            Task {
+                try? await Task.sleep(for: .milliseconds(160))
+                withAnimation(.spring(response: 0.28, dampingFraction: 0.58)) { danceScalePulse = 1.0 }
+                try? await Task.sleep(for: .milliseconds(120))
+                startArmFlair()
+            }
+
+        case .lowRide:
+            startArmFlair()
+            danceJumpOffset = 0
+            withAnimation(.spring(response: 0.28, dampingFraction: 0.55)) {
+                danceScalePulse = 0.90
+                wiggleOffset = 0
+            }
+
+        case .pointUp:
+            stopArmFlair()
+            danceScalePulse = 1.0
+            danceJumpOffset = 0
+            withAnimation(.spring(response: 0.3, dampingFraction: 0.6)) { wiggleOffset = 0 }
 
         case .groove, .leftArmUp, .rightArmUp, .bothArmsUp:
             startArmFlair()
             danceJumpOffset = 0
-            withAnimation(.spring(response: 0.3, dampingFraction: 0.6)) { wiggleOffset = 0 }
+            withAnimation(.spring(response: 0.28, dampingFraction: 0.58)) {
+                wiggleOffset = 0
+                danceScalePulse = (move == .bothArmsUp) ? 1.05 : 1.0
+            }
         }
     }
 

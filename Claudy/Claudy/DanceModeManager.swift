@@ -7,25 +7,26 @@ private let logger = Logger(subsystem: "com.claudy", category: "DanceModeManager
 // MARK: - DanceMove
 
 /// Choreography moves that drive ClaudyCharacterView during dance mode.
-///
-/// Each case maps to a distinct arm position, wiggle, and energy level in the character view.
-/// The sequence is timed at ~130 BPM — the approximate tempo of No Broke Boys.
 enum DanceMove: Equatable, Sendable {
-    case groove       // base bounce, arms alternating to the beat
-    case leftArmUp    // left arm raised high, body energy right
-    case rightArmUp   // right arm raised high, body energy left
-    case bothArmsUp   // Y-shape, maximum energy
-    case shimmy       // rapid side-to-side sway
-    case spin         // full 360° rotation
-    case freeze       // dramatic pose hold — sudden stop
-    case bigJump      // large vertical leap with both arms up
+    case groove         // base bounce, arms alternating to the beat
+    case leftArmUp      // left arm raised high
+    case rightArmUp     // right arm raised high
+    case bothArmsUp     // Y-shape, maximum energy
+    case shimmy         // rapid side-to-side sway
+    case spin           // full 360° rotation
+    case freeze         // dramatic pose hold — sudden stop
+    case bigJump        // large vertical leap with both arms up
+    case pointUp        // right arm pointing straight up, left at hip
+    case lowRide        // crouch with arms wide — body scales down
+    case throwHands     // both arms thrown forward/up — quick energy burst
+    case chestPop       // sharp body pop with scale pulse
 }
 
 // MARK: - DanceModeManager
 
 /// Timed choreography engine for Dance Mode.
 ///
-/// Sequences DanceMove values across four repeating phrases at ~130 BPM.
+/// Sequences DanceMove values across five repeating phrases at ~130 BPM.
 /// CharacterViewModel owns this object and calls start() / stop().
 /// ClaudyCharacterView reads currentMove to render each pose.
 @MainActor
@@ -60,40 +61,58 @@ final class DanceModeManager {
     // MARK: - Choreography
     //
     // At 130 BPM: 1 beat = 0.462s
-    //   2 beats = 0.924s   4 beats = 1.846s   8 beats = 3.692s
+    //   1 beat  = 0.462s   2 beats = 0.924s
+    //   4 beats = 1.846s   8 beats = 3.692s
 
     private let beat: Double = 0.462
 
     /// Full choreography loop — runs until dance mode is stopped.
+    ///
+    /// Five phrases total. Phrase C uses 1-beat micro-moves to build
+    /// urgency before the drop in Phrase D.
     private func runChoreography() async {
         while !Task.isCancelled {
 
-            // ── Phrase A: Intro groove ──────────────────────────────────
+            // ── Phrase A: Settle in ─────────────────────────────────────
             await step(.groove,      beats: 4)
-            await step(.rightArmUp,  beats: 4)
-            await step(.leftArmUp,   beats: 4)
-            await step(.groove,      beats: 4)
-
-            // ── Phrase B: Build energy ──────────────────────────────────
             await step(.rightArmUp,  beats: 2)
             await step(.leftArmUp,   beats: 2)
-            await step(.bothArmsUp,  beats: 4)
-            await step(.shimmy,      beats: 4)
+            await step(.pointUp,     beats: 2)
+            await step(.groove,      beats: 2)
 
-            // ── Phrase C: Drop ──────────────────────────────────────────
-            await step(.spin,        beats: 2)
-            await step(.freeze,      beats: 2)
-            await step(.bothArmsUp,  beats: 4)
-            await step(.bigJump,     beats: 4)
-
-            // ── Phrase D: Peak / chorus ─────────────────────────────────
+            // ── Phrase B: Build ─────────────────────────────────────────
             await step(.shimmy,      beats: 4)
             await step(.rightArmUp,  beats: 2)
+            await step(.throwHands,  beats: 1)
             await step(.leftArmUp,   beats: 2)
+            await step(.throwHands,  beats: 1)
+            await step(.bothArmsUp,  beats: 2)
+
+            // ── Phrase C: Tension — rapid 1-beat cuts ───────────────────
+            await step(.chestPop,    beats: 1)
+            await step(.rightArmUp,  beats: 1)
+            await step(.chestPop,    beats: 1)
+            await step(.leftArmUp,   beats: 1)
+            await step(.chestPop,    beats: 1)
+            await step(.pointUp,     beats: 1)
             await step(.spin,        beats: 2)
-            await step(.bothArmsUp,  beats: 4)
             await step(.freeze,      beats: 2)
-            await step(.groove,      beats: 4)
+
+            // ── Phrase D: Drop / chorus — maximum energy ────────────────
+            await step(.bothArmsUp,  beats: 2)
+            await step(.bigJump,     beats: 2)
+            await step(.lowRide,     beats: 2)
+            await step(.bothArmsUp,  beats: 2)
+            await step(.chestPop,    beats: 1)
+            await step(.throwHands,  beats: 1)
+            await step(.bigJump,     beats: 2)
+
+            // ── Phrase E: Cool down → loop ───────────────────────────────
+            await step(.shimmy,      beats: 4)
+            await step(.spin,        beats: 2)
+            await step(.freeze,      beats: 2)
+            await step(.bothArmsUp,  beats: 2)
+            await step(.groove,      beats: 2)
         }
     }
 

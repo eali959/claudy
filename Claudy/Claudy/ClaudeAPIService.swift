@@ -151,6 +151,26 @@ actor ClaudeAPIService {
         }
     }
 
+    /// Collects a full non-streaming response to a single prompt. Returns nil on error or no key.
+    func singleMessage(
+        _ prompt: String,
+        systemPrompt: String = "",
+        priority: MessagePriority = .reaction
+    ) async -> String? {
+        guard hasAPIKey else { return nil }
+        let message = ChatMessage(role: .user, content: prompt)
+        var result = ""
+        do {
+            for try await token in streamResponse(messages: [message], systemPrompt: systemPrompt, priority: priority) {
+                result += token
+            }
+            return result.isEmpty ? nil : result.trimmingCharacters(in: .whitespacesAndNewlines)
+        } catch {
+            logger.error("singleMessage error: \(error)")
+            return nil
+        }
+    }
+
     /// Rate-limited unprompted commentary. Returns nil if within the rate-limit window.
     func requestUnpromptedCommentary(
         context: String,

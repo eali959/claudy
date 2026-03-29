@@ -329,6 +329,11 @@ struct CharacterRootView: View {
             }
         }
 
+        Button(characterViewModel.roastModeManager.isRoasting ? "Roasting..." : "Roast Me") {
+            characterViewModel.roastMe()
+        }
+        .disabled(characterViewModel.roastModeManager.isRoasting)
+
         Button(demoManager.isRunning ? "Stop Demo" : "Start Demo") {
             if demoManager.isRunning { demoManager.stop() } else { demoManager.start() }
         }
