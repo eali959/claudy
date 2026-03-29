@@ -1,4 +1,5 @@
-# Claud-y 🍊
+<img width="1248" height="832" alt="Claud-y_Cover_Image" src="https://github.com/user-attachments/assets/97469873-0992-4f33-b2c4-4be74b54ba17" />
+Claud-y 🍊
 
 **A small AI companion that lives on your Mac.**
 
