@@ -140,6 +140,7 @@ Notary
 # Internal planning files
 BACKLOG.md
 BUG_REPORT.md
+CHANGELOG.md
 claudy-backlog.md
 claudy-setup.html
 claudy-spec.md

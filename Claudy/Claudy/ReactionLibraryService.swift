@@ -73,6 +73,36 @@ enum ReactionTrigger: String, CaseIterable {
     case appObsidian        = "app_obsidian"
     case appDatabase        = "app_database"
 
+    // Cursor-specific build events
+    case cursorBuildStart   = "cursor_build_start"
+    case cursorBuildDone    = "cursor_build_done"
+    case appAntigravity     = "app_antigravity"
+    case claudeCodeAgentBuild = "claude_code_agent_build"
+
+    // Microsoft Office suite
+    case appMicrosoftWord       = "app_microsoft_word"
+    case appMicrosoftExcel      = "app_microsoft_excel"
+    case appMicrosoftPowerPoint = "app_microsoft_powerpoint"
+    case appMicrosoftOutlook    = "app_microsoft_outlook"
+    case appMicrosoftTeams      = "app_microsoft_teams"
+
+    // Apple productivity suite
+    case appApplePages    = "app_apple_pages"
+    case appAppleKeynote  = "app_apple_keynote"
+    case appAppleNumbers  = "app_apple_numbers"
+    case appAppleMail     = "app_apple_mail"
+    case appAppleNotes    = "app_apple_notes"
+    case appAppleSafari   = "app_apple_safari"
+
+    // Other popular dev tools
+    case appGitHubDesktop = "app_github_desktop"
+    case appLinear        = "app_linear"
+    case appRaycast       = "app_raycast"
+    case appArc           = "app_arc"
+    case appWindsurf      = "app_windsurf"
+    case appPostman       = "app_postman"
+    case appInsomnia      = "app_insomnia"
+
     // AI session
     case vibeCodingSession  = "vibe_coding_session"
     case aiContextLimit     = "ai_context_limit"

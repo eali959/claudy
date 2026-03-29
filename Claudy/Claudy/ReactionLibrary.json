@@ -339,7 +339,226 @@
     "The ghost text knows.",
     "Cursor sees your intent. Interesting.",
     "The model is watching the keystrokes.",
-    "AI everywhere. The future arrived quietly."
+    "AI everywhere. The future arrived quietly.",
+    "Cursor. Where the ghost text lives.",
+    "AI pair programming. This is the way.",
+    "The autocomplete is smarter than it looks. Trust it.",
+    "Cursor open. Time to let the AI do some lifting.",
+    "Inline completions and chat and agents. The full stack AI IDE.",
+    "Tab, review, tab, review. The Cursor workflow.",
+    "Building with AI assistance. The future of the craft.",
+    "Cursor and Claude. The dream team, technically.",
+    "AI suggestions incoming. Review everything. Ship the good ones."
+  ],
+
+  "cursor_build_start": [
+    "Cursor's running a build. Fingers crossed.",
+    "Build kicked off. The AI wrote it, the compiler decides its fate.",
+    "Something is compiling. The ghost text led us here.",
+    "Build running. I'll wait with you.",
+    "TypeScript is doing its thing. Good luck out there.",
+    "Build started. This is the moment of truth.",
+    "Compiler engaged. Let's see if the AI's suggestions hold up."
+  ],
+
+  "cursor_build_done": [
+    "Build done. Clean or errors? Either way, we adapt.",
+    "That finished. Good sign.",
+    "Compiled. Now we run it and find out.",
+    "Build complete. The AI's work is now judged by the compiler.",
+    "Done building. The moment of truth approaches.",
+    "Finished. Was it worth the wait? Probably.",
+    "Build wrapped. What did we ship?"
+  ],
+
+  "app_antigravity": [
+    "Antigravity is open. Nice setup.",
+    "Oh. That app. Yes. I see you.",
+    "The workflow on this one is clean.",
+    "Nice tool selection. I notice these things.",
+    "Antigravity. Levelling up the environment.",
+    "This is a person who knows their tools.",
+    "Okay we are doing this properly.",
+    "Good choice. I keep notes on these things."
+  ],
+
+  "claude_code_agent_build": [
+    "The agent built something and now the compiler is involved. This is the future.",
+    "Claude Code just kicked off a build. Let's see what it shipped.",
+    "AI wrote it, compiler judges it. Edge of my seat.",
+    "Build running via agent. This is peak vibe coding.",
+    "The agent is letting the compiler have its say. Respect the process.",
+    "Claude Code building something. I'm excited and a little nervous.",
+    "It doesn't just write code. It builds and verifies. Incredible."
+  ],
+
+  "app_windsurf": [
+    "Windsurf open. Codeium's AI IDE. Solid choice.",
+    "Another AI IDE in the mix. The tools keep getting better.",
+    "Windsurf. Tab to accept the future.",
+    "AI-assisted development, Codeium style. Let's go.",
+    "Windsurf and Cursor in the same league. You have options.",
+    "The AI IDE ecosystem is thriving. I love to see it."
+  ],
+
+  "app_microsoft_word": [
+    "Word open. Something is being written.",
+    "Microsoft Word. The classic. Respect the classics.",
+    "Drafting something? Word is reliable for a reason.",
+    "Word is open. Essay, report, or cover letter? I'm rooting for you.",
+    "Track changes on or off? The eternal question.",
+    "Writing mode engaged. I'll keep the interruptions minimal.",
+    "Word. The document that started a thousand careers.",
+    "Whatever you're writing in there — make it count."
+  ],
+
+  "app_microsoft_excel": [
+    "Excel. Where data goes to become insights.",
+    "Spreadsheet mode. Vlookup or pivot table?",
+    "Excel open. Either very organised or in serious trouble.",
+    "The cells await. Fill them with wisdom.",
+    "Excel. The most powerful app that nobody fully understands.",
+    "Spreadsheets are just code for people who say they don't code.",
+    "Whatever is in that spreadsheet — I believe in you.",
+    "Excel open. Try not to put spaces in column headers. That's all I ask."
+  ],
+
+  "app_microsoft_powerpoint": [
+    "Presentation time. Make the slides count.",
+    "PowerPoint. Where good ideas go to become bullet points.",
+    "Building a deck? Less text, more impact. Always.",
+    "Slides are open. Are they too many? They're always too many.",
+    "PowerPoint. The art of communicating visually with 47 slides.",
+    "Deck mode engaged. Remember: one idea per slide.",
+    "Presenting something important? You've got this.",
+    "Good slides, bad slides — the idea is always the thing."
+  ],
+
+  "app_microsoft_outlook": [
+    "Outlook open. The inbox awaits your courage.",
+    "Email time. Inbox zero is a myth but it's a beautiful myth.",
+    "Outlook. The professional relationship with email.",
+    "An inbox. A challenge. I believe in your ability to triage it.",
+    "Email open. Deal with the urgent ones. Archive the rest.",
+    "Outlook. Where calendar invites multiply like rabbits."
+  ],
+
+  "app_microsoft_teams": [
+    "Teams open. Another meeting.",
+    "Microsoft Teams. Where 'this could have been an email' lives.",
+    "Meeting time. Camera on or off? Bold choice either way.",
+    "Teams. The enterprise communication hub. You know the drill.",
+    "Another call on Teams. Hope it's a short one.",
+    "Teams meeting. Mute yourself until you need to speak. Always."
+  ],
+
+  "app_apple_pages": [
+    "Pages open. Apple's take on writing.",
+    "Writing something in Pages? Clean, simple, good.",
+    "Pages. Where essays and proposals get their start.",
+    "Pages open. Whatever you're writing — make it clear.",
+    "Apple Pages. The word processor that respects your eyes.",
+    "Document mode. Pages is a good call."
+  ],
+
+  "app_apple_keynote": [
+    "Keynote! The presentation tool that actually looks good.",
+    "Building a Keynote deck. The animations are going to be smooth.",
+    "Keynote open. This presentation is going to look incredible.",
+    "Apple Keynote. Where presentations actually become beautiful.",
+    "Slides with style. Keynote is the right call.",
+    "Keynote. The presentation tool that made the world expect more from slides.",
+    "Building something to show people? Keynote will do it justice.",
+    "Magic Move is still the best slide transition. I said what I said."
+  ],
+
+  "app_apple_numbers": [
+    "Numbers open. Apple's spin on spreadsheets.",
+    "Numbers. Cleaner than Excel but just as powerful when you need it.",
+    "Spreadsheet in Numbers. I respect the aesthetic choice.",
+    "Apple Numbers. The spreadsheet app that doesn't make you feel bad about data.",
+    "Crunching numbers. Literally.",
+    "Numbers open. Something is being calculated."
+  ],
+
+  "app_apple_mail": [
+    "Apple Mail. The inbox is open.",
+    "Email time. Write well. Be brief.",
+    "Mail open. Something important is being sent or read.",
+    "The inbox awaits. Go get it.",
+    "Apple Mail. Where unread counts haunt people.",
+    "Sending something? Make the subject line count."
+  ],
+
+  "app_apple_notes": [
+    "Notes open. Good — write it down.",
+    "Apple Notes. The scratchpad that scales.",
+    "Capturing a thought? Good instinct. Always write it down.",
+    "Notes. The app where unfinished ideas live forever.",
+    "Quick capture mode. I approve.",
+    "Good ideas deserve to be written down. Notes is the right instinct."
+  ],
+
+  "app_apple_safari": [
+    "Safari open. The web awaits.",
+    "Researching something? Safari is the correct choice on Mac.",
+    "Browser open. What are we looking for?",
+    "Safari. The browser Apple spent a lot of time on. It shows.",
+    "Looking something up? Good. The answer is probably out there.",
+    "Browser time. Make the tabs count."
+  ],
+
+  "app_github_desktop": [
+    "GitHub Desktop. Visual git. No shame in that.",
+    "GitHub Desktop open. Committing, pushing, reviewing diffs.",
+    "The GUI git client. Easy to judge, hard to argue with.",
+    "GitHub Desktop. Where the non-CLI git users feel welcome.",
+    "Git with a visual interface. Works exactly as well as the terminal version.",
+    "GitHub Desktop open. Something is being versioned right now."
+  ],
+
+  "app_linear": [
+    "Linear! The issue tracker that developers actually like.",
+    "Linear open. Tickets, epics, and roadmaps. The good kind.",
+    "Linear. The project management tool that doesn't make you hate project management.",
+    "Issue tracker time. What are we shipping next?",
+    "Linear. Where the roadmap lives and the backlog is honest.",
+    "Tickets in Linear. Organised chaos, but organised."
+  ],
+
+  "app_raycast": [
+    "Raycast! The launcher that does everything.",
+    "Raycast open. Command palette power user.",
+    "The productivity launcher. You have excellent taste.",
+    "Raycast. Where one keystroke does the work of ten.",
+    "Command palette mode. I respect this workflow deeply.",
+    "Raycast. The tool that quietly makes everything faster."
+  ],
+
+  "app_arc": [
+    "Arc browser. The browser that reimagined the tab.",
+    "Arc open. Spaces, profiles, command bar. Very you.",
+    "The browser built for power users. Good choice.",
+    "Arc. Where tabs become spaces and browsing becomes intentional.",
+    "Arc browser. I see you — you care about your workflow.",
+    "Browsing in Arc. The sidebar makes sense once you get it."
+  ],
+
+  "app_postman": [
+    "Postman open. Time to poke the API.",
+    "API testing mode. What are we calling?",
+    "Postman. Where the API either works or gives you a 422.",
+    "Testing endpoints. The satisfying ping of a 200.",
+    "Postman. The API explorer's home base.",
+    "Request sent. Response incoming. Fingers crossed."
+  ],
+
+  "app_insomnia": [
+    "Insomnia open. API client, the cleaner choice.",
+    "REST client mode. What are we hitting?",
+    "Insomnia. Like Postman but lighter on its feet.",
+    "API testing. The 200 is the goal. Always.",
+    "Poking an endpoint? Insomnia is good for that."
   ],
   "vibe_coding_session": [
     "Long AI session. I see you.",

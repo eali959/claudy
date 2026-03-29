@@ -258,6 +258,34 @@ struct CharacterRootView: View {
             }
         }
 
+        Menu("Reminders") {
+            let pending = characterViewModel.alarmReminderManager.reminders.filter { !$0.fired }
+            if pending.isEmpty {
+                Button("No active reminders") { }.disabled(true)
+            } else {
+                ForEach(pending) { reminder in
+                    let formatter: DateFormatter = {
+                        let f = DateFormatter()
+                        f.timeStyle = .short
+                        f.dateStyle = reminder.fireDate.timeIntervalSinceNow > 86400 ? .short : .none
+                        return f
+                    }()
+                    Button("\(formatter.string(from: reminder.fireDate)) — \(reminder.title)") {
+                        characterViewModel.alarmReminderManager.remove(id: reminder.id)
+                    }
+                }
+                Divider()
+                Button("Clear All Reminders") {
+                    characterViewModel.alarmReminderManager.clearFired()
+                    for r in pending {
+                        characterViewModel.alarmReminderManager.remove(id: r.id)
+                    }
+                }
+            }
+            Text("Tip: say \"remind me in 30 min to...\" in chat")
+                .font(.caption)
+        }
+
         Menu("Size") {
             ForEach(WindowManager.SizePreset.allCases, id: \.self) { preset in
                 Button {
@@ -334,14 +362,6 @@ struct CharacterRootView: View {
             characterViewModel.setMuted(!characterViewModel.isMuted)
         }
         .keyboardShortcut("m", modifiers: .option)
-
-        Button(characterViewModel.danceModeManager.isActive ? "Stop Dancing" : "Dance Mode") {
-            if characterViewModel.danceModeManager.isActive {
-                characterViewModel.stopDanceMode()
-            } else {
-                characterViewModel.startDanceMode()
-            }
-        }
 
         Button(characterViewModel.roastModeManager.isRoasting ? "Roasting..." : "Roast Me") {
             characterViewModel.roastMe()

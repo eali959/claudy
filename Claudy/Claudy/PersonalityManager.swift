@@ -114,9 +114,10 @@ enum PersonalityMode: String, CaseIterable, Codable, Sendable {
 /// Manages the active personality mode and builds the system prompt injected into every API call.
 ///
 /// The system prompt is assembled from a base template (SystemPrompt.txt in the bundle) plus
-/// the active personality's `promptBlock`. Custom mode replaces the block with user-supplied text.
+/// the active personality's `promptBlock` and, when set, the active BehaviorMode's `modePromptBlock`.
+/// Custom mode replaces the personality block with user-supplied text.
 /// Greeting logic uses `asyncGreeting(for:)` which makes a lightweight API call for expressive
-/// personalities (Director, HypeCoach, Chatty) and falls back to the local reaction library otherwise.
+/// personalities (Director, HypeCoach, Chatty, BrainRot) and falls back to the local reaction library.
 @MainActor
 @Observable
 final class PersonalityManager {
@@ -129,6 +130,9 @@ final class PersonalityManager {
         didSet { UserDefaults.standard.set(customPersonaText, forKey: "CustomPersonaText") }
     }
 
+    /// Set by BehaviorModeManager.activate() so every API call reflects the current mode.
+    var activeBehaviorMode: BehaviorMode = .normal
+
     private init() {
         let savedMode = UserDefaults.standard.string(forKey: "PersonalityMode") ?? ""
         currentMode = PersonalityMode(rawValue: savedMode) ?? .companion
@@ -140,18 +144,29 @@ final class PersonalityManager {
               let rawText = try? String(contentsOf: base, encoding: .utf8) else {
             return buildFallbackPrompt()
         }
-        let modeBlock = currentMode == .custom && !customPersonaText.isEmpty
+        let personalityBlock = currentMode == .custom && !customPersonaText.isEmpty
             ? "### MODE: YOU DO YOU\n\(customPersonaText)"
             : currentMode.promptBlock
         let stripped = rawText.replacingOccurrences(
             of: "[PERSONALITY_BLOCK]\n\n*Replaced at runtime by PersonalityManager.swift*\n\n",
             with: ""
         )
-        return stripped + "\n\n## ACTIVE PERSONALITY\n\(modeBlock)"
+        var prompt = stripped + "\n\n## ACTIVE PERSONALITY\n\(personalityBlock)"
+
+        // Inject behavior mode context (Study, Dev, Dance, Brain Rot) when active
+        let modeBlock = activeBehaviorMode.modePromptBlock
+        if !modeBlock.isEmpty {
+            prompt += "\n\n" + modeBlock
+        }
+
+        return prompt
     }
 
     private func buildFallbackPrompt() -> String {
-        "You are Claud-y, a small round orange AI companion on the user's Mac. \(currentMode.promptBlock)"
+        var base = "You are Claud-y, a small round orange AI companion on the user's Mac. \(currentMode.promptBlock)"
+        let modeBlock = activeBehaviorMode.modePromptBlock
+        if !modeBlock.isEmpty { base += "\n\n" + modeBlock }
+        return base
     }
 
     // MARK: - Greeting system
@@ -209,8 +224,10 @@ final class PersonalityManager {
         }
     }
 
-    /// Whether this personality requests API-generated greetings.
+    /// Whether this personality/mode combination requests API-generated greetings.
+    /// Brain Rot mode always uses API if available — local reactions don't have enough slang.
     var usesAPIGreetings: Bool {
         currentMode == .director || currentMode == .hypeCoach || currentMode == .chatty
+            || activeBehaviorMode == .brainRot
     }
 }

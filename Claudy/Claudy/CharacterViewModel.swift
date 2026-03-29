@@ -43,6 +43,8 @@ final class CharacterViewModel {
     @ObservationIgnored private var appContextMonitor: AppContextMonitor!
     @ObservationIgnored private(set) var pomodoroManager: PomodoroManager!
     @ObservationIgnored private(set) var behaviorModeManager: BehaviorModeManager!
+    @ObservationIgnored private(set) var alarmReminderManager: AlarmReminderManager!
+    @ObservationIgnored private var holidayTask: Task<Void, Never>?
 
     @ObservationIgnored private var contextMonitor: ContextMonitor?
     @ObservationIgnored private var keyboardMonitor: KeyboardMonitor?
@@ -94,6 +96,8 @@ final class CharacterViewModel {
         pomodoroManager      = PomodoroManager(viewModel: self)
         roastModeManager     = RoastModeManager(viewModel: self)
         behaviorModeManager  = BehaviorModeManager(viewModel: self)
+        alarmReminderManager = AlarmReminderManager(viewModel: self)
+        checkHolidayOnLaunch()
         startBlinkLoop()
 
         NotificationCenter.default.addObserver(
@@ -323,6 +327,33 @@ final class CharacterViewModel {
     func resetIdleTimer() {
         idleMonitor.resetActivity()
         behaviorModeManager?.onActivity()
+    }
+
+    // MARK: - Reminder parsing (call from chat before sending to API)
+
+    /// Attempts to parse and schedule a reminder from a user's chat message.
+    /// Returns true if a reminder was created (so the chat can add context to the API call).
+    @discardableResult
+    func parseReminderFromChat(_ text: String) -> Bool {
+        let lower = text.lowercased()
+        let hasKeyword = lower.contains("remind me") || lower.contains("set a reminder")
+                      || lower.contains("set an alarm") || lower.contains("alarm for")
+        guard hasKeyword else { return false }
+        return alarmReminderManager.parseAndSchedule(from: text) != nil
+    }
+
+    // MARK: - Holiday check
+
+    private func checkHolidayOnLaunch() {
+        holidayTask = Task { @MainActor [weak self] in
+            // Small delay so the greeting fires first and holiday feels like a separate moment
+            try? await Task.sleep(for: .seconds(8))
+            guard !Task.isCancelled else { return }
+            if let holiday = HolidayCalendar.shared.holidayToday() {
+                self?.wave()
+                self?.showBubbleDirect(holiday.messages.randomElement() ?? holiday.name, duration: 8)
+            }
+        }
     }
 
     // MARK: - Mute

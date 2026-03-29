@@ -6,15 +6,15 @@ import OSLog
 
 /// Watches the frontmost application and system processes to trigger contextual reactions.
 ///
-/// Monitors: frontmost app switches, Xcode build results (success/fail), npm/node activity,
-/// Zoom/Meet video calls, and "vibe coding" sessions (sustained Claude Code use).
+/// Monitors: frontmost app switches (dev tools, productivity suites, AI tools, Office/iWork),
+/// Xcode build results, Cursor IDE builds (tsc/webpack/cargo/etc), Claude Code agent builds,
+/// npm/node activity, Zoom/Meet calls, and "vibe coding" sessions.
 /// A single 15 s poll loop drives all process checks to minimise CPU usage.
-/// All reaction strings are sourced from ReactionLibraryService.
 @MainActor
 final class AppContextMonitor {
     private weak var viewModel: CharacterViewModel?
     private var monitorTask: Task<Void, Never>?
-    private var pollTask: Task<Void, Never>?       // unified poll loop
+    private var pollTask: Task<Void, Never>?
     private var vibeCodingTask: Task<Void, Never>?
     private var lastBundleID: String = ""
     private let logger = Logger(subsystem: "com.claudy", category: "AppContextMonitor")
@@ -30,6 +30,13 @@ final class AppContextMonitor {
     // Xcode build tracking
     private var xcodeBuildStartTime: Date? = nil
     private var longCompileReacted = false
+
+    // Cursor build tracking
+    private var cursorLastFrontmostTime: Date? = nil
+    private var cursorBuildStartTime: Date? = nil
+
+    // Claude Code agent build tracking
+    private var lastClaudeAgentBuildReactionTime: Date = .distantPast
 
     init(viewModel: CharacterViewModel) {
         self.viewModel = viewModel
@@ -64,7 +71,13 @@ final class AppContextMonitor {
     func handleActivation(bundleID: String, appName: String?) {
         terminalIsFrontmost = isTerminalBundleID(bundleID)
 
-        // Let BehaviorModeManager react to app switches (Study Mode browser nudge etc.)
+        // Track Cursor frontmost time for build detection
+        let lower = bundleID.lowercased()
+        if lower.contains("cursor") || bundleID == "com.todesktop.230313mzl4w4u92" {
+            cursorLastFrontmostTime = Date()
+        }
+
+        // Let BehaviorModeManager react (Study Mode browser nudge, BrainRot app switch, etc.)
         viewModel?.behaviorModeManager.onAppSwitch(bundleID: bundleID)
 
         if isClaudeAppBundleID(bundleID) {
@@ -76,7 +89,9 @@ final class AppContextMonitor {
         let msg = ReactionLibraryService.shared.reaction(for: trigger)
         guard !msg.isEmpty else { return }
 
-        if trigger == .appZoom { viewModel?.applyMood(for: .zoomActive) }
+        if trigger == .appZoom || trigger == .appMicrosoftTeams {
+            viewModel?.applyMood(for: .zoomActive)
+        }
 
         viewModel?.showSpeechBubble(msg)
     }
@@ -100,32 +115,59 @@ final class AppContextMonitor {
     private func ambientTrigger(for bundleID: String) -> ReactionTrigger? {
         let lower = bundleID.lowercased()
 
-        // Developer tools
-        if lower.contains("xcode")                                              { return .appXcode }
-        if lower.contains("figma")                                              { return .appFigma }
-        if isTerminalBundleID(bundleID)                                         { return .appTerminal }
-        if lower.contains("zoom") || lower.contains("teams")                   { return .appZoom }
-        if lower.contains("slack")                                              { return .appSlack }
+        // ── AI tools ──────────────────────────────────────────────────────────
+        if lower.contains("xcode")                                                { return .appXcode }
+        if lower.contains("figma")                                                { return .appFigma }
+        if isTerminalBundleID(bundleID)                                           { return .appTerminal }
         if lower.contains("cursor") || bundleID == "com.todesktop.230313mzl4w4u92" { return .appCursor }
+        if lower.contains("windsurf") || lower.contains("codeium")               { return .appWindsurf }
+        if lower.contains("antigravity")                                          { return .appAntigravity }
 
-        // AI competitors - friendly rivalry
-        if bundleID == "com.openai.chat" || lower.contains("openai")           { return .appChatGPT }
-        if lower.contains("perplexity")                                         { return .appPerplexity }
+        // ── AI competitors ─────────────────────────────────────────────────────
+        if bundleID == "com.openai.chat" || lower.contains("openai")             { return .appChatGPT }
+        if lower.contains("perplexity")                                           { return .appPerplexity }
 
-        // Music - party mode
-        if bundleID == "com.spotify.client"                                     { return .appSpotify }
-        if bundleID == "com.apple.Music"                                        { return .appMusic }
+        // ── Communication & meetings ─────────────────────────────────────────
+        if lower.contains("zoom")                                                 { return .appZoom }
+        if lower.contains("slack")                                                { return .appSlack }
+        if lower.contains("microsoft.teams") || lower.contains("msteams")        { return .appMicrosoftTeams }
 
-        // Productivity
-        if bundleID == "com.google.Chrome" || bundleID == "com.google.chrome"  { return .appGoogle }
-        if bundleID == "notion.id" || lower.contains("notion")                 { return .appNotion }
-        if bundleID == "md.obsidian" || lower.contains("obsidian")             { return .appObsidian }
+        // ── Microsoft Office suite ────────────────────────────────────────────
+        if bundleID == "com.microsoft.Word"       || lower == "com.microsoft.word"       { return .appMicrosoftWord }
+        if bundleID == "com.microsoft.Excel"      || lower == "com.microsoft.excel"      { return .appMicrosoftExcel }
+        if bundleID == "com.microsoft.Powerpoint" || lower.contains("microsoft.powerpoint") { return .appMicrosoftPowerPoint }
+        if lower.contains("microsoft.outlook")                                    { return .appMicrosoftOutlook }
 
-        // Database tools
+        // ── Apple productivity suite ─────────────────────────────────────────
+        if bundleID == "com.apple.iWork.Pages"   || lower.contains("iwork.pages")    { return .appApplePages }
+        if bundleID == "com.apple.iWork.Keynote" || lower.contains("iwork.keynote")  { return .appAppleKeynote }
+        if bundleID == "com.apple.iWork.Numbers" || lower.contains("iwork.numbers")  { return .appAppleNumbers }
+        if bundleID == "com.apple.mail"                                           { return .appAppleMail }
+        if bundleID == "com.apple.Notes"                                          { return .appAppleNotes }
+        if bundleID == "com.apple.Safari" || bundleID == "com.apple.safari"       { return .appAppleSafari }
+
+        // ── Dev tools & services ─────────────────────────────────────────────
+        if bundleID == "com.github.GitHubDesktop" || lower.contains("githubdesktop") { return .appGitHubDesktop }
+        if lower.contains("linear.app") || bundleID == "com.linear.Linear"       { return .appLinear }
+        if lower.contains("raycast")                                              { return .appRaycast }
+        if lower.contains("arc") && lower.contains("browser")                    { return .appArc }
+        if lower.contains("postman")                                              { return .appPostman }
+        if lower.contains("insomnia")                                             { return .appInsomnia }
+
+        // ── Music ─────────────────────────────────────────────────────────────
+        if bundleID == "com.spotify.client"                                       { return .appSpotify }
+        if bundleID == "com.apple.Music"                                          { return .appMusic }
+
+        // ── Knowledge & productivity ─────────────────────────────────────────
+        if bundleID == "com.google.Chrome" || bundleID == "com.google.chrome"    { return .appGoogle }
+        if bundleID == "notion.id" || lower.contains("notion")                   { return .appNotion }
+        if bundleID == "md.obsidian" || lower.contains("obsidian")               { return .appObsidian }
+
+        // ── Database tools ─────────────────────────────────────────────────────
         if bundleID == "com.tableplus.TablePlus" ||
            bundleID == "com.eggerapps.Postico2"  ||
            lower.contains("postico") || lower.contains("tableplus") ||
-           lower.contains("sequel")                                             { return .appDatabase }
+           lower.contains("sequel")                                               { return .appDatabase }
 
         return nil
     }
@@ -188,9 +230,6 @@ final class AppContextMonitor {
     }
 
     // MARK: - Unified poll loop (15s tick)
-    // Claude Code check: every other tick (~30s) via tickCount modulo
-    // Xcode build check: every tick (15s)
-    // npm check: every tick, guarded by frontmost-terminal + once-per-session
 
     private func startPollLoop() {
         pollTask = Task { @MainActor in
@@ -202,13 +241,11 @@ final class AppContextMonitor {
                 tickCount += 1
                 self.logger.debug("AppContextMonitor: poll tick \(tickCount)")
 
-                // ── Xcode build (every tick) ──────────────────────────────
                 self.checkXcodeBuild()
-
-                // ── npm detection (every tick, guarded) ──────────────────
                 self.checkNpm()
+                self.checkCursorBuild()
+                self.checkClaudeCodeAgentBuild()
 
-                // ── Claude Code detection (every other tick ≈ 30s) ───────
                 if tickCount.isMultiple(of: 2) {
                     self.checkClaudeCode()
                 }
@@ -241,20 +278,66 @@ final class AppContextMonitor {
                 let msg = ReactionLibraryService.shared.reaction(for: .longCompileDone)
                 if !msg.isEmpty { viewModel?.showSpeechBubble(msg, duration: 5) }
                 longCompileReacted = false
-                // Notify BehaviorModeManager — Dev Mode may add extra confetti
                 viewModel?.behaviorModeManager.onBuildComplete()
             } else if duration >= 3 {
-                // Build ran long enough to be a real compilation (not a sub-second
-                // internal Xcode tool invocation). We have no exit code from polling,
-                // so we react neutrally — no false confetti on a failed build,
-                // no false alarm on a successful one.
                 let msg = ReactionLibraryService.shared.reaction(for: .xcodeBuildSuccess)
                 if !msg.isEmpty { viewModel?.showSpeechBubble(msg, duration: 5) }
                 viewModel?.behaviorModeManager.onBuildComplete()
             }
-            // Mood and stare reactions removed - they relied on the unreliable
-            // duration-based success/failure guess which was wrong ~50% of the time.
         }
+    }
+
+    // MARK: - Cursor build detection
+    // Fires when Cursor was frontmost within the last 90s and a non-Xcode build tool runs.
+
+    private static let cursorBuildProcessNames = [
+        "tsc", "webpack", "vite", "rollup", "esbuild",
+        "cargo", "make", "cmake", "gradle", "mvn",
+        "pytest", "jest", "vitest", "mocha"
+    ]
+
+    private func checkCursorBuild() {
+        // Only fire if Cursor was recently active
+        guard let lastFrontmost = cursorLastFrontmostTime,
+              Date().timeIntervalSince(lastFrontmost) < 90 else { return }
+
+        let isBuilding = Self.cursorBuildProcessNames.contains { Self.isProcessRunning(named: $0) }
+
+        if isBuilding && cursorBuildStartTime == nil {
+            cursorBuildStartTime = Date()
+            let msg = ReactionLibraryService.shared.reaction(for: .cursorBuildStart)
+            if !msg.isEmpty { viewModel?.showSpeechBubble(msg, duration: 4) }
+
+        } else if !isBuilding, let start = cursorBuildStartTime {
+            cursorBuildStartTime = nil
+            let duration = Date().timeIntervalSince(start)
+            if duration >= 2 {
+                let msg = ReactionLibraryService.shared.reaction(for: .cursorBuildDone)
+                if !msg.isEmpty { viewModel?.showSpeechBubble(msg, duration: 5) }
+                viewModel?.behaviorModeManager.onBuildComplete()
+            }
+        }
+    }
+
+    // MARK: - Claude Code agent build detection
+    // Fires when the claude CLI is running AND a build process is detected.
+
+    private static let agentBuildProcessNames = [
+        "tsc", "node", "webpack", "vite", "cargo", "make",
+        "python3", "pytest", "jest", "gradle", "mvn"
+    ]
+
+    private func checkClaudeCodeAgentBuild() {
+        guard Self.isProcessRunning(named: "claude") else { return }
+        // Rate-limit to once every 5 minutes
+        guard Date().timeIntervalSince(lastClaudeAgentBuildReactionTime) > 5 * 60 else { return }
+        let isBuilding = Self.agentBuildProcessNames.contains { Self.isProcessRunning(named: $0) }
+        guard isBuilding else { return }
+
+        lastClaudeAgentBuildReactionTime = Date()
+        let msg = ReactionLibraryService.shared.reaction(for: .claudeCodeAgentBuild)
+        if !msg.isEmpty { viewModel?.showSpeechBubble(msg, duration: 6) }
+        viewModel?.celebrate()
     }
 
     private func checkNpm() {
