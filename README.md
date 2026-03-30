@@ -3,8 +3,6 @@
 # Claud-y 🍊
 **A small AI companion that lives on your Mac.**
 
-![Kapture 2026-03-28 at 05 19 25](https://github.com/user-attachments/assets/a6de61e8-d124-487a-aa03-a0296ffaa811)
-
 ---
 
 ## Why I built this
@@ -15,7 +13,7 @@ No standup to look forward to, no one to tell when something finally works, no o
 
 I wanted something in the corner of the screen. Not a chatbot. Not a tool. Something more like a presence. Something that notices when you're deep in it, reacts when something breaks, cheers when it comes together. Something that makes the room feel a little less empty.
 
-The inspiration was *Project Hail Mary* by Andy Weir. If you've read it, you know the part I mean. If you haven't -- it's about solving impossible problems alone in deep space, and what it means to find company in unexpected places. I won't spoil it. Go read it.
+The inspiration was *Project Hail Mary* by Andy Weir. If you've read it, you know the part I mean. If you haven't — it's about solving impossible problems alone in deep space, and what it means to find company in unexpected places. I won't spoil it. Go read it.
 
 That's what Claud-y is trying to be. Your Rocky. Except orange. And on your desktop.
 
@@ -29,9 +27,15 @@ Tap it to open a chat. It'll talk to you. Really talk to you.
 
 **No API key needed. No account. No setup. Free forever.**
 
-Out of the box, Claud-y runs completely locally -- curated response pools, 100+ contextual reactions, personality modes, a Pomodoro focus timer, sound effects, daily streaks, and a few hidden Easter eggs. Everything works on your machine, offline, always.
+Out of the box, Claud-y runs completely locally — curated response pools, 400+ contextual reactions, personality modes, a Pomodoro focus timer, break nudges, a daily wrap-up, mood check-ins, and a few hidden Easter eggs. Everything works on your machine, offline, always.
 
-If you have an [Anthropic API key](https://console.anthropic.com), you can switch to full Claude AI -- streaming responses, code review, debugging help, anything. Your key stays in your Mac's Keychain and goes nowhere else.
+If you have an API key, you can unlock full AI responses — streaming, code review, debugging help, anything. Claud-y supports three providers:
+
+- **[Anthropic Claude](https://console.anthropic.com)** — the original
+- **[OpenAI (ChatGPT)](https://platform.openai.com/api-keys)** — GPT-4o and GPT-4o mini
+- **[Google Gemini](https://aistudio.google.com/app/apikey)** — 2.0 Flash and 1.5 Pro
+
+Your key stays in your Mac's Keychain and goes nowhere except that provider's API.
 
 ---
 
@@ -39,11 +43,12 @@ If you have an [Anthropic API key](https://console.anthropic.com), you can switc
 
 | | Companion | AI |
 |---|---|---|
-| **Setup** | None | Anthropic API key |
+| **Setup** | None | API key (your choice of provider) |
 | **Cost** | Free forever | API usage (pay-as-you-go) |
-| **Data sent** | Nothing | Messages → Anthropic API |
+| **Data sent** | Nothing | Messages → provider API |
 | **Works offline** | Yes | No |
-| **Response quality** | Warm & witty | Full Claude AI |
+| **Response quality** | Warm & witty | Full AI |
+| **Providers** | — | Claude · ChatGPT · Gemini |
 
 You start in Companion mode. Switch anytime from the chat header.
 
@@ -51,29 +56,65 @@ You start in Companion mode. Switch anytime from the chat header.
 
 ## Personalities
 
-Claud-y ships with seven personalities you can switch on the fly:
+Seven personalities, switchable on the fly:
 
 | Personality | Vibe |
 |---|---|
 | **The Companion** | Warm, clever, genuinely present |
 | **The Chatty One** | Verbose, tangential, always circles back |
-| **The Hype Coach** | LOUD. ENERGETIC. BELIEVES IN YOU. |
+| **The Hype Coach** | LOUD. UNCONDITIONAL. BELIEVES IN YOU COMPLETELY. |
 | **The Director** | Theatrical, grand, slightly unhinged |
-| **The Mate** | Casual, direct, "yeah nah you've got this" |
+| **The Mate** | Australian energy. Deadpan. Chill. "Yeah nah" is a complete sentence. |
 | **The Listener** | Quiet, unhurried, asks the right questions |
 | **You Do You** | Write your own persona in Settings |
 
 ---
 
+## Modes
+
+Right-click → Mode to switch. Every mode stacks with your personality — Director + Brain Rot is exactly what it sounds like.
+
+| Mode | Vibe |
+|---|---|
+| **Normal** | Default. Claud-y is just Claud-y. |
+| **Study** | Quieter, pedagogical, Pomodoro-framed. Milestone bubbles at 25/50/90 min. |
+| **Dev** | Flow-state detection, debugging empathy, extra confetti on builds. |
+| **Work** | Professional. Quieter. Reacts to Zoom, Outlook, Slack. |
+| **Dance** | It dances. That's it. |
+| **Brain Rot** | Gen Z internet culture mode. Still helpful. Completely unhinged about it. |
+
+---
+
 ## Features
 
-- **Contextual reactions** -- reacts to Xcode builds, app switches, clipboard content, keyboard patterns, time of day, and more
-- **Chat panel** -- tap to open, with markdown rendering, code blocks, and export
-- **Pomodoro timer** -- right-click to start a focus session; badge shows countdown below the character
-- **Sound effects** -- optional audio feedback and a GTA-style character mumble voice
-- **Daily streaks** -- quietly tracks your coding sessions
-- **Quick launch** -- up to 3 configurable app shortcuts in the right-click menu
-- **Reaction log** -- hold the character for 3 seconds to see what it's been thinking
+### Smart awareness
+- **Contextual reactions** — reacts to Xcode/Cursor builds, app switches, clipboard content, keyboard patterns, time of day, day of week, and more
+- **60+ apps detected** — Xcode, Cursor, Figma, Slack, Zoom, Notion, Obsidian, VS Code, full Microsoft Office suite, full Apple productivity suite, and more
+- **9 browsers** — Chrome, Safari, Edge, Firefox, Brave, Opera, DuckDuckGo, Helium, Arc — each with distinct personality-aware reactions
+- **Public holiday awareness** — UK, US, Australia, Universal, and Islamic observances
+- **Spotify sync** — reacts to genre changes (metal → headbanging, lo-fi → vibing)
+
+### Focus & productivity
+- **Pomodoro focus timer** — right-click to start; badge shows countdown; customisable durations
+- **Alarms & reminders** — set via right-click or natural language in chat ("remind me in 30 min to take a break")
+- **Break nudges** — gentle at 90 min, firm at 2 hours, non-negotiable at 3 hours
+- **Focus stats** — today's Pomodoros, total focus time, day streak — shown in the right-click menu
+- **Daily wrap-up** — personality-flavoured 6pm session summary (only fires if you actually worked)
+- **Mood check-ins** — every ~2 hours of active use, Claud-y quietly asks how you're doing
+
+### Smart shortcuts
+- **⌘⇧Space global hotkey** — toggle chat from any app, no clicking required
+- **Contextual quick-action buttons** — switch to Zoom, Figma, Notion, etc. and a pre-written prompt appears above Claud-y for 8 seconds
+- **Quick launch** — up to 5 configurable app shortcuts in the right-click menu
+- **Mini scratchpad** — persistent notepad in the right-click menu; pin notes, edit inline, survives restarts
+
+### Ambience
+- **macOS Focus / DND sync** — Claud-y sees your Focus mode and quiets down automatically
+- **Sound effects** — optional audio feedback with a GTA-style character mumble voice
+- **Reaction log** — hold for 3 seconds to see what it's been thinking
+- **Roast Mode** — it will roast you. You asked for this.
+- **Dance Mode** — 130 BPM choreography with full arm choreography
+- **Brain Rot Mode** — Gen Z slang on everything. "W build no cap fr."
 
 ---
 
@@ -81,77 +122,89 @@ Claud-y ships with seven personalities you can switch on the fly:
 
 ### What leaves your device
 
-In **Companion mode**: nothing. All responses come from local logic. No network calls are made.
+| Mode | What's sent | Where | When |
+|------|-------------|-------|------|
+| **Companion** | Nothing | — | Never |
+| **AI (Claude)** | Your message + active system prompt | `api.anthropic.com` | When you send a message |
+| **AI (ChatGPT)** | Your message + active system prompt | `api.openai.com` | When you send a message |
+| **AI (Gemini)** | Your message + active system prompt | `generativelanguage.googleapis.com` | When you send a message |
 
-In **API mode**: your chat messages and the active personality's system prompt are sent to `https://api.anthropic.com` using the Anthropic API. That's the only outbound connection Claud-y ever makes. No other hosts. No CDN. No analytics endpoint.
+In **Companion mode**: nothing leaves your Mac. No network calls are made at all.
 
-### API key
+In **AI mode**: your messages go directly from your Mac to the provider's API using your own key. There is no Claud-y server. Nothing is in the middle. We cannot see your prompts, your responses, or your key — not even in principle.
 
-- Stored in the **macOS Keychain** (`kSecClassGenericPassword`)
+### API key storage
+
+- Stored in **macOS Keychain** (`kSecClassGenericPassword`)
 - `kSecAttrAccessibleWhenUnlockedThisDeviceOnly` — **never synced to iCloud Keychain**, never leaves this Mac
 - Never written to `UserDefaults`, log files, or any file on disk
-- Transmitted as an `x-api-key` HTTP header — never in a URL or request body
+- Each provider has its own isolated account: `claude-api-key`, `openai-api-key`, `gemini-api-key`
+- Claude key is transmitted as an `x-api-key` header; OpenAI as `Authorization: Bearer`; Gemini as a URL query param (Google's requirement, still HTTPS)
+- Presence is checked with `SecItemCopyMatching` and **no `kSecReturnData`** — the secret is never read unless an API call is being made, so the Keychain dialog doesn't appear on launch
 
 ### System access
-
-Claud-y requests two permissions and uses each narrowly:
 
 **Accessibility access** (required for keyboard reactions):
 - Monitors global keyboard events via `NSEvent.addGlobalMonitorForEvents`
 - Detects: typing bursts, typing pauses, `Cmd+Z` spam, `Cmd+S`, `Cmd+C`/`Cmd+V` patterns
 - Keystrokes are **never recorded or stored** — only event timing and modifier keys are used
-- Granting this is required for keyboard reactions. Without it, Claud-y still works fully — keyboard reactions just don't fire.
+- Without this permission, Claud-y still works fully — keyboard reactions just don't fire
+
+**Process inspection**:
+- Reads running process names via `sysctl KERN_PROC_ALL` with `kinfo_proc`
+- Detects: `xcodebuild`, `tsc`, `webpack`, `vite`, `cargo`, `make`, `jest`, `claude` CLI, and others
+- **Process names only** — no arguments, no memory, no file handles. Poll runs every 15 seconds.
+
+**Clipboard monitoring**:
+- Watches `NSPasteboard.changeCount`. On change, reads content and classifies it as plain text, code, or URL — the classification drives the reaction type
+- **Clipboard content is never stored, logged, or sent anywhere**
 
 **No microphone, camera, location, or contacts access** — Claud-y never requests any of these.
 
-### Process inspection
-
-Claud-y detects running processes (`xcodebuild`, `npm`, `claude`) using `sysctl KERN_PROC_ALL` with `kinfo_proc`. This reads **process names only** — no process arguments, no memory, no file handles. The poll runs every 15 seconds.
-
-### Clipboard monitoring
-
-`ClipboardMonitor` watches `NSPasteboard.changeCount`. When the clipboard changes, it reads the content and classifies it as plain text, code, or URL — the classification drives the reaction type. **Clipboard content is never stored, logged, or sent anywhere.**
-
 ### What's stored locally (UserDefaults)
 
-Everything except the API key is stored in `UserDefaults` on your Mac. Full table:
+Everything except API keys lives in `UserDefaults` on your Mac:
 
-| Key | Stored value |
-|---|---|
+| Key | Value |
+|-----|-------|
 | `CharacterWindowOrigin` | Last panel position `[Double, Double]` |
 | `CharacterSizePreset` | `"small"` / `"medium"` / `"large"` |
-| `ClaudyChatHeight` | Chat panel height in points |
 | `PersonalityMode` | Active personality raw value |
 | `CustomPersonaText` | Your custom persona text (if set) |
-| `SelectedModel` | Active Claude model identifier |
-| `UseComplexModel` | Bool — Opus for complex tasks |
+| `SelectedProvider` | Active AI provider (`"claude"` / `"openai"` / `"gemini"`) |
+| `SelectedModel` | Active model identifier |
+| `UseComplexModel` | Bool — smarter model for complex tasks |
 | `IsMuted` | Bool — mute state |
 | `SoundEffectsEnabled` | Bool — sound toggle |
+| `ChattinessLevel` | Int 1–5 — ambient bubble frequency |
+| `GlobalHotkeyEnabled` | Bool — ⌘⇧Space toggle |
 | `HasSeenOnboarding` | Bool — first launch flag |
 | `FirstLaunchDate` | `Date` — for anniversary reactions |
 | `DailySessionDates` | `[String]` ISO dates — streak tracking (90-day window) |
-| `StreakShownDate` | `String` — prevents repeat streak messages same day |
 | `QuickLaunchShortcuts` | `Data` — JSON-encoded shortcut array |
-| `PomodoroPreset` | `Int` raw value of active preset |
+| `PomodoroPreset` | `Int` — active timer preset |
 | `PomodoroCustomMinutes` | `Int` — custom timer duration |
+| `FocusStats` | `Data` — JSON: today's Pomodoros, focus seconds, streak days |
+| `ScratchpadNotes` | `Data` — JSON-encoded scratchpad notes |
 
 **Chat history is never persisted.** It lives in memory for the session only. Use the export function to save it.
 
 ### No telemetry, analytics, or crash reporting
 
-There are no analytics calls, no Sentry/Crashlytics/Firebase, no remote logging, and no usage tracking of any kind. All `OSLog` output stays on device. Claud-y has no idea how many people use it.
+No analytics calls. No Sentry/Crashlytics/Firebase. No remote logging. No usage tracking of any kind. All `OSLog` output stays on device. Claud-y has no idea how many people use it.
 
 ### App Sandbox
 
-Claud-y runs **without App Sandbox** to allow `sysctl` process inspection and global `NSEvent` keyboard monitoring. This means it cannot be distributed on the Mac App Store as-is and is source-only / direct download. The trade-off is intentional and documented here so you can make an informed choice.
+Claud-y runs **without App Sandbox** to allow `sysctl` process inspection and global `NSEvent` keyboard monitoring. This means it cannot be distributed on the Mac App Store and is source-only / direct download. The trade-off is intentional and documented here so you can make an informed choice.
 
 ---
 
 ## Getting it
 
 ### Download
-
 Grab the latest `.dmg` from [Releases](../../releases). Open it, drag Claud-y to Applications. Done.
+
+On first launch macOS may say it can't verify the developer — right-click the app → Open to get past this. It's because Claud-y is distributed outside the App Store.
 
 ### Build from source
 
@@ -161,7 +214,23 @@ cd claudy
 open Claudy/Claudy.xcodeproj
 ```
 
-Requires macOS 15+ and Xcode 16+. Build and run the `Claudy` scheme.
+Requires macOS 15+ and Xcode 16+. Build and run the `Claudy` scheme. No dependencies to install.
+
+---
+
+## v2.0 — what changed
+
+The big one. Highlights:
+
+- **3 AI providers** — Claude, ChatGPT, Gemini (your key, your choice, your data)
+- **Work Mode** — professional context, quieter, meeting/email/Slack aware
+- **8 new background systems** — global hotkey, Focus/DND sync, break nudges, focus stats, quick-action buttons, scratchpad, mood check-ins, daily wrap-up
+- **9 browsers detected** — including Helium ("A floating browser for a floating companion. We match.")
+- **60+ apps detected** — up from ~20
+- **400+ reactions** — up from ~200
+- **Brain Rot mode** — unhinged Gen Z energy that is somehow still helpful
+
+Full history in [CHANGELOG.md](CHANGELOG.md).
 
 ---
 
@@ -169,7 +238,7 @@ Requires macOS 15+ and Xcode 16+. Build and run the `Claudy` scheme.
 
 I've been a developer for a while. This is the first thing I've shipped publicly.
 
-I built it for myself, and then I thought -- other people probably have the same quiet problem. So here it is. Free. Open source. No strings.
+I built it for myself, and then I thought — other people probably have the same quiet problem. So here it is. Free. Open source. No strings.
 
 If Claud-y makes your coding sessions feel a little less solo, that's everything I wanted.
 
@@ -177,23 +246,23 @@ If Claud-y makes your coding sessions feel a little less solo, that's everything
 
 ## Support
 
-Claud-y is and always will be free.
+Claud-y is and always will be free. No subscriptions. No paywalls. No ads.
 
-If it's made a difference to your day and you want to say thanks, I've set up a Ko-fi:
+I don't believe in making people pay for something like this. But if Claud-y has earned a spot in your day and you want to support more features being built, a coffee goes a long way:
 
 **☕ [ko-fi.com/ealiii](https://ko-fi.com/ealiii)**
 
-No pressure. Not why I built it.
+Your feedback and support genuinely shape what gets built next. Every bit of it is appreciated.
 
 ---
 
 ## What's next
 
-- [ ] Reminder / alarm system
 - [ ] Persistent conversation history (opt-in)
-- [ ] iOS companion (maybe)
+- [ ] More provider support
+- [ ] iOS companion (maybe, no promises)
 
-Have ideas? Open an issue.
+Have ideas? [Open an issue](../../issues).
 
 ---
 
@@ -202,14 +271,14 @@ Have ideas? Open an issue.
 - **Platform:** macOS 15+
 - **Language:** Swift 6.0 (strict concurrency)
 - **UI:** SwiftUI
-- **AI:** Anthropic Claude API (optional)
+- **AI:** Claude · ChatGPT · Gemini (all optional)
 - **Architecture:** MVVM with `@Observable`
 - **License:** MIT
 
 ---
 
 *"I am not talking to myself. I am talking to Rocky."*
-*-- Project Hail Mary, Andy Weir*
+*— Project Hail Mary, Andy Weir*
 
 ---
 

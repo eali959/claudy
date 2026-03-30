@@ -11,11 +11,44 @@ struct CharacterRootView: View {
     @State private var demoManager = DemoModeManager()
     @State private var showHelp = false
     @State private var showDonate = false
+    @State private var showFocusAdder = false
+    @State private var focusAdderDefaultType: FocusToolAdderSheet.ToolType = .reminder
+    @State private var showScratchpad = false
     @AppStorage("CharacterOpacity")   private var characterOpacity: Double = 1.0
     @AppStorage("TimerBadgeScale")    private var timerBadgeScale: Double = 1.0
 
     var body: some View {
         characterScene
+        .sheet(isPresented: $showFocusAdder) {
+            FocusToolAdderSheet(
+                isPresented: $showFocusAdder,
+                manager: characterViewModel.alarmReminderManager,
+                defaultType: focusAdderDefaultType
+            )
+        }
+        .sheet(isPresented: $showScratchpad) {
+            ScratchpadSheet(isPresented: $showScratchpad)
+        }
+        .onReceive(NotificationCenter.default.publisher(for: .claudyToggleChat)) { _ in
+            let opening = !chatViewModel.isOpen
+            withAnimation(.spring(response: 0.35, dampingFraction: 0.8)) {
+                chatViewModel.isOpen = opening
+            }
+            if opening {
+                SoundManager.shared.play(.chatOpen)
+                characterViewModel.setState(.idle)
+                windowManager.window?.makeKey()
+            }
+        }
+        .onReceive(NotificationCenter.default.publisher(for: .claudyQuickActionFired)) { note in
+            guard let prompt = note.userInfo?["prompt"] as? String else { return }
+            chatViewModel.inputText = prompt
+            withAnimation(.spring(response: 0.35, dampingFraction: 0.8)) {
+                chatViewModel.isOpen = true
+            }
+            SoundManager.shared.play(.chatOpen)
+            windowManager.window?.makeKey()
+        }
         .onAppear {
             characterViewModel.setup(windowManager: windowManager)
             demoManager.prepare(character: characterViewModel, chat: chatViewModel)
@@ -194,6 +227,35 @@ struct CharacterRootView: View {
                 } // VStack (bubble + character + badge)
             }
         }
+        // Quick-action button — contextual prompt for the frontmost app
+        .overlay(alignment: .top) {
+            if let action = QuickActionManager.shared.currentAction {
+                Button {
+                    QuickActionManager.shared.actionTapped()
+                } label: {
+                    HStack(spacing: 5) {
+                        Image(systemName: action.icon)
+                            .font(.system(size: 11, weight: .semibold))
+                        Text(action.label)
+                            .font(.system(size: 11, weight: .semibold))
+                            .lineLimit(1)
+                    }
+                    .foregroundStyle(.white)
+                    .padding(.horizontal, 10)
+                    .padding(.vertical, 5)
+                    .background(
+                        Capsule().fill(Color(red: 0.784, green: 0.361, blue: 0.220).opacity(0.92))
+                    )
+                }
+                .buttonStyle(.plain)
+                .padding(.top, 4)
+                .transition(.asymmetric(
+                    insertion: .scale(scale: 0.8, anchor: .top).combined(with: .opacity),
+                    removal:   .scale(scale: 0.8, anchor: .top).combined(with: .opacity)
+                ))
+            }
+        }
+        .animation(.spring(response: 0.3, dampingFraction: 0.75), value: QuickActionManager.shared.currentAction?.label)
         // DEMO pill - top-left corner, visible only during demo
         .overlay(alignment: .topLeading) {
             if demoManager.isRunning {
@@ -233,18 +295,26 @@ struct CharacterRootView: View {
 
     @ViewBuilder
     private var characterContextMenu: some View {
-        // Personality
-        Menu("Personality") {
+
+        // ── Personality ──────────────────────────────────────────────────────
+        Menu {
             ForEach(PersonalityMode.allCases, id: \.self) { mode in
-                Button(mode.displayName) {
+                Button {
                     guard mode != PersonalityManager.shared.currentMode else { return }
                     PersonalityManager.shared.currentMode = mode
                     chatViewModel.announcePersonalityChange(to: mode)
+                } label: {
+                    Label(
+                        mode.displayName,
+                        systemImage: PersonalityManager.shared.currentMode == mode
+                            ? "checkmark" : personalityIcon(mode)
+                    )
                 }
             }
-        }
+        } label: { Label("Personality", systemImage: "theatermasks") }
 
-        Menu("Mode") {
+        // ── Mode ─────────────────────────────────────────────────────────────
+        Menu {
             ForEach(BehaviorMode.allCases, id: \.self) { mode in
                 Button {
                     characterViewModel.behaviorModeManager.activate(mode)
@@ -252,81 +322,122 @@ struct CharacterRootView: View {
                     Label(
                         mode.displayName,
                         systemImage: characterViewModel.behaviorModeManager.currentMode == mode
-                            ? "checkmark" : ""
+                            ? "checkmark" : modeIcon(mode)
                     )
                 }
             }
-        }
+        } label: { Label("Mode", systemImage: "dial.high") }
 
-        Menu("Reminders") {
-            let pending = characterViewModel.alarmReminderManager.reminders.filter { !$0.fired }
-            if pending.isEmpty {
-                Button("No active reminders") { }.disabled(true)
-            } else {
-                ForEach(pending) { reminder in
-                    let formatter: DateFormatter = {
-                        let f = DateFormatter()
-                        f.timeStyle = .short
-                        f.dateStyle = reminder.fireDate.timeIntervalSinceNow > 86400 ? .short : .none
-                        return f
-                    }()
-                    Button("\(formatter.string(from: reminder.fireDate)) — \(reminder.title)") {
-                        characterViewModel.alarmReminderManager.remove(id: reminder.id)
-                    }
-                }
-                Divider()
-                Button("Clear All Reminders") {
-                    characterViewModel.alarmReminderManager.clearFired()
-                    for r in pending {
-                        characterViewModel.alarmReminderManager.remove(id: r.id)
-                    }
-                }
-            }
-            Text("Tip: say \"remind me in 30 min to...\" in chat")
-                .font(.caption)
-        }
-
-        Menu("Size") {
+        // ── Size ─────────────────────────────────────────────────────────────
+        Menu {
             ForEach(WindowManager.SizePreset.allCases, id: \.self) { preset in
                 Button {
                     windowManager.sizePreset = preset
                 } label: {
-                    Label(preset.displayName,
-                          systemImage: windowManager.sizePreset == preset ? "checkmark" : "")
+                    Label(
+                        preset.displayName,
+                        systemImage: windowManager.sizePreset == preset ? "checkmark" : "circle"
+                    )
                 }
             }
-        }
+        } label: { Label("Size", systemImage: "arrow.up.left.and.arrow.down.right") }
 
         Divider()
 
-        // Focus Timer - submenu when idle (pick duration + start), inline controls when active
+        // ── Focus Tools ───────────────────────────────────────────────────────
         let pom: PomodoroManager = characterViewModel.pomodoroManager
-        switch pom.state {
-        case .idle, .complete:
-            Menu("▶ Focus Timer") {
-                Button("Short - 15 min")   { pom.selectedPreset = .short;   pom.start() }
-                Button("Classic - 25 min") { pom.selectedPreset = .classic; pom.start() }
-                Button("Long - 45 min")    { pom.selectedPreset = .long;    pom.start() }
-                Button("Deep - 60 min")    { pom.selectedPreset = .deep;    pom.start() }
-                Divider()
-                Button("Custom - \(pom.customMinutes) min") {
-                    pom.selectedPreset = .custom
-                    pom.start()
-                }
+        Menu {
+
+            // — Pomodoro —
+            switch pom.state {
+            case .idle, .complete:
+                Menu {
+                    Button { pom.selectedPreset = .short;   pom.start() } label: { Label("Short — 15 min",   systemImage: "15.circle") }
+                    Button { pom.selectedPreset = .classic; pom.start() } label: { Label("Classic — 25 min", systemImage: "25.circle") }
+                    Button { pom.selectedPreset = .long;    pom.start() } label: { Label("Long — 45 min",    systemImage: "45.circle") }
+                    Button { pom.selectedPreset = .deep;    pom.start() } label: { Label("Deep — 60 min",    systemImage: "60.circle") }
+                    Divider()
+                    Button { pom.selectedPreset = .custom;  pom.start() } label: { Label("Custom — \(pom.customMinutes) min", systemImage: "slider.horizontal.3") }
+                } label: { Label("Start Pomodoro", systemImage: "timer") }
+            case .running:
+                Button { pom.pause() } label: { Label("Pause  (\(pom.displayTime))", systemImage: "pause.circle.fill") }
+                Button { pom.stop()  } label: { Label("Stop Timer",                  systemImage: "stop.circle") }
+            case .paused:
+                Button { pom.resume() } label: { Label("Resume  (\(pom.displayTime))", systemImage: "play.circle.fill") }
+                Button { pom.stop()   } label: { Label("Stop Timer",                   systemImage: "stop.circle") }
             }
-        case .running:
-            Button("⏸  Pause Timer  (\(pom.displayTime))") { pom.pause() }
-            Button("⏹  Stop Timer") { pom.stop() }
-        case .paused:
-            Button("▶  Resume Timer  (\(pom.displayTime))") { pom.resume() }
-            Button("⏹  Stop Timer") { pom.stop() }
-        }
+
+            Divider()
+
+            // — Alarm —
+            Menu {
+                Button { addQuickAlarm(minutes: 5)   } label: { Label("In 5 minutes",  systemImage: "5.circle") }
+                Button { addQuickAlarm(minutes: 10)  } label: { Label("In 10 minutes", systemImage: "10.circle") }
+                Button { addQuickAlarm(minutes: 15)  } label: { Label("In 15 minutes", systemImage: "15.circle") }
+                Button { addQuickAlarm(minutes: 30)  } label: { Label("In 30 minutes", systemImage: "30.circle") }
+                Button { addQuickAlarm(minutes: 60)  } label: { Label("In 1 hour",     systemImage: "1.circle") }
+                Button { addQuickAlarm(minutes: 120) } label: { Label("In 2 hours",    systemImage: "2.circle") }
+                Button { addQuickAlarm(minutes: 240) } label: { Label("In 4 hours",    systemImage: "4.circle") }
+                Divider()
+                Button {
+                    focusAdderDefaultType = .alarm
+                    showFocusAdder = true
+                } label: { Label("Set Custom Alarm…", systemImage: "alarm.waves.left.and.right") }
+            } label: { Label("Set Alarm", systemImage: "alarm") }
+
+            // — Reminders —
+            let pending = characterViewModel.alarmReminderManager.reminders.filter { !$0.fired }
+            Menu {
+                Button {
+                    focusAdderDefaultType = .reminder
+                    showFocusAdder = true
+                } label: { Label("New Reminder…", systemImage: "plus.circle.fill") }
+
+                if !pending.isEmpty {
+                    Divider()
+                    ForEach(pending) { reminder in
+                        let timeStr: String = {
+                            let f = DateFormatter()
+                            f.timeStyle = .short
+                            f.dateStyle = reminder.fireDate.timeIntervalSinceNow > 86400 ? .short : .none
+                            return f.string(from: reminder.fireDate)
+                        }()
+                        Button {
+                            characterViewModel.alarmReminderManager.remove(id: reminder.id)
+                        } label: {
+                            Label("\(timeStr) — \(reminder.title)", systemImage: "xmark.circle")
+                        }
+                    }
+                    Divider()
+                    Button {
+                        characterViewModel.alarmReminderManager.clearFired()
+                        for r in pending { characterViewModel.alarmReminderManager.remove(id: r.id) }
+                    } label: { Label("Clear All", systemImage: "trash") }
+                }
+            } label: {
+                Label(
+                    pending.isEmpty ? "Reminders" : "Reminders  (\(pending.count))",
+                    systemImage: "checklist"
+                )
+            }
+
+            // — Stats footer —
+            let stats = FocusStatsManager.shared
+            if stats.pomodorosToday > 0 {
+                Divider()
+                Text(stats.summaryLine)
+                    .font(.system(size: 11))
+                    .foregroundStyle(.secondary)
+            }
+
+        } label: { Label("Focus Tools", systemImage: "target") }
 
         Divider()
 
+        // ── Quick Launch ──────────────────────────────────────────────────────
         let shortcuts = QuickLaunchManager.shared.shortcuts
         if !shortcuts.isEmpty {
-            Menu("Launch") {
+            Menu {
                 ForEach(shortcuts) { shortcut in
                     let key = shortcut.shortcutKey.first
                     if let key {
@@ -342,54 +453,102 @@ struct CharacterRootView: View {
                         }
                     }
                 }
-            }
+            } label: { Label("Launch", systemImage: "bolt") }
             Divider()
         }
 
-        Button("Reset Position") {
+        // ── Actions ───────────────────────────────────────────────────────────
+        Button {
             windowManager.resetPosition()
-        }
+        } label: { Label("Reset Position", systemImage: "arrow.clockwise") }
 
-        Button(characterViewModel.animationState == .sleeping ? "Wake Up" : "Sleep") {
+        Button {
             if characterViewModel.animationState == .sleeping {
                 characterViewModel.setState(.idle)
             } else {
                 characterViewModel.setState(.sleeping)
             }
+        } label: {
+            Label(
+                characterViewModel.animationState == .sleeping ? "Wake Up" : "Sleep",
+                systemImage: characterViewModel.animationState == .sleeping ? "sun.max" : "moon.zzz"
+            )
         }
 
-        Button(characterViewModel.isMuted ? "Unmute" : "Mute") {
+        Button {
             characterViewModel.setMuted(!characterViewModel.isMuted)
+        } label: {
+            Label(
+                characterViewModel.isMuted ? "Unmute" : "Mute",
+                systemImage: characterViewModel.isMuted ? "speaker.wave.2" : "speaker.slash"
+            )
         }
         .keyboardShortcut("m", modifiers: .option)
 
-        Button(characterViewModel.roastModeManager.isRoasting ? "Roasting..." : "Roast Me") {
+        Button {
             characterViewModel.roastMe()
-        }
+        } label: { Label("Roast Me", systemImage: "flame") }
         .disabled(characterViewModel.roastModeManager.isRoasting)
 
-        Button(demoManager.isRunning ? "Stop Demo" : "Start Demo") {
+        Button {
             if demoManager.isRunning { demoManager.stop() } else { demoManager.start() }
+        } label: {
+            Label(
+                demoManager.isRunning ? "Stop Demo" : "Start Demo",
+                systemImage: demoManager.isRunning ? "stop.circle" : "play.rectangle"
+            )
         }
 
         Divider()
 
-        Button("Settings…") {
+        // ── Settings & help ───────────────────────────────────────────────────
+        Button {
             NotificationCenter.default.post(name: .claudyOpenSettings, object: nil)
-        }
+        } label: { Label("Settings…", systemImage: "gear") }
 
-        Button("Help") {
-            showHelp = true
-        }
+        Button { showScratchpad = true } label: { Label("Scratchpad", systemImage: "note.text") }
 
-        Button("Support Claud-y...") {
-            showDonate = true
-        }
+        Button { showHelp = true } label: { Label("Help", systemImage: "questionmark.circle") }
+
+        Button { showDonate = true } label: { Label("Support Claud-y…", systemImage: "heart") }
 
         Divider()
 
         Button("Quit Claud-y", role: .destructive) {
             NSApp.terminate(nil)
+        }
+    }
+
+    // MARK: - Context menu helpers
+
+    private func addQuickAlarm(minutes: Int) {
+        let fireDate = Date().addingTimeInterval(TimeInterval(minutes * 60))
+        let label = minutes < 60
+            ? "Alarm — \(minutes) min"
+            : "Alarm — \(minutes / 60) hr"
+        characterViewModel.alarmReminderManager.add(title: label, fireDate: fireDate)
+    }
+
+    private func personalityIcon(_ mode: PersonalityMode) -> String {
+        switch mode {
+        case .companion:  return "heart"
+        case .chatty:     return "bubble.left.and.bubble.right"
+        case .hypeCoach:  return "bolt.fill"
+        case .director:   return "megaphone"
+        case .mate:       return "hand.wave"
+        case .listener:   return "ear"
+        case .custom:     return "pencil"
+        }
+    }
+
+    private func modeIcon(_ mode: BehaviorMode) -> String {
+        switch mode {
+        case .normal:   return "circle"
+        case .study:    return "book"
+        case .dev:      return "terminal"
+        case .work:     return "briefcase"
+        case .dance:    return "music.note"
+        case .brainRot: return "brain.head.profile"
         }
     }
 
@@ -466,5 +625,273 @@ struct CharacterRootView: View {
             characterViewModel.setState(.idle)
             windowManager.window?.makeKey()
         }
+    }
+}
+
+// MARK: - FocusToolAdderSheet
+
+private struct FocusToolAdderSheet: View {
+    enum ToolType: String, CaseIterable {
+        case alarm    = "Alarm"
+        case reminder = "Reminder"
+    }
+
+    @Binding var isPresented: Bool
+    let manager: AlarmReminderManager
+
+    @State private var toolType: ToolType
+    @State private var title: String = ""
+    @State private var date: Date = Date().addingTimeInterval(30 * 60)
+
+    init(isPresented: Binding<Bool>, manager: AlarmReminderManager, defaultType: ToolType = .reminder) {
+        self._isPresented = isPresented
+        self.manager = manager
+        self._toolType = State(initialValue: defaultType)
+    }
+
+    private var isAlarm: Bool { toolType == .alarm }
+
+    var body: some View {
+        VStack(spacing: 0) {
+            // Header
+            HStack(spacing: 8) {
+                Image(systemName: isAlarm ? "alarm.fill" : "checklist")
+                    .font(.system(size: 16, weight: .semibold))
+                    .foregroundStyle(Color(red: 0.784, green: 0.361, blue: 0.220))
+                Text(isAlarm ? "Set Alarm" : "New Reminder")
+                    .font(.system(size: 15, weight: .bold))
+                Spacer()
+                Button { isPresented = false } label: {
+                    Image(systemName: "xmark.circle.fill")
+                        .font(.system(size: 16))
+                        .foregroundStyle(.secondary)
+                }
+                .buttonStyle(.plain)
+            }
+            .padding(.horizontal, 16)
+            .padding(.top, 16)
+            .padding(.bottom, 12)
+
+            Divider()
+
+            VStack(alignment: .leading, spacing: 14) {
+                // Type picker
+                Picker("", selection: $toolType) {
+                    ForEach(ToolType.allCases, id: \.self) { t in
+                        Label(t.rawValue, systemImage: t == .alarm ? "alarm" : "checklist")
+                            .tag(t)
+                    }
+                }
+                .pickerStyle(.segmented)
+
+                // Title field
+                VStack(alignment: .leading, spacing: 4) {
+                    Text(isAlarm ? "Label (optional)" : "What to remind you")
+                        .font(.system(size: 11, weight: .medium))
+                        .foregroundStyle(.secondary)
+                    TextField(isAlarm ? "e.g. Stand up, check build…" : "e.g. Review PR, call back…", text: $title)
+                        .textFieldStyle(.roundedBorder)
+                        .font(.system(size: 13))
+                }
+
+                // Date / time picker
+                VStack(alignment: .leading, spacing: 4) {
+                    Text("When")
+                        .font(.system(size: 11, weight: .medium))
+                        .foregroundStyle(.secondary)
+                    DatePicker("", selection: $date, in: Date()..., displayedComponents: [.date, .hourAndMinute])
+                        .datePickerStyle(.compact)
+                        .labelsHidden()
+                }
+
+                // Confirm button
+                Button {
+                    let label = title.trimmingCharacters(in: .whitespacesAndNewlines)
+                    let finalTitle = label.isEmpty
+                        ? (isAlarm ? "Alarm" : "Reminder")
+                        : label
+                    manager.add(title: finalTitle, fireDate: date)
+                    isPresented = false
+                } label: {
+                    Label(isAlarm ? "Set Alarm" : "Set Reminder",
+                          systemImage: isAlarm ? "alarm.fill" : "checkmark.circle.fill")
+                        .font(.system(size: 13, weight: .semibold))
+                        .frame(maxWidth: .infinity)
+                }
+                .buttonStyle(.borderedProminent)
+                .tint(Color(red: 0.784, green: 0.361, blue: 0.220))
+                .disabled(!isAlarm && title.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
+            }
+            .padding(16)
+        }
+        .frame(width: 280)
+        .background(.ultraThinMaterial, in: RoundedRectangle(cornerRadius: 16))
+    }
+}
+
+// MARK: - ScratchpadSheet
+
+private struct ScratchpadSheet: View {
+    @Binding var isPresented: Bool
+    @State private var newNoteText: String = ""
+    @State private var editingID: UUID? = nil
+
+    private let manager = ScratchpadManager.shared
+    private let orange  = Color(red: 0.784, green: 0.361, blue: 0.220)
+
+    var body: some View {
+        VStack(spacing: 0) {
+            // Header
+            HStack(spacing: 8) {
+                Image(systemName: "note.text")
+                    .font(.system(size: 16, weight: .semibold))
+                    .foregroundStyle(orange)
+                Text("Scratchpad")
+                    .font(.system(size: 15, weight: .bold))
+                Spacer()
+                Button { isPresented = false } label: {
+                    Image(systemName: "xmark.circle.fill")
+                        .font(.system(size: 16))
+                        .foregroundStyle(.secondary)
+                }
+                .buttonStyle(.plain)
+            }
+            .padding(.horizontal, 16)
+            .padding(.top, 16)
+            .padding(.bottom, 10)
+
+            Divider()
+
+            // New note input
+            HStack(spacing: 8) {
+                TextField("Jot something down…", text: $newNoteText, axis: .vertical)
+                    .lineLimit(1...3)
+                    .textFieldStyle(.roundedBorder)
+                    .font(.system(size: 12))
+                    .onSubmit { commitNewNote() }
+                Button {
+                    commitNewNote()
+                } label: {
+                    Image(systemName: "plus.circle.fill")
+                        .font(.system(size: 20))
+                        .foregroundStyle(newNoteText.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ? .secondary : orange)
+                }
+                .buttonStyle(.plain)
+                .disabled(newNoteText.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
+            }
+            .padding(.horizontal, 12)
+            .padding(.vertical, 10)
+
+            Divider()
+
+            // Notes list
+            if manager.notes.isEmpty {
+                VStack(spacing: 6) {
+                    Image(systemName: "note.text")
+                        .font(.system(size: 28))
+                        .foregroundStyle(.quaternary)
+                    Text("No notes yet.\nJot something above.")
+                        .font(.system(size: 12))
+                        .foregroundStyle(.secondary)
+                        .multilineTextAlignment(.center)
+                }
+                .frame(maxWidth: .infinity)
+                .padding(24)
+            } else {
+                ScrollView {
+                    LazyVStack(alignment: .leading, spacing: 1) {
+                        ForEach(manager.notes) { note in
+                            NoteRow(note: note, manager: manager)
+                        }
+                    }
+                    .padding(.vertical, 4)
+                }
+                .frame(maxHeight: 260)
+            }
+        }
+        .frame(width: 300)
+        .background(.ultraThinMaterial, in: RoundedRectangle(cornerRadius: 16))
+    }
+
+    private func commitNewNote() {
+        let text = newNoteText.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !text.isEmpty else { return }
+        manager.addNote(text)
+        newNoteText = ""
+    }
+}
+
+private struct NoteRow: View {
+    let note: ScratchpadNote
+    let manager: ScratchpadManager
+    @State private var isEditing = false
+    @State private var editText: String = ""
+    private let orange = Color(red: 0.784, green: 0.361, blue: 0.220)
+
+    var body: some View {
+        HStack(alignment: .top, spacing: 8) {
+            if note.isPinned {
+                Image(systemName: "pin.fill")
+                    .font(.system(size: 9))
+                    .foregroundStyle(orange)
+                    .padding(.top, 3)
+            }
+
+            if isEditing {
+                TextField("", text: $editText, axis: .vertical)
+                    .lineLimit(1...5)
+                    .font(.system(size: 12))
+                    .textFieldStyle(.roundedBorder)
+                    .onSubmit { commitEdit() }
+            } else {
+                Text(note.text)
+                    .font(.system(size: 12))
+                    .foregroundStyle(.primary)
+                    .fixedSize(horizontal: false, vertical: true)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .onTapGesture(count: 2) {
+                        editText = note.text
+                        isEditing = true
+                    }
+            }
+
+            Spacer(minLength: 0)
+
+            Menu {
+                Button {
+                    manager.togglePin(id: note.id)
+                } label: {
+                    Label(note.isPinned ? "Unpin" : "Pin", systemImage: note.isPinned ? "pin.slash" : "pin")
+                }
+                Button {
+                    editText = note.text
+                    isEditing = true
+                } label: {
+                    Label("Edit", systemImage: "pencil")
+                }
+                Divider()
+                Button(role: .destructive) {
+                    manager.deleteNote(id: note.id)
+                } label: {
+                    Label("Delete", systemImage: "trash")
+                }
+            } label: {
+                Image(systemName: "ellipsis")
+                    .font(.system(size: 11))
+                    .foregroundStyle(.secondary)
+                    .padding(4)
+            }
+            .menuStyle(.borderlessButton)
+            .fixedSize()
+        }
+        .padding(.horizontal, 12)
+        .padding(.vertical, 7)
+        .background(note.isPinned ? orange.opacity(0.06) : Color.clear)
+    }
+
+    private func commitEdit() {
+        let trimmed = editText.trimmingCharacters(in: .whitespacesAndNewlines)
+        if !trimmed.isEmpty { manager.updateNote(id: note.id, text: trimmed) }
+        isEditing = false
     }
 }

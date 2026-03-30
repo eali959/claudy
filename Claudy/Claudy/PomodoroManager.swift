@@ -203,6 +203,7 @@ final class PomodoroManager {
             SoundManager.shared.play(.timerDone)
             self.viewModel?.celebrate()
             self.viewModel?.triggerConfetti()
+            FocusStatsManager.shared.recordPomodoro(seconds: self.totalDuration)
         }
     }
 

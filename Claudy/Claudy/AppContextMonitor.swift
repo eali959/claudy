@@ -80,6 +80,11 @@ final class AppContextMonitor {
         // Let BehaviorModeManager react (Study Mode browser nudge, BrainRot app switch, etc.)
         viewModel?.behaviorModeManager.onAppSwitch(bundleID: bundleID)
 
+        // Surface a contextual quick-action button for supported apps
+        Task { @MainActor in
+            QuickActionManager.shared.appDidActivate(bundleID: bundleID)
+        }
+
         if isClaudeAppBundleID(bundleID) {
             handleClaudeAppActivation()
             return
@@ -158,8 +163,16 @@ final class AppContextMonitor {
         if bundleID == "com.spotify.client"                                       { return .appSpotify }
         if bundleID == "com.apple.Music"                                          { return .appMusic }
 
+        // ── Browsers ──────────────────────────────────────────────────────────
+        if bundleID == "com.google.Chrome" || bundleID == "com.google.chrome"    { return .appChrome }
+        if lower.contains("microsoft.edge") || lower.contains("edgemac")         { return .appEdge }
+        if lower.contains("firefox") || bundleID == "org.mozilla.firefox"        { return .appFirefox }
+        if lower.contains("brave") || bundleID == "com.brave.Browser"            { return .appBrave }
+        if lower.contains("opera") || bundleID == "com.operasoftware.Opera"      { return .appOpera }
+        if lower.contains("duckduckgo")                                           { return .appDuckDuckGo }
+        if lower.contains("helium") || bundleID == "com.externalhard.Helium"      { return .appHelium }
+
         // ── Knowledge & productivity ─────────────────────────────────────────
-        if bundleID == "com.google.Chrome" || bundleID == "com.google.chrome"    { return .appGoogle }
         if bundleID == "notion.id" || lower.contains("notion")                   { return .appNotion }
         if bundleID == "md.obsidian" || lower.contains("obsidian")               { return .appObsidian }
 

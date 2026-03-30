@@ -13,16 +13,20 @@ enum MessagePriority: Sendable {
     case complex
 
     var model: String {
+        let provider = APIProvider.selected
         switch self {
         case .reaction:
-            return "claude-3-5-haiku-20241022"
+            return provider.fastModel
         case .chat:
             return UserDefaults.standard.string(forKey: "SelectedModel")
-                ?? ClaudeAPIService.defaultModel
+                ?? provider.defaultModel
         case .complex:
             let useComplex = UserDefaults.standard.bool(forKey: "UseComplexModel")
-            return useComplex ? "claude-opus-4-6"
-                : (UserDefaults.standard.string(forKey: "SelectedModel") ?? ClaudeAPIService.defaultModel)
+            if provider == .claude {
+                return useComplex ? "claude-opus-4-6"
+                    : (UserDefaults.standard.string(forKey: "SelectedModel") ?? ClaudeAPIService.defaultModel)
+            }
+            return useComplex ? provider.smartModel : provider.defaultModel
         }
     }
 
@@ -59,8 +63,13 @@ actor ClaudeAPIService {
     nonisolated private let apiVersion = "2023-06-01"
     static let defaultModel = "claude-haiku-4-5-20251001"
 
-    /// True when an API key is stored in the Keychain.
-    nonisolated var hasAPIKey: Bool { KeychainService.hasAPIKey }
+    /// True when an API key is stored for the currently selected provider.
+    nonisolated var hasAPIKey: Bool { KeychainService.has(for: APIProvider.selected) }
+
+    /// True when any API key exists (used for companion/API mode toggle).
+    nonisolated var hasAnyAPIKey: Bool {
+        APIProvider.allCases.contains { KeychainService.has(for: $0) }
+    }
 
     private var model: String {
         UserDefaults.standard.string(forKey: "SelectedModel") ?? Self.defaultModel
@@ -78,49 +87,42 @@ actor ClaudeAPIService {
         priority: MessagePriority = .chat
     ) -> AsyncThrowingStream<String, Error> {
         AsyncThrowingStream { continuation in
-            // Capture the Task so onTermination can cancel it.
-            // Without this, dropping the stream (e.g. on cancel) leaves the URLSession
-            // request running until it completes or times out.
             let task = Task {
                 do {
-                    // Hop to MainActor to resolve UserDefaults-backed priority values,
-                    // then immediately return to the task's isolation context.
-                    let resolvedModel    = await MainActor.run { priority.model }
-                    let resolvedMaxToks  = await MainActor.run { priority.maxTokens }
+                    let resolvedModel   = await MainActor.run { priority.model }
+                    let resolvedMaxToks = await MainActor.run { priority.maxTokens }
+                    let provider        = await MainActor.run { APIProvider.selected }
+                    let apiKey          = try KeychainService.load(for: provider)
 
-                    let apiKey = try KeychainService.load()
-                    var request = URLRequest(url: self.baseURL)
-                    request.httpMethod = "POST"
-                    request.setValue("application/json", forHTTPHeaderField: "Content-Type")
-                    request.setValue(apiKey, forHTTPHeaderField: "x-api-key")
-                    request.setValue(self.apiVersion, forHTTPHeaderField: "anthropic-version")
-
-                    let body = APIRequest(
-                        model: resolvedModel,
-                        maxTokens: resolvedMaxToks,
-                        system: systemPrompt,
-                        messages: messages.map { APIRequest.APIMessage(role: $0.role.rawValue, content: $0.content) },
-                        stream: true
-                    )
-                    // Hop to MainActor for encode: the synthesized Encodable conformance is
-                    // inferred @MainActor by the compiler in this SDK/module combination.
-                    request.httpBody = try await MainActor.run { try JSONEncoder().encode(body) }
+                    var request: URLRequest
+                    switch provider {
+                    case .claude:
+                        request = try await self.buildClaudeRequest(
+                            apiKey: apiKey, model: resolvedModel, maxTokens: resolvedMaxToks,
+                            messages: messages, systemPrompt: systemPrompt)
+                    case .openai:
+                        request = try await self.buildOpenAIRequest(
+                            apiKey: apiKey, model: resolvedModel, maxTokens: resolvedMaxToks,
+                            messages: messages, systemPrompt: systemPrompt)
+                    case .gemini:
+                        request = try await self.buildGeminiRequest(
+                            apiKey: apiKey, model: resolvedModel, maxTokens: resolvedMaxToks,
+                            messages: messages, systemPrompt: systemPrompt)
+                    }
 
                     let (bytes, response) = try await URLSession.shared.bytes(for: request)
-
                     guard let http = response as? HTTPURLResponse else {
                         throw URLError(.badServerResponse)
                     }
                     guard http.statusCode == 200 else {
-                        // Read error body so we know exactly what went wrong
                         var errorLines: [String] = []
                         for try await line in bytes.lines {
                             errorLines.append(line)
                             if errorLines.count >= 5 { break }
                         }
-                        let body = errorLines.joined(separator: " ")
-                        self.logger.error("API \(http.statusCode): \(body)")
-                        throw ClaudeAPIError.httpError(http.statusCode, body: body)
+                        let errBody = errorLines.joined(separator: " ")
+                        self.logger.error("API \(http.statusCode): \(errBody)")
+                        throw ClaudeAPIError.httpError(http.statusCode, body: errBody)
                     }
 
                     for try await line in bytes.lines {
@@ -128,15 +130,18 @@ actor ClaudeAPIService {
                         let payload = String(line.dropFirst(6))
                         guard payload != "[DONE]",
                               let data = payload.data(using: .utf8) else { continue }
-                        // Hop to MainActor for decode: same @MainActor conformance inference issue.
-                        let event = await MainActor.run { try? JSONDecoder().decode(StreamEvent.self, from: data) }
-                        guard let event else { continue }
-
-                        if event.type == "content_block_delta",
-                           event.delta?.type == "text_delta",
-                           let text = event.delta?.text {
-                            continuation.yield(text)
+                        let text: String?
+                        switch provider {
+                        case .claude:
+                            let event = await MainActor.run { try? JSONDecoder().decode(StreamEvent.self, from: data) }
+                            text = (event?.type == "content_block_delta" && event?.delta?.type == "text_delta")
+                                ? event?.delta?.text : nil
+                        case .openai:
+                            text = await MainActor.run { Self.parseOpenAIChunk(data) }
+                        case .gemini:
+                            text = await MainActor.run { Self.parseGeminiChunk(data) }
                         }
+                        if let t = text { continuation.yield(t) }
                     }
                     continuation.finish()
                 } catch {
@@ -144,11 +149,108 @@ actor ClaudeAPIService {
                     continuation.finish(throwing: error)
                 }
             }
-            // When the stream is cancelled or dropped by the caller, cancel the
-            // underlying URLSession request immediately rather than waiting for it
-            // to drain naturally.
             continuation.onTermination = { _ in task.cancel() }
         }
+    }
+
+    // MARK: - Provider request builders
+
+    private func buildClaudeRequest(
+        apiKey: String, model: String, maxTokens: Int,
+        messages: [ChatMessage], systemPrompt: String
+    ) async throws -> URLRequest {
+        var req = URLRequest(url: baseURL)
+        req.httpMethod = "POST"
+        req.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        req.setValue(apiKey, forHTTPHeaderField: "x-api-key")
+        req.setValue(apiVersion, forHTTPHeaderField: "anthropic-version")
+        let body = APIRequest(
+            model: model, maxTokens: maxTokens, system: systemPrompt,
+            messages: messages.map { APIRequest.APIMessage(role: $0.role.rawValue, content: $0.content) },
+            stream: true)
+        req.httpBody = try await MainActor.run { try JSONEncoder().encode(body) }
+        return req
+    }
+
+    private func buildOpenAIRequest(
+        apiKey: String, model: String, maxTokens: Int,
+        messages: [ChatMessage], systemPrompt: String
+    ) async throws -> URLRequest {
+        let url = URL(string: "https://api.openai.com/v1/chat/completions")!
+        var req = URLRequest(url: url)
+        req.httpMethod = "POST"
+        req.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        req.setValue("Bearer \(apiKey)", forHTTPHeaderField: "Authorization")
+
+        struct OAIMessage: Encodable { let role: String; let content: String }
+        struct OAIBody: Encodable {
+            let model: String; let messages: [OAIMessage]
+            let stream: Bool; let max_tokens: Int
+        }
+        var oaiMessages: [OAIMessage] = []
+        if !systemPrompt.isEmpty { oaiMessages.append(OAIMessage(role: "system", content: systemPrompt)) }
+        oaiMessages += messages.map { OAIMessage(role: $0.role.rawValue, content: $0.content) }
+        let body = OAIBody(model: model, messages: oaiMessages, stream: true, max_tokens: maxTokens)
+        req.httpBody = try await MainActor.run { try JSONEncoder().encode(body) }
+        return req
+    }
+
+    private func buildGeminiRequest(
+        apiKey: String, model: String, maxTokens: Int,
+        messages: [ChatMessage], systemPrompt: String
+    ) async throws -> URLRequest {
+        let urlStr = "https://generativelanguage.googleapis.com/v1beta/models/\(model):streamGenerateContent?alt=sse&key=\(apiKey)"
+        let url = URL(string: urlStr)!
+        var req = URLRequest(url: url)
+        req.httpMethod = "POST"
+        req.setValue("application/json", forHTTPHeaderField: "Content-Type")
+
+        struct GPart:    Encodable { let text: String }
+        struct GContent: Encodable { let role: String; let parts: [GPart] }
+        struct GSysInst: Encodable { let parts: [GPart] }
+        struct GConfig:  Encodable { let maxOutputTokens: Int }
+        struct GBody:    Encodable {
+            let contents: [GContent]
+            let systemInstruction: GSysInst?
+            let generationConfig: GConfig
+        }
+        let contents = messages.map { m in
+            GContent(role: m.role == .user ? "user" : "model", parts: [GPart(text: m.content)])
+        }
+        let sysInst = systemPrompt.isEmpty ? nil : GSysInst(parts: [GPart(text: systemPrompt)])
+        let body = GBody(contents: contents, systemInstruction: sysInst,
+                         generationConfig: GConfig(maxOutputTokens: maxTokens))
+        req.httpBody = try await MainActor.run { try JSONEncoder().encode(body) }
+        return req
+    }
+
+    // MARK: - Provider SSE parsers
+
+    private static func parseOpenAIChunk(_ data: Data) -> String? {
+        struct OAIChunk: Decodable {
+            struct Choice: Decodable {
+                struct Delta: Decodable { let content: String? }
+                let delta: Delta
+            }
+            let choices: [Choice]
+        }
+        guard let chunk = try? JSONDecoder().decode(OAIChunk.self, from: data) else { return nil }
+        return chunk.choices.first?.delta.content
+    }
+
+    private static func parseGeminiChunk(_ data: Data) -> String? {
+        struct GChunk: Decodable {
+            struct Candidate: Decodable {
+                struct Content: Decodable {
+                    struct Part: Decodable { let text: String? }
+                    let parts: [Part]
+                }
+                let content: Content?
+            }
+            let candidates: [Candidate]?
+        }
+        guard let chunk = try? JSONDecoder().decode(GChunk.self, from: data) else { return nil }
+        return chunk.candidates?.first?.content?.parts.first?.text
     }
 
     /// Collects a full non-streaming response to a single prompt. Returns nil on error or no key.

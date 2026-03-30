@@ -872,5 +872,61 @@
     "Session ended. Progress is still progress.",
     "Timer cancelled. Come back when you are ready.",
     "We stop here. That is okay."
+  ],
+
+  "app_chrome": [
+    "Chrome's open. Research mode or rabbit-hole mode?",
+    "The browser awakens. Where are we going today?",
+    "Chrome. Where tasks sometimes become 40 open tabs.",
+    "Switched to Chrome. I won't judge the tab count.",
+    "Google Chrome. Equal parts research and procrastination.",
+    "The Chromium empire. Use it wisely."
+  ],
+  "app_edge": [
+    "Microsoft Edge. Living your best corporate browser life.",
+    "Edge is open. Bold choice. Respectable.",
+    "Edge. Actually pretty solid these days, to be fair.",
+    "Switched to Edge. A calm, sensible browser decision.",
+    "Microsoft's browser. Edge is fine. It's fine.",
+    "Edge open. You probably have a legitimate reason. Carry on."
+  ],
+  "app_firefox": [
+    "Firefox. A person of principle. I respect that.",
+    "The fox is in the house. Privacy-first energy.",
+    "Firefox. The underdog that never stops fighting.",
+    "Switched to Firefox. The open-web advocate's browser.",
+    "Firefox is open. Strong character choice.",
+    "The red panda has arrived. Let's browse with dignity."
+  ],
+  "app_brave": [
+    "Brave browser. Privacy mode: engaged.",
+    "Brave is open. Ads cancelled. Trackers crying.",
+    "Switched to Brave. Zero ads, maximum principle.",
+    "Brave — because your browsing data is nobody's business.",
+    "Privacy first. Brave is out here fighting for you.",
+    "Brave. The browser that actually lives up to its name."
+  ],
+  "app_opera": [
+    "Opera. An eclectic choice. I appreciate it.",
+    "Opera is open. The browser with a personality.",
+    "Switched to Opera. The sidebar enjoyer has arrived.",
+    "Opera. Not the most popular but absolutely a vibe.",
+    "Opera browser. You like things a bit different. Noted.",
+    "The opera begins. Tabs as your stage."
+  ],
+  "app_duckduckgo": [
+    "DuckDuckGo. Not being tracked today. Good.",
+    "The duck has landed. Privacy unlocked.",
+    "Switched to DuckDuckGo. Google doesn't need to know everything.",
+    "DuckDuckGo. What happens in the browser, stays in the browser.",
+    "The privacy-first browser. Respect.",
+    "DuckDuckGo is open. Your search history remains yours."
+  ],
+  "app_helium": [
+    "Helium. A floating browser for a floating companion. We match.",
+    "Switched to Helium. Always-on-top energy. I respect that.",
+    "Helium is open. Picture-in-picture vibes. Very us.",
+    "A browser that floats. You and I have the same philosophy.",
+    "Helium browser. Staying on top of things, literally."
   ]
 }

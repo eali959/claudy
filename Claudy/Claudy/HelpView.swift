@@ -27,11 +27,13 @@ struct HelpView: View {
                 VStack(alignment: .leading, spacing: 1) {
                     helpSection("Getting Started") {
                         helpRow("What is Claud-y?",
-                                "A small animated companion that lives on your screen. It reacts to what you're building, celebrates your wins, and keeps you company while you code.")
+                                "A small animated companion that lives on your screen. It reacts to what you're building, celebrates your wins, and keeps you company while you work.")
                         helpRow("Companion Mode vs API Mode",
-                                "Companion mode runs entirely on your Mac - no internet needed, free forever. API mode connects to Claude AI for real conversations. Tap the mode pill in the chat header to switch.")
-                        helpRow("Adding a Claude API key",
-                                "Right-click Claud-y → Settings → Claude API Key. Paste your key and tap Save. Your key is stored in your Mac's Keychain and never leaves your device except to reach Anthropic directly.")
+                                "Companion mode runs entirely on your Mac — no internet needed, free forever. API mode connects to an AI provider for real conversations. Tap the mode pill in the chat header to switch.")
+                        helpRow("Supported AI providers",
+                                "Claude (Anthropic), ChatGPT (OpenAI), and Gemini (Google). Add a key for any or all in Settings → API Provider. Claud-y routes to whichever provider is currently selected. No data is shared between providers.")
+                        helpRow("Adding an API key",
+                                "Right-click → Settings → API Provider. Select your provider, paste your key, and tap Save. Each provider's key is stored separately in your Mac's Keychain and never leaves your device except to reach that provider directly.")
                     }
 
                     helpSection("Chat") {
@@ -55,12 +57,22 @@ struct HelpView: View {
                         helpRow("You Do You", "Write your own character in Settings. Fully custom persona.")
                     }
 
-                    helpSection("Focus Timer") {
-                        helpRow("Starting a timer", "Right-click Claud-y → Focus Timer, then pick a duration (15, 25, 45, 60 min, or your custom value). The badge appears above Claud-y once the session begins.")
-                        helpRow("Pausing", "Tap the badge while the timer is running.")
-                        helpRow("Resuming", "Tap the badge again while paused.")
-                        helpRow("Resetting", "Double-tap the badge at any time to stop and reset. The badge disappears when the timer is idle.")
-                        helpRow("Changing duration", "Right-click Claud-y → Focus Timer and select a different preset. Your choice takes effect on the next start.")
+                    helpSection("Modes") {
+                        helpRow("Normal", "Default behaviour. No extra context layered on.")
+                        helpRow("Study Mode", "Tailored for students. Encourages focused sessions, uses Pomodoro framing, and provides calm, exam-friendly support. Works with every personality.")
+                        helpRow("Dev Mode", "Deeper flow-state awareness. Celebrates builds, respects deep focus, empathises with debugging slumps. Works with every personality.")
+                        helpRow("Work Mode", "Professional context. Claud-y quiets down, shifts to business-appropriate language, and offers to help with emails, meetings, decks, and deadlines. Reacts to Zoom, Teams, Outlook, and Slack switches.")
+                        helpRow("Dance Mode", "Claud-y dances. That's it. Enable from right-click → Mode. Disable the same way.")
+                        helpRow("Brain Rot Mode", "Gen Z slang, chaotic energy, W builds, no cap fr. Still helpful — just unhinged about it.")
+                        helpRow("Stacking personalities + modes", "Modes layer on top of your chosen personality. Director + Work = boardroom drama. Hype Coach + Study = intense revision energy. All combos work.")
+                    }
+
+                    helpSection("Focus Tools") {
+                        helpRow("Pomodoro timer", "Right-click Claud-y → Focus Tools → Pomodoro, then pick a duration (15, 25, 45, or 60 min). The badge appears above Claud-y once the session begins.")
+                        helpRow("Pausing / resuming", "Right-click → Focus Tools → Pomodoro while running to pause or stop. Resume from the same submenu when paused.")
+                        helpRow("Alarms", "Right-click → Focus Tools → Set Alarm. Choose a quick preset (5–240 min) or tap 'Set Custom Alarm…' to pick an exact time. Claud-y will wave and remind you when it fires.")
+                        helpRow("Reminders", "Right-click → Focus Tools → Reminders → New Reminder…. Give it a label and a time. Pending reminders show in the submenu — tap one to dismiss it early. 'Clear All' removes everything.")
+                        helpRow("Custom alarm / reminder sheet", "Tap 'Set Custom Alarm…' or 'New Reminder…' to open a compact sheet. Pick a date and time, optionally add a label, and confirm. The sheet closes and Claud-y takes it from there.")
                     }
 
                     helpSection("Sound & Voice") {
@@ -72,26 +84,82 @@ struct HelpView: View {
                                 "Controlled by the volume slider in Settings → Sound. Applies to all sounds including the character voice.")
                     }
 
+                    helpSection("Global Shortcut") {
+                        helpRow("⌘⇧Space — Toggle chat",
+                                "Press Command + Shift + Space from any app to open or close the Claud-y chat panel. Works without switching focus to Claud-y. Disable in Settings if it conflicts with another app.")
+                    }
+
+                    helpSection("Smart Awareness") {
+                        helpRow("Quick-action button",
+                                "When you switch to an app like Zoom, Figma, Slack, or Keynote, a small button appears above Claud-y with a contextual prompt. Tap it to open chat with the question pre-filled. It auto-hides after 8 seconds.")
+                        helpRow("macOS Focus / Do Not Disturb",
+                                "When your Mac's Focus mode is on, Claud-y automatically suppresses most ambient bubbles. The 🌙 badge confirms Focus is active. Claud-y resumes normally when Focus ends.")
+                        helpRow("Break nudges",
+                                "After 90 minutes of continuous screen time, Claud-y will gently remind you to take a break. Reminders get firmer at 2 hours and 3 hours. A 5-minute gap resets the clock.")
+                        helpRow("Mood check-ins",
+                                "Every couple of hours of active use, Claud-y will quietly ask how you're doing. You can respond in chat or dismiss it. If you mention you're struggling, Claud-y shifts into a more supportive tone.")
+                        helpRow("Daily wrap-up",
+                                "At 6 pm (if you've completed at least one Pomodoro), Claud-y gives a personality-flavoured summary of your day — sessions done, total focus time, encouragement.")
+                    }
+
                     helpSection("Reactions & Awareness") {
                         helpRow("What Claud-y watches",
-                                "App switches (Xcode, Figma, Terminal, Zoom…), keyboard activity, clipboard content, and Xcode build events. All processing is local - nothing is logged or sent anywhere.")
+                                "App switches (Xcode, Figma, Terminal, Zoom, Cursor, Office, browsers…), keyboard activity, clipboard content, and build events. All processing is local — nothing is logged or sent anywhere.")
+                        helpRow("Browser reactions",
+                                "Claud-y reacts when you switch to Chrome, Edge, Firefox, Brave, Opera, Safari, DuckDuckGo, or Helium — each with its own personality-aware comment.")
                         helpRow("Controlling bubble frequency",
-                                "Settings → Chattiness. Drag the slider from Quiet (every 2 minutes) to Non-stop (every 14 seconds).")
+                                "Settings → Chattiness. Drag the slider from Quiet (every 2 min) to Non-stop (every 14 sec).")
                         helpRow("Muting",
-                                "Press Option+M, or right-click Claud-y → Mute. A 🔇 badge appears when muted. Unmuting shows a small reaction.")
+                                "Press Option+M, or right-click → Mute. A 🔇 badge appears when muted. Unmuting shows a small reaction.")
                     }
 
                     helpSection("Privacy") {
-                        helpRow("Companion mode", "100% local. No data leaves your Mac. No accounts, no telemetry, no analytics.")
-                        helpRow("API mode", "Your messages go directly to Anthropic's API using your own key. Claud-y has no server and stores nothing.")
-                        helpRow("Your API key", "Stored only in your Mac's Keychain. Never in UserDefaults, never in any file, never sent anywhere except Anthropic's API endpoint.")
+                        helpRow("Companion mode — 100% local",
+                                "No internet required. No accounts, no sign-up, no analytics, no telemetry. Nothing about you, your machine, or your work ever leaves your Mac.")
+                        helpRow("API mode — direct and transparent",
+                                "Your messages travel from your Mac straight to the AI provider's API using your own key. There is no Claud-y server. We are not in the middle. We cannot see your prompts, your responses, or your key — not even in principle.")
+                        helpRow("How API keys are stored (technical)",
+                                "Keys are written to macOS Keychain with kSecAttrAccessibleWhenUnlockedThisDeviceOnly — the strictest access level. Encrypted by macOS, bound to this device, never written to any file, UserDefaults, or iCloud. Presence is checked without reading the secret (no kSecReturnData), so the Keychain dialog only appears when an API call is actually made.")
+                        helpRow("No cross-provider data sharing",
+                                "Claude, OpenAI, and Gemini keys and conversations are completely separate. Switching providers starts a fresh session. Nothing carries over.")
+                        helpRow("What Claud-y never does",
+                                "No telemetry SDK. No crash reporter. No analytics library. No third-party frameworks of any kind. The only outbound connections are the API calls you explicitly trigger by chatting.")
                     }
 
+                    helpSection("Scratchpad") {
+                        helpRow("Opening",
+                                "Right-click Claud-y → Scratchpad. A compact notepad opens as a sheet.")
+                        helpRow("Adding notes",
+                                "Type in the input at the top and press Return or the + button. Notes appear instantly and persist between sessions.")
+                        helpRow("Editing",
+                                "Double-tap a note to edit it inline. Press Return to save.")
+                        helpRow("Pinning",
+                                "Tap the ••• menu on any note → Pin. Pinned notes float to the top and get a subtle orange tint.")
+                        helpRow("Deleting",
+                                "Tap ••• → Delete on an individual note, or ask Claud-y to 'clear my scratchpad' in chat (API mode).")
+                    }
+
+                    helpSection("Focus Stats") {
+                        helpRow("Where to find them",
+                                "Right-click → Focus Tools. At the bottom of the menu, a stats line shows how many Pomodoros you've done today and your total focus time.")
+                        helpRow("Streak",
+                                "Claud-y tracks consecutive days where you completed at least one Pomodoro. The streak is visible in Focus Stats and mentioned in the daily wrap-up.")
+                        helpRow("Resetting",
+                                "Stats reset automatically at midnight each day.")
+                    }
+
+
                     helpSection("Support") {
-                        VStack(alignment: .leading, spacing: 8) {
-                            Text("Claud-y is free. If it made your day better:")
+                        VStack(alignment: .leading, spacing: 10) {
+                            Text("Claud-y is free and always will be. No subscriptions, no paywalls, no ads, no data collection. That's the philosophy — good tools should be accessible to everyone.")
                                 .font(.system(size: 12))
                                 .foregroundStyle(.secondary)
+                                .fixedSize(horizontal: false, vertical: true)
+
+                            Text("Support is completely optional. But if Claud-y has made your day a little better, a coffee goes directly toward new features and keeping development going. Your feedback and support genuinely shape what gets built next.")
+                                .font(.system(size: 12))
+                                .foregroundStyle(.secondary)
+                                .fixedSize(horizontal: false, vertical: true)
 
                             Button {
                                 if let url = URL(string: "https://ko-fi.com/ealiii") {
@@ -103,6 +171,11 @@ struct HelpView: View {
                             }
                             .buttonStyle(.link)
 
+                            Text("One-time tip, no account needed. Every contribution is appreciated and used well.")
+                                .font(.system(size: 11))
+                                .foregroundStyle(.tertiary)
+                                .fixedSize(horizontal: false, vertical: true)
+
                             Button {
                                 if let url = URL(string: "https://github.com/eali959/claudy") {
                                     NSWorkspace.shared.open(url)
@@ -112,6 +185,11 @@ struct HelpView: View {
                                     .font(.system(size: 12, weight: .medium))
                             }
                             .buttonStyle(.link)
+
+                            Text("Source is public. Bug reports, feature ideas, and pull requests are all welcome.")
+                                .font(.system(size: 11))
+                                .foregroundStyle(.tertiary)
+                                .fixedSize(horizontal: false, vertical: true)
                         }
                         .padding(.horizontal, 16)
                         .padding(.vertical, 10)

@@ -10,6 +10,7 @@ enum BehaviorMode: String, CaseIterable {
     case normal   = "Normal"
     case study    = "Study"
     case dev      = "Dev"
+    case work     = "Work"
     case dance    = "Dance"
     case brainRot = "Brain Rot"
 
@@ -46,6 +47,27 @@ enum BehaviorMode: String, CaseIterable {
             - Match the energy of someone in flow state — match their pace
             - Short punchy reactions are better than long explanations here
             - When they're stuck, offer a concrete directional nudge, not just emotional support
+            """
+
+        case .work:
+            return """
+            ## ACTIVE MODE: WORK MODE (Professional Context)
+            The user is in a professional work context — likely in meetings, handling emails, \
+            presentations, reports, or client-facing tasks. Adapt accordingly:
+            - Shift to a professional, polished register — clear, concise, business-appropriate
+            - Help with writing, editing, and structuring: emails, proposals, reports, decks
+            - Be meeting-aware: offer to help prep talking points, agendas, or follow-ups
+            - Deadlines and priorities matter — acknowledge urgency without adding stress
+            - No swearing, reduced sarcasm, dialled-back chaos — but warmth and personality intact
+            - Still be the user's companion, just wearing smarter clothes
+            - Short, useful responses preferred — the user is likely context-switching frequently
+            Each personality adapts to Work Mode differently:
+            - Companion: steady, professional, supportive
+            - Chatty: enthusiastic but stays on topic, shorter detours
+            - Hype Coach: BOARDROOM ENERGY — professional excellence, you are CRUSHING IT
+            - Director: boardroom-ready, still dramatic but channelled — "This proposal is CINEMA"
+            - Mate: work-focused but relaxed, "right, let's smash this out"
+            - Listener: calm, deadline-empathetic, "what's the most pressing thing right now?"
             """
 
         case .dance:
@@ -114,8 +136,9 @@ final class BehaviorModeManager {
         case .normal:   return 1.0
         case .study:    return 3.0
         case .dev:      return 0.75
-        case .dance:    return 0.5   // very chatty during dance
-        case .brainRot: return 0.5   // gen z never shuts up
+        case .work:     return 1.8   // quieter — professional context, less interruption
+        case .dance:    return 0.5
+        case .brainRot: return 0.5
         }
     }
 
@@ -143,6 +166,7 @@ final class BehaviorModeManager {
         case .normal:    break
         case .study:     activateStudyMode()
         case .dev:       activateDevMode()
+        case .work:      activateWorkMode()
         case .dance:     activateDanceMode()
         case .brainRot:  activateBrainRotMode()
         }
@@ -166,7 +190,8 @@ final class BehaviorModeManager {
             let isBrowser = lower.contains("safari") || lower.contains("chrome")
                          || lower.contains("firefox") || lower.contains("arc")
                          || lower.contains("brave")   || lower.contains("opera")
-                         || lower.contains("vivaldi")
+                         || lower.contains("vivaldi") || lower.contains("edge")
+                         || lower.contains("duckduckgo")
             if isBrowser {
                 let nudges = [
                     "Still in study mode. Just checking.",
@@ -176,6 +201,32 @@ final class BehaviorModeManager {
                     "Study mode is still on. That tab can wait.",
                 ]
                 viewModel?.showBubbleDirect(nudges.randomElement()!, duration: 5)
+            }
+
+        case .work:
+            // React to high-value work apps with relevant prompts
+            let isMeeting = lower.contains("zoom") || lower.contains("teams") || lower.contains("meet")
+            let isEmail   = lower.contains("outlook") || lower.contains("mail")
+            let isSlack   = lower.contains("slack")
+            if isMeeting {
+                let lines = [
+                    "Meeting incoming. Want me to help prep talking points?",
+                    "Call starting. I can draft an agenda or talking points — just ask.",
+                    "Heads up — you just switched to a meeting app. Need anything first?",
+                ]
+                viewModel?.showBubbleDirect(lines.randomElement()!, duration: 6)
+            } else if isEmail {
+                let lines = [
+                    "Email time. Need help drafting something?",
+                    "Inbox. The eternal battle. I can help draft if you need.",
+                ]
+                if Bool.random() { viewModel?.showBubbleDirect(lines.randomElement()!, duration: 5) }
+            } else if isSlack {
+                let lines = [
+                    "Slack open. Quick message or something bigger? I can help draft.",
+                    "Switching to Slack. Don't get sucked in.",
+                ]
+                if Bool.random() { viewModel?.showBubbleDirect(lines.randomElement()!, duration: 5) }
             }
 
         case .brainRot:
@@ -200,6 +251,14 @@ final class BehaviorModeManager {
         switch currentMode {
         case .dev:
             if Bool.random() { viewModel?.triggerConfetti() }
+
+        case .work:
+            let lines = [
+                "Build done. One less thing on the list.",
+                "Clean build in work mode. Quietly impressive.",
+                "Shipped. Professional excellence right there.",
+            ]
+            viewModel?.showBubbleDirect(lines.randomElement()!, duration: 5)
 
         case .brainRot:
             let lines = [
@@ -237,6 +296,11 @@ final class BehaviorModeManager {
                 "Dev mode off. Step away. Even five minutes helps.",
                 "Build session wrapped. Good work today.",
                 "Dev mode off. Close the laptop.",
+            ],
+            .work: [
+                "Work mode off. Loosen the tie.",
+                "Clocking out of work mode. Well done today.",
+                "Work mode off. You can swear again.",
             ],
             .dance: [
                 "Dance mode off. Back to reality.",
@@ -368,6 +432,71 @@ final class BehaviorModeManager {
                 if Date().timeIntervalSince(self.lastActivityTime) >= idleThreshold {
                     self.viewModel?.showBubbleDirect(debugLines.randomElement()!, duration: 6)
                     self.viewModel?.beConfused()
+                    self.lastActivityTime = Date()
+                }
+            }
+        }
+    }
+
+    // MARK: - Work Mode
+
+    private func activateWorkMode() {
+        let personality = PersonalityManager.shared.currentMode
+        let starts: [String]
+        switch personality {
+        case .hypeCoach:
+            starts = [
+                "WORK MODE. This is your time to DOMINATE the professional arena. Let's go.",
+                "Work mode on. You are going to CRUSH every email, every meeting, every deliverable.",
+            ]
+        case .director:
+            starts = [
+                "Work mode activated. Right. Time to be PROFESSIONAL. I can do professional. Mostly.",
+                "Work mode. Boardroom energy. We are SHARP today. Tailored, focused, magnificent.",
+            ]
+        case .mate:
+            starts = [
+                "Work mode on. Right, let's smash this out.",
+                "Yeah, work mode. Let's get it done.",
+            ]
+        case .listener:
+            starts = [
+                "Work mode on. I'm here for whatever you need — meetings, writing, deadlines.",
+                "Work mode activated. What's the most pressing thing right now?",
+            ]
+        case .chatty:
+            starts = [
+                "Work mode! Which is great, I love work mode, because there's so much to talk about — but professionally, obviously.",
+                "Okay, work mode, which means I'll try to stay on topic, mostly, professionally.",
+            ]
+        default:
+            starts = [
+                "Work mode on. Professional, focused, ready.",
+                "Work mode activated. Let's make today count.",
+                "Right — work mode. I've got you. What are we tackling?",
+            ]
+        }
+        viewModel?.wave()
+        viewModel?.showBubbleDirect(starts.randomElement()!, duration: 6)
+        startWorkIdleWatch()
+    }
+
+    private func startWorkIdleWatch() {
+        let idleThreshold: TimeInterval = 10 * 60
+        let pollInterval:  TimeInterval = 60
+        let idleLines = [
+            "Ten minutes quiet in work mode. Deep in a document, or blocked on something?",
+            "Long pause. Stuck on phrasing? I can help with that.",
+            "Quiet for a while. Drafting something tricky? Happy to take a look.",
+            "Long idle. Deadline approaching or already passed? Either way, I'm here.",
+        ]
+        idleWatchTask = Task { @MainActor [weak self] in
+            while !Task.isCancelled {
+                try? await Task.sleep(for: .seconds(pollInterval))
+                guard !Task.isCancelled, self?.currentMode == .work else { return }
+                guard let self else { return }
+                if Date().timeIntervalSince(self.lastActivityTime) >= idleThreshold {
+                    self.viewModel?.showBubbleDirect(idleLines.randomElement()!, duration: 6)
                     self.lastActivityTime = Date()
                 }
             }

@@ -45,6 +45,10 @@ final class CharacterViewModel {
     @ObservationIgnored private(set) var behaviorModeManager: BehaviorModeManager!
     @ObservationIgnored private(set) var alarmReminderManager: AlarmReminderManager!
     @ObservationIgnored private var holidayTask: Task<Void, Never>?
+    @ObservationIgnored private(set) var breakNudgeManager: BreakNudgeManager!
+    @ObservationIgnored private var focusModeMonitor: FocusModeMonitor!
+    @ObservationIgnored private(set) var moodCheckInManager: MoodCheckInManager!
+    @ObservationIgnored private(set) var dailyWrapUpManager: DailyWrapUpManager!
 
     @ObservationIgnored private var contextMonitor: ContextMonitor?
     @ObservationIgnored private var keyboardMonitor: KeyboardMonitor?
@@ -97,7 +101,12 @@ final class CharacterViewModel {
         roastModeManager     = RoastModeManager(viewModel: self)
         behaviorModeManager  = BehaviorModeManager(viewModel: self)
         alarmReminderManager = AlarmReminderManager(viewModel: self)
+        breakNudgeManager    = BreakNudgeManager(viewModel: self)
+        focusModeMonitor     = FocusModeMonitor(viewModel: self)
+        moodCheckInManager   = MoodCheckInManager(viewModel: self)
+        dailyWrapUpManager   = DailyWrapUpManager(viewModel: self)
         checkHolidayOnLaunch()
+        GlobalHotkeyManager.shared.refresh()
         startBlinkLoop()
 
         NotificationCenter.default.addObserver(
@@ -327,6 +336,8 @@ final class CharacterViewModel {
     func resetIdleTimer() {
         idleMonitor.resetActivity()
         behaviorModeManager?.onActivity()
+        breakNudgeManager?.recordActivity()
+        moodCheckInManager?.recordActivity()
     }
 
     // MARK: - Reminder parsing (call from chat before sending to API)
@@ -537,4 +548,9 @@ extension Notification.Name {
     static let claudyAPICodeBlock        = Notification.Name("claudyAPICodeBlock")
     static let claudyAPILongResponse     = Notification.Name("claudyAPILongResponse")
     static let claudyLongConversation    = Notification.Name("claudyLongConversation")
+    /// Fired by GlobalHotkeyManager (⌘⇧Space) — CharacterRootView toggles chat.
+    static let claudyToggleChat          = Notification.Name("claudyToggleChat")
+    /// Fired by QuickActionManager when the user taps a contextual button.
+    /// userInfo["prompt"]: String — pre-fill value for the chat input.
+    static let claudyQuickActionFired    = Notification.Name("claudyQuickActionFired")
 }

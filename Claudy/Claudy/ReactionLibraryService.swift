@@ -103,6 +103,15 @@ enum ReactionTrigger: String, CaseIterable {
     case appPostman       = "app_postman"
     case appInsomnia      = "app_insomnia"
 
+    // Browsers
+    case appChrome      = "app_chrome"
+    case appEdge        = "app_edge"
+    case appFirefox     = "app_firefox"
+    case appBrave       = "app_brave"
+    case appOpera       = "app_opera"
+    case appDuckDuckGo  = "app_duckduckgo"
+    case appHelium      = "app_helium"
+
     // AI session
     case vibeCodingSession  = "vibe_coding_session"
     case aiContextLimit     = "ai_context_limit"

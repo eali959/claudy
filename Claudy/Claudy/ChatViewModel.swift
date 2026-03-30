@@ -30,7 +30,7 @@ final class ChatViewModel {
         didSet { UserDefaults.standard.set(chatMode.rawValue, forKey: "chatMode") }
     }
 
-    var hasAPIKey: Bool { KeychainService.hasAPIKey }
+    var hasAPIKey: Bool { KeychainService.has(for: APIProvider.selected) }
 
     /// True when the user has an API key and has chosen API mode.
     var isAPIMode: Bool { chatMode == .api && hasAPIKey }
