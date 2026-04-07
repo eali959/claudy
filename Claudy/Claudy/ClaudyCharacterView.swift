@@ -52,7 +52,7 @@ struct ClaudyCharacterView: View {
         ZStack {
             // Sleeping Zs
             if animationState == .sleeping {
-                sleepingZs.offset(x: 40, y: -50)
+                sleepingZs.offset(x: CharacterGeometry.sleepingZsOffsetX, y: CharacterGeometry.sleepingZsOffsetY)
             }
 
             // Startled "!"
@@ -60,15 +60,15 @@ struct ClaudyCharacterView: View {
                 Text("!")
                     .font(.system(size: 20, weight: .black))
                     .foregroundStyle(bodyColor)
-                    .offset(x: 22, y: -58)
+                    .offset(x: CharacterGeometry.startledOffsetX, y: CharacterGeometry.startledOffsetY)
                     .transition(.opacity.combined(with: .scale))
             }
 
             // Dance glow — pulsing orange aura, sits behind everything
             if animationState == .dancing {
-                RoundedRectangle(cornerRadius: 22)
+                RoundedRectangle(cornerRadius: CharacterGeometry.glowCorner)
                     .fill(bodyColor.opacity(danceGlowPulse ? 0.5 : 0.08))
-                    .frame(width: 122, height: 100)
+                    .frame(width: CharacterGeometry.glowWidth, height: CharacterGeometry.glowHeight)
                     .blur(radius: danceGlowPulse ? 20 : 8)
                     .animation(
                         .easeInOut(duration: 0.38).repeatForever(autoreverses: true),
@@ -80,46 +80,46 @@ struct ClaudyCharacterView: View {
             // Character group
             ZStack {
                 // Drop shadow
-                RoundedRectangle(cornerRadius: 16)
+                RoundedRectangle(cornerRadius: CharacterGeometry.shadowCorner)
                     .fill(Color.black.opacity(0.25))
-                    .frame(width: 90, height: 72)
-                    .blur(radius: 6)
-                    .offset(x: 3, y: 46)
+                    .frame(width: CharacterGeometry.shadowWidth, height: CharacterGeometry.shadowHeight)
+                    .blur(radius: CharacterGeometry.shadowBlur)
+                    .offset(x: CharacterGeometry.shadowOffsetX, y: CharacterGeometry.shadowOffsetY)
 
                 // Body
-                RoundedRectangle(cornerRadius: 16)
+                RoundedRectangle(cornerRadius: CharacterGeometry.bodyCorner)
                     .fill(bodyColor)
-                    .frame(width: 90, height: 72)
+                    .frame(width: CharacterGeometry.bodyWidth, height: CharacterGeometry.bodyHeight)
 
                 // Top-to-bottom volumetric gradient — gives form depth
-                RoundedRectangle(cornerRadius: 16)
+                RoundedRectangle(cornerRadius: CharacterGeometry.bodyCorner)
                     .fill(LinearGradient(
                         colors: [highlight.opacity(0.60), Color.clear, shadowClr.opacity(0.45)],
                         startPoint: .top, endPoint: .bottom
                     ))
-                    .frame(width: 90, height: 72)
+                    .frame(width: CharacterGeometry.bodyWidth, height: CharacterGeometry.bodyHeight)
 
                 // Edge darkening — fakes surface curvature (ambient occlusion)
-                RoundedRectangle(cornerRadius: 16)
+                RoundedRectangle(cornerRadius: CharacterGeometry.bodyCorner)
                     .fill(RadialGradient(
                         colors: [Color.clear, shadowClr.opacity(0.30)],
                         center: .center,
                         startRadius: 22, endRadius: 54
                     ))
-                    .frame(width: 90, height: 72)
+                    .frame(width: CharacterGeometry.bodyWidth, height: CharacterGeometry.bodyHeight)
 
                 // Specular highlight — concentrated bright spot top-left
-                RoundedRectangle(cornerRadius: 16)
+                RoundedRectangle(cornerRadius: CharacterGeometry.bodyCorner)
                     .fill(RadialGradient(
                         colors: [Color.white.opacity(0.32), Color.clear],
                         center: UnitPoint(x: 0.28, y: 0.20),
                         startRadius: 0, endRadius: 28
                     ))
-                    .frame(width: 90, height: 72)
+                    .frame(width: CharacterGeometry.bodyWidth, height: CharacterGeometry.bodyHeight)
 
                 leftArm
                 rightArm
-                feet.offset(y: 44)
+                feet.offset(y: CharacterGeometry.feetGroupOffsetY)
                 face
             }
             .offset(x: wiggleOffset, y: bobOffset + jumpOffset + danceJumpOffset - 10)
@@ -136,7 +136,7 @@ struct ClaudyCharacterView: View {
             .animation(.spring(response: 0.25, dampingFraction: 0.5), value: danceMove)
             .animation(.spring(response: 0.12, dampingFraction: 0.45), value: danceScalePulse)
         }
-        .frame(width: 130, height: 150)
+        .frame(width: CharacterGeometry.characterFrameWidth, height: CharacterGeometry.characterFrameHeight)
         .contentShape(Rectangle())
         .gesture(
             DragGesture(minimumDistance: 5)
@@ -223,18 +223,15 @@ struct ClaudyCharacterView: View {
 
     private var feet: some View {
         ZStack {
-            footShape(at: -28)
-            footShape(at:  -8)
-            footShape(at:   8)
-            footShape(at:  28)
+            ForEach(CharacterGeometry.footPositions, id: \.self) { footShape(at: $0) }
         }
-        .frame(width: 90, height: 17)
+        .frame(width: CharacterGeometry.feetFrameWidth, height: CharacterGeometry.feetFrameHeight)
     }
 
     private func footShape(at x: CGFloat) -> some View {
-        RoundedRectangle(cornerRadius: 6)
+        RoundedRectangle(cornerRadius: CharacterGeometry.footCorner)
             .fill(limbColor)
-            .frame(width: 18, height: 17)
+            .frame(width: CharacterGeometry.footWidth, height: CharacterGeometry.footHeight)
             .overlay(alignment: .top) {
                 RoundedRectangle(cornerRadius: 3)
                     .fill(Color.white.opacity(0.22))
@@ -295,9 +292,9 @@ struct ClaudyCharacterView: View {
     }
 
     private var leftArm: some View {
-        RoundedRectangle(cornerRadius: 7)
+        RoundedRectangle(cornerRadius: CharacterGeometry.armCorner)
             .fill(limbColor)
-            .frame(width: 14, height: 16)
+            .frame(width: CharacterGeometry.armWidth, height: CharacterGeometry.armHeight)
             .rotationEffect(.degrees(
                 animationState == .dancing                  ? danceLeftArmAngle :
                 animationState == .celebrating              ? -60 :
@@ -305,7 +302,7 @@ struct ClaudyCharacterView: View {
                 animationState == .facepalm                 ? -48 :
                 (animationState == .tickled && armFlair)    ? -55 : 28
             ))
-            .offset(x: -52, y: (animationState == .dancing && danceLeftArmRaised) ? -12 :
+            .offset(x: -CharacterGeometry.armOffsetX, y: (animationState == .dancing && danceLeftArmRaised) ? -12 :
                                 (animationState == .celebrating ||
                                  animationState == .facepalm ||
                                  (animationState == .tickled && armFlair)) ? -8 : 8)
@@ -315,9 +312,9 @@ struct ClaudyCharacterView: View {
     }
 
     private var rightArm: some View {
-        RoundedRectangle(cornerRadius: 7)
+        RoundedRectangle(cornerRadius: CharacterGeometry.armCorner)
             .fill(limbColor)
-            .frame(width: 14, height: 16)
+            .frame(width: CharacterGeometry.armWidth, height: CharacterGeometry.armHeight)
             .rotationEffect(.degrees(
                 animationState == .dancing                  ?  danceRightArmAngle :
                 animationState == .celebrating              ?  60 :
@@ -325,7 +322,7 @@ struct ClaudyCharacterView: View {
                 animationState == .waving                   ? -65 :
                 (animationState == .tickled && armFlair)    ?  55 : -28
             ))
-            .offset(x: 52, y: (animationState == .dancing && danceRightArmRaised) ? -12 :
+            .offset(x: CharacterGeometry.armOffsetX, y: (animationState == .dancing && danceRightArmRaised) ? -12 :
                                (animationState == .celebrating ||
                                 animationState == .waving ||
                                 (animationState == .tickled && armFlair)) ? -8 : 8)
@@ -338,8 +335,8 @@ struct ClaudyCharacterView: View {
 
     private var face: some View {
         ZStack {
-            eyes.offset(y: -12)
-            mouth.offset(y: 14)
+            eyes.offset(y: CharacterGeometry.eyesOffsetY)
+            mouth.offset(y: CharacterGeometry.mouthOffsetY)
         }
     }
 
@@ -355,31 +352,31 @@ struct ClaudyCharacterView: View {
             HStack(spacing: 17) { squintyEye; squintyEye }
         case .vibing:
             // Half-closed content eyes — in the zone
-            HStack(spacing: 17) { vibeEye(size: 27); vibeEye(size: 23) }
+            HStack(spacing: 17) { vibeEye(size: CharacterGeometry.eyeSizeLarge); vibeEye(size: CharacterGeometry.eyeSizeSmall) }
         case .sleeping:
             HStack(spacing: 22) { sleepEye; sleepEye }
         case .drowsy:
-            HStack(spacing: 17) { drowsyEye(size: 27); drowsyEye(size: 23) }
+            HStack(spacing: 17) { drowsyEye(size: CharacterGeometry.eyeSizeLarge); drowsyEye(size: CharacterGeometry.eyeSizeSmall) }
         case .thinking:
             thinkingDots
         case .tickled:
             HStack(spacing: 20) { arcEyeDown; arcEyeDown }
         case .alert:
             HStack(spacing: 17) {
-                pixarEye(size: 27).scaleEffect(1.2)
-                pixarEye(size: 23).scaleEffect(1.2)
+                pixarEye(size: CharacterGeometry.eyeSizeLarge).scaleEffect(1.2)
+                pixarEye(size: CharacterGeometry.eyeSizeSmall).scaleEffect(1.2)
             }
         case .surprised:
             HStack(spacing: 17) {
-                pixarEye(size: 27).scaleEffect(1.4)
-                pixarEye(size: 23).scaleEffect(1.4)
+                pixarEye(size: CharacterGeometry.eyeSizeLarge).scaleEffect(1.4)
+                pixarEye(size: CharacterGeometry.eyeSizeSmall).scaleEffect(1.4)
             }
         case .facepalm:
             HStack(spacing: 20) { squintyEye; squintyEye }
         default:
             HStack(spacing: 17) {
-                pixarEye(size: 27)
-                pixarEye(size: 23)
+                pixarEye(size: CharacterGeometry.eyeSizeLarge)
+                pixarEye(size: CharacterGeometry.eyeSizeSmall)
             }
         }
     }
@@ -412,19 +409,19 @@ struct ClaudyCharacterView: View {
                 // Iris — slightly larger for a more expressive, doe-eyed look
                 Circle()
                     .fill(darkBrown)
-                    .frame(width: size * 0.57, height: size * 0.57)
+                    .frame(width: size * CharacterGeometry.irisRatio, height: size * CharacterGeometry.irisRatio)
                     .offset(x: irisOffset.x, y: irisOffset.y)
 
                 // Primary catchlight (upper-right)
                 Circle()
                     .fill(Color.white.opacity(0.90))
-                    .frame(width: size * 0.22, height: size * 0.22)
+                    .frame(width: size * CharacterGeometry.catchlightPrimaryRatio, height: size * CharacterGeometry.catchlightPrimaryRatio)
                     .offset(x: irisOffset.x + size * 0.12, y: irisOffset.y - size * 0.14)
 
                 // Secondary micro-catchlight (lower-left) — classic cute sparkle
                 Circle()
                     .fill(Color.white.opacity(0.55))
-                    .frame(width: size * 0.10, height: size * 0.10)
+                    .frame(width: size * CharacterGeometry.catchlightSecondaryRatio, height: size * CharacterGeometry.catchlightSecondaryRatio)
                     .offset(x: irisOffset.x - size * 0.14, y: irisOffset.y + size * 0.13)
             }
         }
@@ -437,11 +434,11 @@ struct ClaudyCharacterView: View {
         ZStack {
             Circle()
                 .fill(Color.white)
-                .frame(width: size, height: size * 0.42)
+                .frame(width: size, height: size * CharacterGeometry.drowsyHeightRatio)
             // Dark iris peeking under lid
             Circle()
                 .fill(darkBrown)
-                .frame(width: size * 0.32, height: size * 0.18)
+                .frame(width: size * CharacterGeometry.drowsyIrisWidthRatio, height: size * CharacterGeometry.drowsyIrisHeightRatio)
                 .offset(y: size * 0.04)
         }
     }
@@ -452,11 +449,11 @@ struct ClaudyCharacterView: View {
             // Sclera — taller than drowsy, shorter than normal
             Capsule()
                 .fill(Color.white)
-                .frame(width: size, height: size * 0.58)
+                .frame(width: size, height: size * CharacterGeometry.vibeHeightRatio)
             // Iris — centred, visible
             Circle()
                 .fill(darkBrown)
-                .frame(width: size * 0.38, height: size * 0.38)
+                .frame(width: size * CharacterGeometry.vibeIrisRatio, height: size * CharacterGeometry.vibeIrisRatio)
                 .offset(y: size * 0.04)
             // Catchlight
             Circle()
