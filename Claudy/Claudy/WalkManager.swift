@@ -128,9 +128,9 @@ final class WalkManager {
         isWalking = true
         vm.setState(.walking)
 
-        // Slide the window to the destination
+        // Slide the window to the destination — 144 steps at ~16 ms each ≈ 60 fps
         let origin = window.frame.origin
-        let steps = 40
+        let steps = 144
         let stepDelay: UInt64 = UInt64((Self.slideDuration / Double(steps)) * 1_000_000_000)
         walkTask = Task { @MainActor [weak window] in
             for i in 1...steps {

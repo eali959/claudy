@@ -97,16 +97,6 @@ struct CharacterSceneView: View {
                                 characterViewModel.tickleManager.resetTickle()
                             }
                         }
-                        // Tamagotchi hover stats — floats above character, never overlaps speech bubble
-                        .overlay(alignment: .top) {
-                            TamagotchiHoverStatsIfEnabled(
-                                manager: characterViewModel.tamagotchiManager,
-                                isHovered: characterViewModel.isHovered
-                            )
-                            .offset(y: -44)
-                            .animation(.spring(response: 0.25, dampingFraction: 0.72),
-                                       value: characterViewModel.isHovered)
-                        }
                         // Long-press 3s reveals reaction log
                         .onLongPressGesture(minimumDuration: 3.0, maximumDistance: 20) {
                             showReactionLog = true
@@ -132,17 +122,6 @@ struct CharacterSceneView: View {
                                 .zIndex(20)
                         }
 
-                        // V2 demo side label — floats to the right of Claud-y during demo scenes
-                        if let label = demoManager.sideLabel {
-                            V2SideLabelView(label: label)
-                                .frame(maxWidth: .infinity, alignment: .trailing)
-                                .allowsHitTesting(false)
-                                .transition(.asymmetric(
-                                    insertion: .move(edge: .trailing).combined(with: .opacity),
-                                    removal:   .move(edge: .trailing).combined(with: .opacity)
-                                ))
-                                .zIndex(15)
-                        }
                     } // ZStack (character)
 
                     // Tamagotchi overlay — compact stat bars + action buttons, below character
@@ -204,7 +183,14 @@ struct CharacterSceneView: View {
         // DEMO pill - top-left corner, visible during demo
         .overlay(alignment: .topLeading) {
             if demoManager.isRunning {
-                Text(demoManager.sideLabel != nil ? "V2 DEMO" : "DEMO")
+                Text({
+                    switch demoManager.activeVariant {
+                    case .v1: return "V1 DEMO"
+                    case .v2: return "V2 DEMO"
+                    case .v3: return "V3 DEMO"
+                    case nil: return "DEMO"
+                    }
+                }())
                     .font(.system(size: 10, weight: .bold, design: .monospaced))
                     .foregroundStyle(.white)
                     .padding(.horizontal, 7)

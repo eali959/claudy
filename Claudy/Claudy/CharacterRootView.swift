@@ -130,7 +130,7 @@ struct CharacterRootView: View {
         }
         .onAppear {
             characterViewModel.setup(windowManager: windowManager)
-            demoManager.prepare(character: characterViewModel, chat: chatViewModel)
+            demoManager.prepare(character: characterViewModel, chat: chatViewModel, windowManager: windowManager)
         }
     }
 

@@ -39,10 +39,17 @@ final class DemoModeManager {
     @ObservationIgnored nonisolated(unsafe) private var v2ShortcutMonitor: Any?
     @ObservationIgnored nonisolated(unsafe) private var interruptMonitor: Any?
 
-    private weak var character: CharacterViewModel?
-    private weak var chat:      ChatViewModel?
+    private weak var character:      CharacterViewModel?
+    private weak var chat:           ChatViewModel?
+    private weak var windowManager:  WindowManager?
 
     private var savedMode: BehaviorMode = .normal
+
+    /// Which demo variant is currently running (drives the DEMO pill label).
+    var activeVariant: DemoVariant? = nil
+
+    /// Separate floating panel that shows the side label — never overlaps the character window.
+    @ObservationIgnored private var labelPanel: NSPanel?
 
     private let logger = Logger(subsystem: "com.claudy", category: "Demo")
 
@@ -50,9 +57,10 @@ final class DemoModeManager {
 
     /// Wire up model refs and keyboard shortcut monitors.
     /// Call once from CharacterRootView.onAppear.
-    func prepare(character: CharacterViewModel, chat: ChatViewModel) {
-        self.character = character
-        self.chat      = chat
+    func prepare(character: CharacterViewModel, chat: ChatViewModel, windowManager: WindowManager) {
+        self.character     = character
+        self.chat          = chat
+        self.windowManager = windowManager
         setupShortcutMonitors()
     }
 
@@ -120,6 +128,7 @@ final class DemoModeManager {
         let variantName = variant == .v1 ? "V1" : variant == .v2 ? "V2" : "V3"
         logger.info("Demo mode starting (\(variantName))")
         if variant == .v2 || variant == .v3 { savedMode = character.behaviorModeManager.currentMode }
+        activeVariant = variant
         isRunning = true
         stopInterruptMonitor()
         startInterruptMonitor()
@@ -150,6 +159,8 @@ final class DemoModeManager {
         chat?.removeDemoMessages()
         character?.behaviorModeManager.activate(savedMode)
         withAnimation(.spring(response: 0.4, dampingFraction: 0.8)) { sideLabel = nil }
+        labelPanel?.orderOut(nil)
+        activeVariant = nil
 
         isRunning = false
         logger.info("Demo mode stopped")
@@ -180,6 +191,9 @@ final class DemoModeManager {
         withAnimation(.spring(response: 0.38, dampingFraction: 0.78)) {
             sideLabel = SideLabel(title: title, items: items, activeItem: active)
         }
+        setupLabelPanel()
+        positionLabelPanel()
+        labelPanel?.orderFront(nil)
     }
 
     private func highlightItem(_ item: String) {
@@ -187,10 +201,51 @@ final class DemoModeManager {
         withAnimation(.easeInOut(duration: 0.22)) {
             sideLabel = SideLabel(title: current.title, items: current.items, activeItem: item)
         }
+        // Panel content auto-updates via @Observable; just keep it front
+        labelPanel?.orderFront(nil)
     }
 
     private func hideLabel() {
         withAnimation(.spring(response: 0.32, dampingFraction: 0.82)) { sideLabel = nil }
+        labelPanel?.orderOut(nil)
+    }
+
+    // MARK: - Label panel helpers
+
+    private func setupLabelPanel() {
+        guard labelPanel == nil else { return }
+        let panel = NSPanel(
+            contentRect: NSRect(x: 0, y: 0, width: 220, height: 300),
+            styleMask: [.nonactivatingPanel, .fullSizeContentView, .borderless],
+            backing: .buffered,
+            defer: false
+        )
+        panel.isFloatingPanel    = true
+        panel.level              = .floating
+        panel.backgroundColor    = .clear
+        panel.isOpaque           = false
+        panel.hasShadow          = false
+        panel.ignoresMouseEvents = true
+        panel.collectionBehavior = [.canJoinAllSpaces, .fullScreenAuxiliary, .ignoresCycle]
+
+        let hostView = NSHostingView(
+            rootView: DemoSideLabelContent(manager: self)
+                .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .center)
+        )
+        hostView.layer?.backgroundColor = .clear
+        panel.contentView = hostView
+        labelPanel = panel
+    }
+
+    private func positionLabelPanel() {
+        guard let panel = labelPanel,
+              let mainWindow = windowManager?.window else { return }
+        // Align panel centre with the character centre (character is bottom 150 pt of the window)
+        let charCenterY = mainWindow.frame.minY + WindowManager.characterSize / 2
+        let panelH: CGFloat = 300
+        let x = mainWindow.frame.maxX + 10
+        let y = charCenterY - panelH / 2
+        panel.setFrameOrigin(CGPoint(x: x, y: y))
     }
 
     // MARK: - V1 Demo sequence (~32 seconds)
@@ -559,6 +614,9 @@ final class DemoModeManager {
         // ── Scene 2 — Tamagotchi (6s) ────────────────────────────────────────
         showLabel("Tamagotchi", items: ["Hunger", "Happiness", "Energy"], active: "Happiness")
         character.beSurprised()
+        // Briefly enable the stat overlay so viewers see the live bars during this scene
+        let prevOverlayEnabled = UserDefaults.standard.bool(forKey: DefaultsKeys.tamagotchiOverlayEnabled)
+        UserDefaults.standard.set(true, forKey: DefaultsKeys.tamagotchiOverlayEnabled)
         guard await wait(0.5) else { return }
         SoundManager.shared.play(.bubblePop)
         character.showBubbleDirect("I have feelings now. Simulated. But still.", duration: 4.0)
@@ -566,6 +624,8 @@ final class DemoModeManager {
         guard await wait(2.0) else { return }
         lookCenter(character)
         guard await wait(2.5) else { return }
+        // Restore overlay state to whatever the user had before
+        UserDefaults.standard.set(prevOverlayEnabled, forKey: DefaultsKeys.tamagotchiOverlayEnabled)
         hideLabel()
         guard await wait(0.4) else { return }
 
@@ -723,6 +783,18 @@ final class DemoModeManager {
             return isRunning && !Task.isCancelled
         } catch {
             return false
+        }
+    }
+}
+
+// MARK: - Label panel SwiftUI content
+
+/// Hosted inside the separate demo label NSPanel. Auto-updates via @Observable on DemoModeManager.
+fileprivate struct DemoSideLabelContent: View {
+    var manager: DemoModeManager
+    var body: some View {
+        if let label = manager.sideLabel {
+            V2SideLabelView(label: label)
         }
     }
 }
