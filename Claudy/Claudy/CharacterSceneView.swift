@@ -7,7 +7,6 @@ struct CharacterSceneView: View {
     let characterViewModel: CharacterViewModel
     let chatViewModel: ChatViewModel
     let demoManager: DemoModeManager
-    let v2DemoManager: V2DemoModeManager
     @Binding var showReactionLog: Bool
     let characterOpacity: Double
     let timerBadgeScale: Double
@@ -101,8 +100,7 @@ struct CharacterSceneView: View {
                                 characterViewModel: characterViewModel,
                                 chatViewModel: chatViewModel,
                                 demoManager: demoManager,
-                                v2DemoManager: v2DemoManager,
-                                onAddQuickAlarm: onAddQuickAlarm,
+                                                                onAddQuickAlarm: onAddQuickAlarm,
                                 onShowFocusAdder: onShowFocusAdder,
                                 onShowHelp: onShowHelp,
                                 onShowDonate: onShowDonate,
@@ -119,7 +117,7 @@ struct CharacterSceneView: View {
                         }
 
                         // V2 demo side label — floats to the right of Claud-y during demo scenes
-                        if let label = v2DemoManager.sideLabel {
+                        if let label = demoManager.sideLabel {
                             V2SideLabelView(label: label)
                                 .frame(maxWidth: .infinity, alignment: .trailing)
                                 .allowsHitTesting(false)
@@ -137,14 +135,12 @@ struct CharacterSceneView: View {
                             .scaleEffect(timerBadgeScale)
                             .transition(.opacity.combined(with: .scale(scale: 0.85, anchor: .top)))
                             .onTapGesture(count: 2) {
-                                if demoManager.isRunning   { demoManager.stop();   return }
-                                if v2DemoManager.isRunning { v2DemoManager.stop(); return }
+                                if demoManager.isRunning { demoManager.stop(); return }
                                 characterViewModel.pomodoroManager.stop()
                                 characterViewModel.showBubbleDirect("Timer reset.", duration: 3)
                             }
                             .onTapGesture(count: 1) {
-                                if demoManager.isRunning   { demoManager.stop();   return }
-                                if v2DemoManager.isRunning { v2DemoManager.stop(); return }
+                                if demoManager.isRunning { demoManager.stop(); return }
                                 let pom: PomodoroManager = characterViewModel.pomodoroManager
                                 switch pom.state {
                                 case .idle, .complete: pom.start()
@@ -186,10 +182,10 @@ struct CharacterSceneView: View {
             }
         }
         .animation(.spring(response: 0.3, dampingFraction: 0.75), value: QuickActionManager.shared.currentAction?.label)
-        // DEMO pill - top-left corner, visible during any demo
+        // DEMO pill - top-left corner, visible during demo
         .overlay(alignment: .topLeading) {
-            if demoManager.isRunning || v2DemoManager.isRunning {
-                Text(v2DemoManager.isRunning ? "V2 DEMO" : "DEMO")
+            if demoManager.isRunning {
+                Text(demoManager.sideLabel != nil ? "V2 DEMO" : "DEMO")
                     .font(.system(size: 10, weight: .bold, design: .monospaced))
                     .foregroundStyle(.white)
                     .padding(.horizontal, 7)
@@ -203,16 +199,16 @@ struct CharacterSceneView: View {
         }
         // Demo interrupt - any tap or drag while demo is running stops it
         .overlay {
-            if demoManager.isRunning || v2DemoManager.isRunning {
+            if demoManager.isRunning {
                 Color.clear
                     .contentShape(Rectangle())
                     .onTapGesture {
-                        demoManager.isRunning ? demoManager.stop() : v2DemoManager.stop()
+                        demoManager.stop()
                     }
                     .gesture(
                         DragGesture(minimumDistance: 6)
                             .onChanged { _ in
-                                demoManager.isRunning ? demoManager.stop() : v2DemoManager.stop()
+                                demoManager.stop()
                             }
                     )
                     .allowsHitTesting(true)
@@ -222,7 +218,7 @@ struct CharacterSceneView: View {
         .background(.clear)
         .animation(.spring(response: 0.35, dampingFraction: 0.8),
                    value: characterViewModel.speechBubbleText != nil)
-        .animation(.spring(response: 0.38, dampingFraction: 0.78), value: v2DemoManager.sideLabel != nil)
+        .animation(.spring(response: 0.38, dampingFraction: 0.78), value: demoManager.sideLabel != nil)
         .animation(.easeInOut(duration: 0.3), value: characterViewModel.showConfetti)
     }
 }

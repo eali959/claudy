@@ -2,7 +2,7 @@ import SwiftUI
 
 /// Floating side-label annotation shown during V2 demo scenes.
 struct V2SideLabelView: View {
-    let label: V2DemoModeManager.SideLabel
+    let label: DemoModeManager.SideLabel
     private let orange = Color(red: 0.784, green: 0.361, blue: 0.220)
 
     var body: some View {

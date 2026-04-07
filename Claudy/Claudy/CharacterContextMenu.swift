@@ -6,7 +6,6 @@ struct CharacterContextMenu: View {
     let characterViewModel: CharacterViewModel
     let chatViewModel: ChatViewModel
     let demoManager: DemoModeManager
-    let v2DemoManager: V2DemoModeManager
     let onAddQuickAlarm: (Int) -> Void
     let onShowFocusAdder: (FocusToolAdderSheet.ToolType) -> Void
     let onShowHelp: () -> Void
@@ -209,17 +208,17 @@ struct CharacterContextMenu: View {
         } label: { Label("Roast Me", systemImage: "flame") }
         .disabled(characterViewModel.roastModeManager.isRoasting)
 
-        let anyDemoRunning = demoManager.isRunning || v2DemoManager.isRunning
+        let anyDemoRunning = demoManager.isRunning
         Menu {
             Button {
-                demoManager.start()
+                demoManager.start(.v1)
             } label: {
                 Label("V1 Demo", systemImage: "play.rectangle")
             }
             .disabled(anyDemoRunning)
 
             Button {
-                v2DemoManager.start()
+                demoManager.start(.v2)
             } label: {
                 Label("V2 Demo", systemImage: "play.rectangle.on.rectangle")
             }
@@ -229,7 +228,6 @@ struct CharacterContextMenu: View {
                 Divider()
                 Button {
                     demoManager.stop()
-                    v2DemoManager.stop()
                 } label: {
                     Label("Stop Demo", systemImage: "stop.circle")
                 }

@@ -10,8 +10,7 @@ struct CharacterRootView: View {
     @State private var characterViewModel = CharacterViewModel()
 
     @State private var showReactionLog = false
-    @State private var demoManager   = DemoModeManager()
-    @State private var v2DemoManager = V2DemoModeManager()
+    @State private var demoManager = DemoModeManager()
     @State private var showHelp = false
     @State private var showDonate = false
     @State private var showFocusAdder = false
@@ -25,7 +24,6 @@ struct CharacterRootView: View {
             characterViewModel: characterViewModel,
             chatViewModel: chatViewModel,
             demoManager: demoManager,
-            v2DemoManager: v2DemoManager,
             showReactionLog: $showReactionLog,
             characterOpacity: characterOpacity,
             timerBadgeScale: timerBadgeScale,
@@ -83,7 +81,7 @@ struct CharacterRootView: View {
             windowManager.window?.makeKey()
         }
         .onReceive(NotificationCenter.default.publisher(for: .claudyStartDemo)) { _ in
-            demoManager.start()
+            demoManager.start(.v1)
         }
         .onReceive(NotificationCenter.default.publisher(for: .claudyContextTrimmed)) { _ in
             characterViewModel.showBubbleDirect(
@@ -133,7 +131,6 @@ struct CharacterRootView: View {
         .onAppear {
             characterViewModel.setup(windowManager: windowManager)
             demoManager.prepare(character: characterViewModel, chat: chatViewModel)
-            v2DemoManager.prepare(character: characterViewModel, chat: chatViewModel)
         }
     }
 
