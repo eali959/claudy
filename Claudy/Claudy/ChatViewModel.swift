@@ -100,11 +100,11 @@ final class ChatViewModel {
             object: nil,
             queue: .main
         ) { [weak self] notification in
-            guard let self,
-                  let lang = notification.object as? AppLanguage,
-                  self.isOpen else { return }
+            // Extract the Sendable value type before entering the @MainActor Task
+            // so we never touch @MainActor-isolated state from this @Sendable closure.
+            guard let lang = notification.object as? AppLanguage else { return }
             Task { @MainActor [weak self] in
-                guard let self else { return }
+                guard let self, self.isOpen else { return }
                 try? await Task.sleep(for: .milliseconds(400))
                 self.messages.append(ChatMessage(role: .assistant, content: lang.switchAcknowledgment))
             }
