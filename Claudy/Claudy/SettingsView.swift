@@ -3,28 +3,28 @@ import AppKit
 
 struct SettingsView: View {
     // MARK: - Appearance
-    @AppStorage("ChatFontSize")           private var chatFontSize: Double = 14
-    @AppStorage("CharacterOpacity")       private var characterOpacity: Double = 1.0
-    @AppStorage("ChatWindowOpacity")      private var chatWindowOpacity: Double = 1.0
-    @AppStorage("UserBubbleColor")        private var userBubbleColor: String = "orange"
+    @AppStorage(DefaultsKeys.chatFontSize)           private var chatFontSize: Double = 14
+    @AppStorage(DefaultsKeys.characterOpacity)       private var characterOpacity: Double = 1.0
+    @AppStorage(DefaultsKeys.chatWindowOpacity)      private var chatWindowOpacity: Double = 1.0
+    @AppStorage(DefaultsKeys.userBubbleColor)        private var userBubbleColor: String = "orange"
 
     // MARK: - Provider + model
-    @AppStorage("SelectedProvider")       private var selectedProviderRaw: String = "claude"
-    @AppStorage("SelectedModel")          private var selectedModel: String = ClaudeAPIService.defaultModel
-    @AppStorage("UseComplexModel")        private var useComplexModel = false
+    @AppStorage(DefaultsKeys.selectedProvider)       private var selectedProviderRaw: String = "claude"
+    @AppStorage(DefaultsKeys.selectedModel)          private var selectedModel: String = ClaudeAPIService.defaultModel
+    @AppStorage(DefaultsKeys.useComplexModel)        private var useComplexModel = false
 
     // MARK: - Sound
-    @AppStorage("SoundEffectsEnabled")    private var soundEffectsEnabled = false
-    @AppStorage("SoundVolume")            private var soundVolume: Double = 0.7
-    @AppStorage("CharacterVoiceEnabled")  private var characterVoiceEnabled = false
+    @AppStorage(DefaultsKeys.soundEffectsEnabled)    private var soundEffectsEnabled = false
+    @AppStorage(DefaultsKeys.soundVolume)            private var soundVolume: Double = 0.7
+    @AppStorage(DefaultsKeys.characterVoiceEnabled)  private var characterVoiceEnabled = false
 
     // MARK: - Focus Timer
-    @AppStorage("PomodoroPreset")         private var pomodoroPresetRaw: Int = PomodoroPreset.classic.rawValue
-    @AppStorage("PomodoroCustomMinutes")  private var pomodoroCustomMinutes: Int = 25
-    @AppStorage("TimerBadgeScale")        private var timerBadgeScale: Double = 1.0
+    @AppStorage(DefaultsKeys.pomodoroPreset)         private var pomodoroPresetRaw: Int = PomodoroPreset.classic.rawValue
+    @AppStorage(DefaultsKeys.pomodoroCustomMinutes)  private var pomodoroCustomMinutes: Int = 25
+    @AppStorage(DefaultsKeys.timerBadgeScale)        private var timerBadgeScale: Double = 1.0
 
     // MARK: - Chattiness
-    @AppStorage("ChattinessLevel")        private var chattinessLevel: Int = 3
+    @AppStorage(DefaultsKeys.chattinessLevel)        private var chattinessLevel: Int = 3
 
     // MARK: - API Key state (per-provider)
     @State private var claudeKeyInput: String = ""

@@ -98,11 +98,11 @@ final class IdleMonitor {
     /// Returns true only when neither the onboarding window nor the bubble intro has run.
     /// Both systems share "onboardingComplete" so they don't fire simultaneously.
     private func isFirstLaunch() -> Bool {
-        !UserDefaults.standard.bool(forKey: "onboardingComplete")
+        !UserDefaults.standard.bool(forKey: DefaultsKeys.onboardingComplete)
     }
 
     private func recordFirstLaunchDate() {
-        let key = "FirstLaunchDate"
+        let key = DefaultsKeys.firstLaunchDate
         if UserDefaults.standard.object(forKey: key) == nil {
             UserDefaults.standard.set(Date(), forKey: key)
         }
@@ -111,7 +111,7 @@ final class IdleMonitor {
     private func scheduleOnboarding() {
         // Mark complete immediately so re-launches don't repeat this.
         // OnboardingWindowController uses the same key - whichever runs first wins.
-        UserDefaults.standard.set(true, forKey: "onboardingComplete")
+        UserDefaults.standard.set(true, forKey: DefaultsKeys.onboardingComplete)
         let bubbles: [(String, TimeInterval, TimeInterval)] = [
             ("Hi! I'm Claud-y. I live here now.", 4.0, 2.0),
             ("I'll react to what you're doing - builds, commits, the usual.", 5.0, 8.0),
@@ -208,7 +208,7 @@ final class IdleMonitor {
             default:
                 // Anniversary - read exclusively from UserDefaults, never from StreakManager
                 // (StreakManager trims entries after 90 days and would lose the original date)
-                if let firstLaunch = UserDefaults.standard.object(forKey: "FirstLaunchDate") as? Date {
+                if let firstLaunch = UserDefaults.standard.object(forKey: DefaultsKeys.firstLaunchDate) as? Date {
                     let calendar = Calendar.current
                     let now = Date()
                     let sameMonthDay = calendar.component(.month, from: firstLaunch) == month

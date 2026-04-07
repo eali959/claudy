@@ -57,20 +57,20 @@ final class PomodoroManager {
     var selectedPreset: PomodoroPreset = {
         // UserDefaults.integer returns 0 for a missing key, and PomodoroPreset.custom
         // also has rawValue 0 - so we must check whether the key actually exists first.
-        guard UserDefaults.standard.object(forKey: "PomodoroPreset") != nil else { return .classic }
-        let raw = UserDefaults.standard.integer(forKey: "PomodoroPreset")
+        guard UserDefaults.standard.object(forKey: DefaultsKeys.pomodoroPreset) != nil else { return .classic }
+        let raw = UserDefaults.standard.integer(forKey: DefaultsKeys.pomodoroPreset)
         return PomodoroPreset(rawValue: raw) ?? .classic
     }() {
-        didSet { UserDefaults.standard.set(selectedPreset.rawValue, forKey: "PomodoroPreset") }
+        didSet { UserDefaults.standard.set(selectedPreset.rawValue, forKey: DefaultsKeys.pomodoroPreset) }
     }
 
     var customMinutes: Int = {
-        let saved = UserDefaults.standard.integer(forKey: "PomodoroCustomMinutes")
+        let saved = UserDefaults.standard.integer(forKey: DefaultsKeys.pomodoroCustomMinutes)
         return saved > 0 ? max(5, min(120, saved)) : 25
     }() {
         didSet {
             customMinutes = max(5, min(120, customMinutes))
-            UserDefaults.standard.set(customMinutes, forKey: "PomodoroCustomMinutes")
+            UserDefaults.standard.set(customMinutes, forKey: DefaultsKeys.pomodoroCustomMinutes)
         }
     }
 

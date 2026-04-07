@@ -15,9 +15,9 @@ final class DailyWrapUpManager {
 
     // Hour at which the wrap-up fires (24h, default 18 = 6 pm)
     var wrapUpHour: Int {
-        get { UserDefaults.standard.object(forKey: "WrapUpHour") != nil
-              ? UserDefaults.standard.integer(forKey: "WrapUpHour") : 18 }
-        set { UserDefaults.standard.set(newValue, forKey: "WrapUpHour") }
+        get { UserDefaults.standard.object(forKey: DefaultsKeys.wrapUpHour) != nil
+              ? UserDefaults.standard.integer(forKey: DefaultsKeys.wrapUpHour) : 18 }
+        set { UserDefaults.standard.set(newValue, forKey: DefaultsKeys.wrapUpHour) }
     }
 
     private static let dateFormatter: DateFormatter = {
@@ -27,7 +27,7 @@ final class DailyWrapUpManager {
 
     init(viewModel: CharacterViewModel) {
         self.viewModel = viewModel
-        lastWrapUpDateKey = UserDefaults.standard.string(forKey: "LastWrapUpDate") ?? ""
+        lastWrapUpDateKey = UserDefaults.standard.string(forKey: DefaultsKeys.lastWrapUpDate) ?? ""
         startLoop()
     }
 
@@ -49,7 +49,7 @@ final class DailyWrapUpManager {
         guard hour == wrapUpHour, lastWrapUpDateKey != todayKey else { return }
         guard FocusStatsManager.shared.pomodorosToday > 0 else { return }
         lastWrapUpDateKey = todayKey
-        UserDefaults.standard.set(todayKey, forKey: "LastWrapUpDate")
+        UserDefaults.standard.set(todayKey, forKey: DefaultsKeys.lastWrapUpDate)
         fire()
     }
 

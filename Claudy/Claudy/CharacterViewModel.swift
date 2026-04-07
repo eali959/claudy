@@ -32,7 +32,7 @@ final class CharacterViewModel {
     var tickleIntensity: TickleIntensity = .none
     var isHovered = false
     var speechBubbleText: String? = nil
-    var isMuted: Bool = UserDefaults.standard.bool(forKey: "IsMuted")
+    var isMuted: Bool = UserDefaults.standard.bool(forKey: DefaultsKeys.isMuted)
     var isFocusModeActive: Bool = false
     var showConfetti: Bool = false
 
@@ -73,14 +73,14 @@ final class CharacterViewModel {
     @ObservationIgnored private var lastUnpromptedBubbleTime: Date = .distantPast
     private let baseBubbleCooldown: TimeInterval = 45
     private var effectiveCooldown: TimeInterval {
-        let level = UserDefaults.standard.integer(forKey: "ChattinessLevel")
+        let level = UserDefaults.standard.integer(forKey: DefaultsKeys.chattinessLevel)
         let l = level < 1 ? 3 : min(level, 5)   // clamp to 1-5, default 3
         let multipliers: [Int: Double] = [1: 3.0, 2: 1.75, 3: 1.0, 4: 0.6, 5: 0.3]
         let chattiness = baseBubbleCooldown * (multipliers[l] ?? 1.0)
         return chattiness * (behaviorModeManager?.ambientCooldownMultiplier ?? 1.0)
     }
     private var maxQueueDepth: Int {
-        let level = UserDefaults.standard.integer(forKey: "ChattinessLevel")
+        let level = UserDefaults.standard.integer(forKey: DefaultsKeys.chattinessLevel)
         let l = level < 1 ? 3 : min(level, 5)
         if l <= 2 { return 1 }
         if l <= 3 { return 3 }
@@ -371,7 +371,7 @@ final class CharacterViewModel {
 
     func setMuted(_ muted: Bool) {
         isMuted = muted
-        UserDefaults.standard.set(muted, forKey: "IsMuted")
+        UserDefaults.standard.set(muted, forKey: DefaultsKeys.isMuted)
         if muted {
             // Slow blink to acknowledge mute
             Task { @MainActor in

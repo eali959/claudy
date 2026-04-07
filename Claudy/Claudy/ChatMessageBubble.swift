@@ -7,8 +7,8 @@ import UniformTypeIdentifiers
 struct ChatMessageBubble: View {
     let message: ChatMessage
     @State private var showCopied = false
-    @AppStorage("ChatFontSize") private var chatFontSize: Double = 14
-    @AppStorage("UserBubbleColor") private var userBubbleColor: String = "orange"
+    @AppStorage(DefaultsKeys.chatFontSize) private var chatFontSize: Double = 14
+    @AppStorage(DefaultsKeys.userBubbleColor) private var userBubbleColor: String = "orange"
     private var isUser: Bool { message.role == .user }
 
     private var bubbleColor: Color {
@@ -76,7 +76,7 @@ struct ChatMessageBubble: View {
 
 struct MarkdownBubble: View {
     let text: String
-    @AppStorage("ChatFontSize") private var chatFontSize: Double = 14
+    @AppStorage(DefaultsKeys.chatFontSize) private var chatFontSize: Double = 14
 
     var body: some View {
         VStack(alignment: .leading, spacing: 6) {

@@ -101,7 +101,7 @@ struct OnboardingView: View {
 
             if state.isLastPage {
                 Button(action: {
-                    UserDefaults.standard.set(true, forKey: "onboardingComplete")
+                    UserDefaults.standard.set(true, forKey: DefaultsKeys.onboardingComplete)
                     onComplete?()
                 }) {
                     Text("Let's go")
@@ -321,11 +321,11 @@ final class OnboardingWindowController {
 
     /// Shows onboarding if the user hasn't completed it yet.
     static func showIfNeeded() {
-        guard !UserDefaults.standard.bool(forKey: "onboardingComplete") else { return }
+        guard !UserDefaults.standard.bool(forKey: DefaultsKeys.onboardingComplete) else { return }
         // Set the flag *before* SwiftUI renders CharacterRootView (which initialises
         // IdleMonitor). IdleMonitor checks this same key; setting it here prevents it
         // from firing the duplicate speech-bubble intro on top of the window.
-        UserDefaults.standard.set(true, forKey: "onboardingComplete")
+        UserDefaults.standard.set(true, forKey: DefaultsKeys.onboardingComplete)
         let controller = OnboardingWindowController()
         // Retain strongly via a static so it survives past the call site.
         OnboardingWindowController._activeController = controller

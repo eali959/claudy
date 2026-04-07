@@ -124,19 +124,19 @@ final class PersonalityManager {
     static let shared = PersonalityManager()
 
     var currentMode: PersonalityMode {
-        didSet { UserDefaults.standard.set(currentMode.rawValue, forKey: "PersonalityMode") }
+        didSet { UserDefaults.standard.set(currentMode.rawValue, forKey: DefaultsKeys.personalityMode) }
     }
     var customPersonaText: String {
-        didSet { UserDefaults.standard.set(customPersonaText, forKey: "CustomPersonaText") }
+        didSet { UserDefaults.standard.set(customPersonaText, forKey: DefaultsKeys.customPersonaText) }
     }
 
     /// Set by BehaviorModeManager.activate() so every API call reflects the current mode.
     var activeBehaviorMode: BehaviorMode = .normal
 
     private init() {
-        let savedMode = UserDefaults.standard.string(forKey: "PersonalityMode") ?? ""
+        let savedMode = UserDefaults.standard.string(forKey: DefaultsKeys.personalityMode) ?? ""
         currentMode = PersonalityMode(rawValue: savedMode) ?? .companion
-        customPersonaText = UserDefaults.standard.string(forKey: "CustomPersonaText") ?? ""
+        customPersonaText = UserDefaults.standard.string(forKey: DefaultsKeys.customPersonaText) ?? ""
     }
 
     var systemPrompt: String {
@@ -182,7 +182,7 @@ final class PersonalityManager {
     func asyncGreeting(for context: GreetingContext) async -> String {
         // Only make an API call if the user has explicitly chosen API mode.
         // Companion mode is always local - no data leaves the device.
-        let userChoseAPIMode = UserDefaults.standard.string(forKey: "chatMode") == "api"
+        let userChoseAPIMode = UserDefaults.standard.string(forKey: DefaultsKeys.chatMode) == "api"
         guard usesAPIGreetings, ClaudeAPIService.shared.hasAPIKey, userChoseAPIMode else {
             return greeting(for: context)
         }

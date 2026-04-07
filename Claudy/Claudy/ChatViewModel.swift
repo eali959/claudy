@@ -27,7 +27,7 @@ final class ChatViewModel {
     /// Companion mode is always available; API mode requires a key.
     /// Defaults to companion so the app is useful immediately out of the box.
     var chatMode: ChatMode {
-        didSet { UserDefaults.standard.set(chatMode.rawValue, forKey: "chatMode") }
+        didSet { UserDefaults.standard.set(chatMode.rawValue, forKey: DefaultsKeys.chatMode) }
     }
 
     var hasAPIKey: Bool { KeychainService.has(for: APIProvider.selected) }
@@ -55,7 +55,7 @@ final class ChatViewModel {
 
     init() {
         // Restore last-used mode; fall back to companion (the default)
-        let saved = UserDefaults.standard.string(forKey: "chatMode") ?? ""
+        let saved = UserDefaults.standard.string(forKey: DefaultsKeys.chatMode) ?? ""
         chatMode = ChatMode(rawValue: saved) ?? .companion
     }
 

@@ -17,8 +17,8 @@ struct CharacterRootView: View {
     @State private var showFocusAdder = false
     @State private var focusAdderDefaultType: FocusToolAdderSheet.ToolType = .reminder
     @State private var showScratchpad = false
-    @AppStorage("CharacterOpacity")   private var characterOpacity: Double = 1.0
-    @AppStorage("TimerBadgeScale")    private var timerBadgeScale: Double = 1.0
+    @AppStorage(DefaultsKeys.characterOpacity)   private var characterOpacity: Double = 1.0
+    @AppStorage(DefaultsKeys.timerBadgeScale)    private var timerBadgeScale: Double = 1.0
 
     var body: some View {
         CharacterSceneView(

@@ -40,7 +40,7 @@ final class AlarmReminderManager {
     @ObservationIgnored private weak var viewModel: CharacterViewModel?
     @ObservationIgnored private var checkTask: Task<Void, Never>?
 
-    private static let storageKey = "ClaudyReminders"
+    private static let storageKey = DefaultsKeys.alarmReminderItems
 
     // MARK: - Init
 

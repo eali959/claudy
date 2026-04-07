@@ -18,13 +18,13 @@ enum MessagePriority: Sendable {
         case .reaction:
             return provider.fastModel
         case .chat:
-            return UserDefaults.standard.string(forKey: "SelectedModel")
+            return UserDefaults.standard.string(forKey: DefaultsKeys.selectedModel)
                 ?? provider.defaultModel
         case .complex:
-            let useComplex = UserDefaults.standard.bool(forKey: "UseComplexModel")
+            let useComplex = UserDefaults.standard.bool(forKey: DefaultsKeys.useComplexModel)
             if provider == .claude {
                 return useComplex ? "claude-opus-4-6"
-                    : (UserDefaults.standard.string(forKey: "SelectedModel") ?? ClaudeAPIService.defaultModel)
+                    : (UserDefaults.standard.string(forKey: DefaultsKeys.selectedModel) ?? ClaudeAPIService.defaultModel)
             }
             return useComplex ? provider.smartModel : provider.defaultModel
         }
@@ -72,7 +72,7 @@ actor ClaudeAPIService {
     }
 
     private var model: String {
-        UserDefaults.standard.string(forKey: "SelectedModel") ?? Self.defaultModel
+        UserDefaults.standard.string(forKey: DefaultsKeys.selectedModel) ?? Self.defaultModel
     }
 
     private var lastUnpromptedTime: Date = .distantPast

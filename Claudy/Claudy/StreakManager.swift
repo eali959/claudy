@@ -10,8 +10,8 @@ final class StreakManager {
     static let shared = StreakManager()
     private let logger = Logger(subsystem: "com.claudy", category: "Streaks")
 
-    private let datesKey    = "DailySessionDates"
-    private let shownKey    = "LastStreakShownDate"
+    private let datesKey    = DefaultsKeys.dailySessionDates
+    private let shownKey    = DefaultsKeys.lastStreakShownDate
 
     // MARK: - Record
 

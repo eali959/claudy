@@ -90,10 +90,10 @@ struct AppearanceSettingsSection: View {
     private var sizePresetPicker: some View {
         let binding = Binding<WindowManager.SizePreset>(
             get: {
-                let saved = UserDefaults.standard.string(forKey: "CharacterSizePreset") ?? ""
+                let saved = UserDefaults.standard.string(forKey: DefaultsKeys.characterSizePreset) ?? ""
                 return WindowManager.SizePreset(rawValue: saved) ?? .medium
             },
-            set: { UserDefaults.standard.set($0.rawValue, forKey: "CharacterSizePreset") }
+            set: { UserDefaults.standard.set($0.rawValue, forKey: DefaultsKeys.characterSizePreset) }
         )
         Picker("", selection: binding) {
             ForEach(WindowManager.SizePreset.allCases, id: \.self) { preset in

@@ -19,9 +19,9 @@ final class GlobalHotkeyManager {
     // MARK: - Settings
 
     var isEnabled: Bool {
-        get { UserDefaults.standard.bool(forKey: "GlobalHotkeyEnabled") }
+        get { UserDefaults.standard.bool(forKey: DefaultsKeys.globalHotkeyEnabled) }
         set {
-            UserDefaults.standard.set(newValue, forKey: "GlobalHotkeyEnabled")
+            UserDefaults.standard.set(newValue, forKey: DefaultsKeys.globalHotkeyEnabled)
             refresh()
             logger.info("Global hotkey \(newValue ? "enabled" : "disabled")")
         }
@@ -31,8 +31,8 @@ final class GlobalHotkeyManager {
 
     private init() {
         // Default on for new installs
-        if UserDefaults.standard.object(forKey: "GlobalHotkeyEnabled") == nil {
-            UserDefaults.standard.set(true, forKey: "GlobalHotkeyEnabled")
+        if UserDefaults.standard.object(forKey: DefaultsKeys.globalHotkeyEnabled) == nil {
+            UserDefaults.standard.set(true, forKey: DefaultsKeys.globalHotkeyEnabled)
         }
         refresh()
     }

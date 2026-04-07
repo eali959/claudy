@@ -72,7 +72,7 @@ final class FocusStatsManager {
         var lastPomodoroDateKey: String
     }
 
-    private static let defaultsKey = "FocusStats"
+    private static let defaultsKey = DefaultsKeys.focusStats
     private static let dateFormatter: DateFormatter = {
         let f = DateFormatter()
         f.dateFormat = "yyyy-MM-dd"

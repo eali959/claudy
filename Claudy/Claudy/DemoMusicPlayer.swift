@@ -37,7 +37,7 @@ final class DemoMusicPlayer {
     }
 
     func play() {
-        guard UserDefaults.standard.bool(forKey: "SoundEffectsEnabled") else { return }
+        guard UserDefaults.standard.bool(forKey: DefaultsKeys.soundEffectsEnabled) else { return }
         stopAll()
         mixerNode.outputVolume = 0
         playTask = Task { [weak self] in
@@ -63,7 +63,7 @@ final class DemoMusicPlayer {
 
     /// Target playback volume - quiet enough not to overpower speech bubbles.
     private var targetVolume: Float {
-        let stored = UserDefaults.standard.double(forKey: "SoundVolume")
+        let stored = UserDefaults.standard.double(forKey: DefaultsKeys.soundVolume)
         let base = stored > 0 ? Float(min(1.0, stored)) : 0.7
         return base * 0.22
     }

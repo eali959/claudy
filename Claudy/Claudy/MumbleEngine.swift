@@ -75,13 +75,13 @@ final class MumbleEngine {
     // MARK: - Private
 
     private var isEnabled: Bool {
-        UserDefaults.standard.bool(forKey: "SoundEffectsEnabled") &&
-        UserDefaults.standard.bool(forKey: "CharacterVoiceEnabled") &&
-        !UserDefaults.standard.bool(forKey: "IsMuted")
+        UserDefaults.standard.bool(forKey: DefaultsKeys.soundEffectsEnabled) &&
+        UserDefaults.standard.bool(forKey: DefaultsKeys.characterVoiceEnabled) &&
+        !UserDefaults.standard.bool(forKey: DefaultsKeys.isMuted)
     }
 
     private var outputVolume: Float {
-        let stored = UserDefaults.standard.double(forKey: "SoundVolume")
+        let stored = UserDefaults.standard.double(forKey: DefaultsKeys.soundVolume)
         let base = stored > 0 ? Float(min(1.0, stored)) : 0.7
         return base * 0.25   // keep mumble quiet relative to other sounds
     }

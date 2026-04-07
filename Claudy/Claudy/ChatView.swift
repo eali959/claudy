@@ -7,8 +7,8 @@ struct ChatView: View {
     @Environment(WindowManager.self) private var windowManager
     @Environment(PersonalityManager.self) private var personalityManager
     @FocusState private var inputFocused: Bool?
-    @AppStorage("ChatFontSize")      private var chatFontSize: Double = 14
-    @AppStorage("ChatWindowOpacity") private var chatWindowOpacity: Double = 1.0
+    @AppStorage(DefaultsKeys.chatFontSize)      private var chatFontSize: Double = 14
+    @AppStorage(DefaultsKeys.chatWindowOpacity) private var chatWindowOpacity: Double = 1.0
 
     @State private var resizeDragStartHeight: CGFloat? = nil
     @State private var showExportSheet = false
@@ -139,11 +139,11 @@ struct ChatView: View {
             viewModel.toggleMode()   // switching back to companion - no explainer needed
             return
         }
-        let explained = UserDefaults.standard.bool(forKey: "keychainExplainerShown")
+        let explained = UserDefaults.standard.bool(forKey: DefaultsKeys.keychainExplainerShown)
         if explained {
             viewModel.toggleMode()
         } else {
-            UserDefaults.standard.set(true, forKey: "keychainExplainerShown")
+            UserDefaults.standard.set(true, forKey: DefaultsKeys.keychainExplainerShown)
             showKeychainExplainer = true   // alert's "Got it" button calls toggleMode
         }
     }

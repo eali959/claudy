@@ -29,7 +29,7 @@ final class ScratchpadManager {
 
     private(set) var notes: [ScratchpadNote] = []
     private let logger = Logger(subsystem: "com.claudy", category: "Scratchpad")
-    private static let defaultsKey = "ScratchpadNotes"
+    private static let defaultsKey = DefaultsKeys.scratchpadNotes
 
     private init() { load() }
 

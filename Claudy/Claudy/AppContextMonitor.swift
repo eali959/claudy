@@ -193,7 +193,7 @@ final class AppContextMonitor {
         startVibeSessionTimer()
         viewModel?.applyMood(for: .vibeCoding)
 
-        let userChoseAPIMode = UserDefaults.standard.string(forKey: "chatMode") == "api"
+        let userChoseAPIMode = UserDefaults.standard.string(forKey: DefaultsKeys.chatMode) == "api"
         if PersonalityManager.shared.currentMode == .director,
            ClaudeAPIService.shared.hasAPIKey,
            userChoseAPIMode {

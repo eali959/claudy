@@ -48,11 +48,11 @@ final class WindowManager {
     }
 
     var sizePreset: SizePreset = {
-        let saved = UserDefaults.standard.string(forKey: "CharacterSizePreset") ?? ""
+        let saved = UserDefaults.standard.string(forKey: DefaultsKeys.characterSizePreset) ?? ""
         return SizePreset(rawValue: saved) ?? .medium
     }() {
         didSet {
-            UserDefaults.standard.set(sizePreset.rawValue, forKey: "CharacterSizePreset")
+            UserDefaults.standard.set(sizePreset.rawValue, forKey: DefaultsKeys.characterSizePreset)
         }
     }
 
@@ -61,11 +61,11 @@ final class WindowManager {
     // MARK: - Dynamic chat height (persisted)
 
     var chatHeight: CGFloat = {
-        let saved = UserDefaults.standard.double(forKey: "ClaudyChatHeight")
+        let saved = UserDefaults.standard.double(forKey: DefaultsKeys.claudyChatHeight)
         return saved > 0 ? CGFloat(saved) : 320
     }() {
         didSet {
-            UserDefaults.standard.set(Double(chatHeight), forKey: "ClaudyChatHeight")
+            UserDefaults.standard.set(Double(chatHeight), forKey: DefaultsKeys.claudyChatHeight)
         }
     }
 
@@ -103,12 +103,12 @@ final class WindowManager {
 
     func savePosition() {
         guard let origin = window?.frame.origin else { return }
-        UserDefaults.standard.set([Double(origin.x), Double(origin.y)], forKey: "CharacterWindowOrigin")
+        UserDefaults.standard.set([Double(origin.x), Double(origin.y)], forKey: DefaultsKeys.characterWindowOrigin)
     }
 
     func restorePosition() {
         guard let window else { return }
-        if let saved = UserDefaults.standard.array(forKey: "CharacterWindowOrigin") as? [Double],
+        if let saved = UserDefaults.standard.array(forKey: DefaultsKeys.characterWindowOrigin) as? [Double],
            saved.count == 2 {
             let origin = CGPoint(x: saved[0], y: saved[1])
             // Validate the panel rect (not just the origin point) is still on a screen.
@@ -134,6 +134,6 @@ final class WindowManager {
         // in the bottom-right corner without being clipped.
         let origin = CGPoint(x: f.maxX - Self.chatWidth - 20, y: f.minY + 80)
         window.setFrameOrigin(origin)
-        UserDefaults.standard.removeObject(forKey: "CharacterWindowOrigin")
+        UserDefaults.standard.removeObject(forKey: DefaultsKeys.characterWindowOrigin)
     }
 }
