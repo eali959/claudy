@@ -23,7 +23,8 @@ struct TypingIndicatorView: View {
         }
         .onAppear {
             // Tiny delay so the transition completes before the animation starts
-            DispatchQueue.main.asyncAfter(deadline: .now() + 0.05) {
+            Task { @MainActor in
+                try? await Task.sleep(for: .milliseconds(50))
                 phase = true
             }
         }

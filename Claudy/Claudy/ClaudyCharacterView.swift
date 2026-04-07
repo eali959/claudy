@@ -29,10 +29,10 @@ struct ClaudyCharacterView: View {
     @State private var dragTilt: Double = 0
     @State private var armFlair: Bool = false
     @State private var armFlairTask: Task<Void, Never>? = nil
-    // Stored so we can invalidate on disappear - avoids timer accumulation if the
+    // Stored so we can cancel on disappear - avoids task accumulation if the
     // view is ever removed and re-added to the hierarchy.
-    @State private var talkingTimer: Timer? = nil
-    @State private var dotTimer: Timer? = nil
+    @State private var talkingTask: Task<Void, Never>? = nil
+    @State private var dotTask: Task<Void, Never>? = nil
 
     // Dance mode state
     @State private var danceSpinAngle: Double = 0
@@ -91,28 +91,29 @@ struct ClaudyCharacterView: View {
                     .fill(bodyColor)
                     .frame(width: 90, height: 72)
 
-                // Upper highlight overlay
+                // Top-to-bottom volumetric gradient — gives form depth
                 RoundedRectangle(cornerRadius: 16)
-                    .fill(highlight.opacity(0.50))
+                    .fill(LinearGradient(
+                        colors: [highlight.opacity(0.60), Color.clear, shadowClr.opacity(0.45)],
+                        startPoint: .top, endPoint: .bottom
+                    ))
                     .frame(width: 90, height: 72)
-                    .mask(alignment: .top) {
-                        Rectangle().frame(width: 90, height: 36)
-                    }
 
-                // Lower shadow overlay
-                RoundedRectangle(cornerRadius: 16)
-                    .fill(shadowClr.opacity(0.28))
-                    .frame(width: 90, height: 72)
-                    .mask(alignment: .bottom) {
-                        Rectangle().frame(width: 90, height: 36)
-                    }
-
-                // Soft top-left catchlight
+                // Edge darkening — fakes surface curvature (ambient occlusion)
                 RoundedRectangle(cornerRadius: 16)
                     .fill(RadialGradient(
-                        colors: [Color.white.opacity(0.20), Color.clear],
-                        center: UnitPoint(x: 0.22, y: 0.18),
-                        startRadius: 0, endRadius: 38
+                        colors: [Color.clear, shadowClr.opacity(0.30)],
+                        center: .center,
+                        startRadius: 22, endRadius: 54
+                    ))
+                    .frame(width: 90, height: 72)
+
+                // Specular highlight — concentrated bright spot top-left
+                RoundedRectangle(cornerRadius: 16)
+                    .fill(RadialGradient(
+                        colors: [Color.white.opacity(0.32), Color.clear],
+                        center: UnitPoint(x: 0.28, y: 0.20),
+                        startRadius: 0, endRadius: 28
                     ))
                     .frame(width: 90, height: 72)
 
@@ -173,10 +174,10 @@ struct ClaudyCharacterView: View {
             startDotAnimation()
         }
         .onDisappear {
-            talkingTimer?.invalidate()
-            talkingTimer = nil
-            dotTimer?.invalidate()
-            dotTimer = nil
+            talkingTask?.cancel()
+            talkingTask = nil
+            dotTask?.cancel()
+            dotTask = nil
         }
         // Single merged onChange for animationState
         .onChange(of: animationState) { _, newState in
@@ -401,21 +402,30 @@ struct ClaudyCharacterView: View {
     /// Pixar-style eye with iris tracking
     private func pixarEye(size: CGFloat) -> some View {
         ZStack {
+            // Sclera — very faint warm tint at edge for softness
             Circle()
                 .fill(Color.white)
                 .frame(width: size, height: isBlinking ? 2.5 : size)
                 .animation(.easeInOut(duration: 0.08), value: isBlinking)
 
             if !isBlinking {
+                // Iris — slightly larger for a more expressive, doe-eyed look
                 Circle()
                     .fill(darkBrown)
-                    .frame(width: size * 0.55, height: size * 0.55)
+                    .frame(width: size * 0.57, height: size * 0.57)
                     .offset(x: irisOffset.x, y: irisOffset.y)
 
+                // Primary catchlight (upper-right)
                 Circle()
-                    .fill(Color.white.opacity(0.88))
+                    .fill(Color.white.opacity(0.90))
                     .frame(width: size * 0.22, height: size * 0.22)
                     .offset(x: irisOffset.x + size * 0.12, y: irisOffset.y - size * 0.14)
+
+                // Secondary micro-catchlight (lower-left) — classic cute sparkle
+                Circle()
+                    .fill(Color.white.opacity(0.55))
+                    .frame(width: size * 0.10, height: size * 0.10)
+                    .offset(x: irisOffset.x - size * 0.14, y: irisOffset.y + size * 0.13)
             }
         }
         .animation(.easeOut(duration: 0.12), value: irisOffset.x)
@@ -638,7 +648,7 @@ struct ClaudyCharacterView: View {
     }
 
     private func startTalkingAnimation() {
-        talkingTimer?.invalidate()
+        talkingTask?.cancel()
         // Lip-sync: cycle through phoneme-shaped mouth openings at speech rhythm.
         // Weights approximate real speech - more mid-open than fully open or closed.
         let shapes: [CGFloat] = [
@@ -646,14 +656,17 @@ struct ClaudyCharacterView: View {
             0.10, 0.50, 0.90, 0.40, 0.20, 0.75, 0.35, 0.60,
         ]
         var shapeIndex = 0
-        // Note: animationState is a `let` prop captured by value at timer creation, so we
-        // cannot guard on it here; the guard would always check the creation-time value.
-        // Instead, always update mouthOpenAmount; the mouth switch only renders the
-        // animated ellipse when animationState == .talking, so non-talking states are
-        // unaffected. onChange resets mouthOpenAmount to 0 when leaving .talking.
-        talkingTimer = Timer.scheduledTimer(withTimeInterval: 0.09, repeats: true) { _ in
-            mouthOpenAmount = shapes[shapeIndex % shapes.count]
-            shapeIndex += 1
+        // Note: Task.isCancelled is checked each iteration so cancellation is clean.
+        // Always update mouthOpenAmount; the mouth switch only renders the animated
+        // ellipse when animationState == .talking, so non-talking states are unaffected.
+        // onChange resets mouthOpenAmount to 0 when leaving .talking.
+        talkingTask = Task { @MainActor in
+            while !Task.isCancelled {
+                try? await Task.sleep(for: .milliseconds(90))
+                guard !Task.isCancelled else { break }
+                mouthOpenAmount = shapes[shapeIndex % shapes.count]
+                shapeIndex += 1
+            }
         }
     }
 
@@ -667,10 +680,14 @@ struct ClaudyCharacterView: View {
     }
 
     private func startDotAnimation() {
-        dotTimer?.invalidate()
-        dotTimer = Timer.scheduledTimer(withTimeInterval: 0.38, repeats: true) { _ in
-            guard animationState == .thinking else { return }
-            dotPhase = (dotPhase + 1) % 3
+        dotTask?.cancel()
+        dotTask = Task { @MainActor in
+            while !Task.isCancelled {
+                try? await Task.sleep(for: .milliseconds(380))
+                guard !Task.isCancelled else { break }
+                guard animationState == .thinking else { continue }
+                dotPhase = (dotPhase + 1) % 3
+            }
         }
     }
 
