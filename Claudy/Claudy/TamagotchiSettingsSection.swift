@@ -35,7 +35,9 @@ struct TamagotchiSettingsSection: View {
             .padding(.top, 2)
 
         } header: {
-            Label("Tamagotchi", systemImage: "heart.fill").font(.headline)
+            Label("Tamagotchi", systemImage: "heart.fill")
+                .font(.system(size: 13, weight: .semibold))
+                .foregroundStyle(Color(red: 0.784, green: 0.361, blue: 0.220))
         }
     }
 }

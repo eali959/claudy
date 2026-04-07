@@ -6,7 +6,7 @@ import OSLog
 /// Supports three variants:
 ///   - .v1 — Original ~32-second sequence (Shift+Option+D or right-click → V1 Demo)
 ///   - .v2 — Extended ~55-second sequence with side labels (Shift+Option+V or right-click → V2 Demo)
-///   - .v3 — v3.0 feature showcase ~56-second sequence (right-click → V3 Demo)
+///   - .v3 — v3.1 feature showcase ~56-second sequence (right-click → V3 Demo)
 ///
 /// All variants run from a single manager instance.
 @Observable
@@ -215,7 +215,7 @@ final class DemoModeManager {
     private func setupLabelPanel() {
         guard labelPanel == nil else { return }
         let panel = NSPanel(
-            contentRect: NSRect(x: 0, y: 0, width: 220, height: 300),
+            contentRect: NSRect(x: 0, y: 0, width: 240, height: 100),
             styleMask: [.nonactivatingPanel, .fullSizeContentView, .borderless],
             backing: .buffered,
             defer: false
@@ -228,10 +228,8 @@ final class DemoModeManager {
         panel.ignoresMouseEvents = true
         panel.collectionBehavior = [.canJoinAllSpaces, .fullScreenAuxiliary, .ignoresCycle]
 
-        let hostView = NSHostingView(
-            rootView: DemoSideLabelContent(manager: self)
-                .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .center)
-        )
+        // No fixed frame wrapper — panel auto-sizes to content via fittingSize in positionLabelPanel()
+        let hostView = NSHostingView(rootView: DemoSideLabelContent(manager: self))
         hostView.layer?.backgroundColor = .clear
         panel.contentView = hostView
         labelPanel = panel
@@ -239,11 +237,19 @@ final class DemoModeManager {
 
     private func positionLabelPanel() {
         guard let panel = labelPanel,
+              let hostView = panel.contentView,
               let mainWindow = windowManager?.window else { return }
-        // Align panel centre with the character centre (character is bottom 150 pt of the window)
-        let charCenterY = mainWindow.frame.minY + WindowManager.characterSize / 2
-        let panelH: CGFloat = 300
-        let x = mainWindow.frame.maxX + 10
+
+        // Auto-size the panel to its SwiftUI content
+        let fit = hostView.fittingSize
+        let panelW = max(fit.width, 100)
+        let panelH = max(fit.height, 40)
+        panel.setContentSize(CGSize(width: panelW, height: panelH))
+
+        // Align panel centre with the character centre
+        let scale = windowManager?.characterScale ?? 1
+        let charCenterY = mainWindow.frame.minY + (WindowManager.characterSize * scale) / 2
+        let x = mainWindow.frame.maxX + 6
         let y = charCenterY - panelH / 2
         panel.setFrameOrigin(CGPoint(x: x, y: y))
     }
@@ -592,7 +598,7 @@ final class DemoModeManager {
 
     // MARK: - V3 Demo sequence (~55 seconds)
     //
-    // Showcases v3.0 features for social media: cute, Claud-y-humour style.
+    // Showcases v3.1 features for social media: cute, Claud-y-humour style.
     // Structure: Intro → Tamagotchi → 10 Languages → Accessories →
     //            Personality Blend → Activity States → AI Chat UX → CTA
 
@@ -601,7 +607,7 @@ final class DemoModeManager {
         // ── Scene 1 — Intro (0s) ─────────────────────────────────────────────
         character.wave()
         SoundManager.shared.play(.bubblePop)
-        character.showBubbleDirect("v3.0. I got an upgrade.", duration: 3.0)
+        character.showBubbleDirect("v3.1. I got an upgrade.", duration: 3.0)
         look(character, x: 8, y: -3)
         guard await wait(0.7) else { return }
         lookCenter(character)

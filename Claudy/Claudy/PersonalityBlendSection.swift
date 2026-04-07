@@ -7,7 +7,9 @@ struct PersonalityBlendSection: View {
     @State private var manager = PersonalityManager.shared
 
     var body: some View {
-        Section(header: Label("Personality Blend", systemImage: "slider.horizontal.3").font(.headline)) {
+        Section(header: Label("Personality Blend", systemImage: "slider.horizontal.3")
+            .font(.system(size: 13, weight: .semibold))
+            .foregroundStyle(Color(red: 0.784, green: 0.361, blue: 0.220))) {
             Toggle("Enable Blend", isOn: $manager.blendEnabled)
 
             if manager.blendEnabled {

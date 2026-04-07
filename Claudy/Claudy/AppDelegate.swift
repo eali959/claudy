@@ -4,11 +4,13 @@ import SwiftData
 import OSLog
 
 @MainActor
-final class AppDelegate: NSObject, NSApplicationDelegate {
+final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
     private let logger = Logger(subsystem: "com.claudy", category: "App")
     var floatingWindowController: FloatingWindowController?
     private var statusItem: NSStatusItem?
     private var settingsWindow: NSWindow?
+    /// Kept so we can refresh checkmarks whenever the menu opens.
+    private var personalitySubmenu: NSMenu?
 
     /// The app's SwiftData container — local-only, never synced to iCloud.
     /// Nil only if the container fails to initialise (store corruption, disk full).
@@ -96,6 +98,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
 
         // Personality submenu
         let personalityMenu = NSMenu()
+        personalityMenu.delegate = self          // refreshes checkmarks on open
         let pm = PersonalityManager.shared
         for mode in PersonalityMode.allCases {
             let item = NSMenuItem(
@@ -108,6 +111,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
             item.state = mode == pm.currentMode ? .on : .off
             personalityMenu.addItem(item)
         }
+        personalitySubmenu = personalityMenu
         let personalityItem = NSMenuItem(title: "Personality", action: nil, keyEquivalent: "")
         personalityItem.submenu = personalityMenu
         menu.addItem(personalityItem)
@@ -148,6 +152,23 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         #endif
 
         return menu
+    }
+
+    // MARK: - NSMenuDelegate
+
+    /// Refreshes personality checkmarks just before the submenu appears.
+    /// Called each time the user opens the Personality submenu so stale
+    /// state (changed from the SwiftUI right-click menu) is always reflected.
+    func menuWillOpen(_ menu: NSMenu) {
+        // AppKit guarantees this is called on the main thread.
+        // @preconcurrency on NSMenuDelegate lets us keep this @MainActor-isolated
+        // so we can access personalitySubmenu without any Sendability issues.
+        guard menu === personalitySubmenu else { return }
+        let current = PersonalityManager.shared.currentMode
+        for item in menu.items {
+            guard let raw = item.representedObject as? String else { continue }
+            item.state = (raw == current.rawValue) ? .on : .off
+        }
     }
 
     // MARK: - Icon

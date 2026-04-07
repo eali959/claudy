@@ -101,16 +101,24 @@ struct CharacterSceneView: View {
                         .onLongPressGesture(minimumDuration: 3.0, maximumDistance: 20) {
                             showReactionLog = true
                         }
-                        .contextMenu {
-                            CharacterContextMenu(
+                        // Context menu lives in an isolated child view so that animation
+                        // re-renders (irisOffset, isBlinking, etc.) never cause SwiftUI
+                        // to rebuild the menu host — which would dismiss open submenus.
+                        // Drag callbacks are forwarded through the overlay so the
+                        // contentShape hit area doesn't swallow drag events.
+                        .overlay {
+                            ContextMenuTarget(
                                 characterViewModel: characterViewModel,
                                 chatViewModel: chatViewModel,
                                 demoManager: demoManager,
-                                                                onAddQuickAlarm: onAddQuickAlarm,
+                                onAddQuickAlarm: onAddQuickAlarm,
                                 onShowFocusAdder: onShowFocusAdder,
                                 onShowHelp: onShowHelp,
                                 onShowDonate: onShowDonate,
-                                onShowScratchpad: onShowScratchpad
+                                onShowScratchpad: onShowScratchpad,
+                                onDragBegan: onDragBegan,
+                                onDragChanged: onDragChanged,
+                                onDragEnded: onDragEnded
                             )
                         }
 
@@ -123,6 +131,16 @@ struct CharacterSceneView: View {
                         }
 
                     } // ZStack (character)
+                    // DEMO pill — anchored to the character ZStack so it never moves
+                    // when chat, tamagotchi, or timer badge change the window height.
+                    .overlay(alignment: .topLeading) {
+                        if demoManager.isRunning {
+                            DemoPill(variant: demoManager.activeVariant)
+                                .padding(6)
+                                .allowsHitTesting(false)
+                                .transition(.opacity)
+                        }
+                    }
 
                     // Tamagotchi overlay — compact stat bars + action buttons, below character
                     TamagotchiOverlayIfEnabled(manager: characterViewModel.tamagotchiManager)
@@ -180,28 +198,6 @@ struct CharacterSceneView: View {
             }
         }
         .animation(.spring(response: 0.3, dampingFraction: 0.75), value: QuickActionManager.shared.currentAction?.label)
-        // DEMO pill - top-left corner, visible during demo
-        .overlay(alignment: .topLeading) {
-            if demoManager.isRunning {
-                Text({
-                    switch demoManager.activeVariant {
-                    case .v1: return "V1 DEMO"
-                    case .v2: return "V2 DEMO"
-                    case .v3: return "V3 DEMO"
-                    case nil: return "DEMO"
-                    }
-                }())
-                    .font(.system(size: 10, weight: .bold, design: .monospaced))
-                    .foregroundStyle(.white)
-                    .padding(.horizontal, 7)
-                    .padding(.vertical, 3)
-                    .background(Color.orange, in: RoundedRectangle(cornerRadius: 5))
-                    .opacity(0.55)
-                    .padding(10)
-                    .transition(.opacity)
-                    .allowsHitTesting(false)
-            }
-        }
         // Demo interrupt - any tap or drag while demo is running stops it
         .overlay {
             if demoManager.isRunning {
@@ -225,5 +221,83 @@ struct CharacterSceneView: View {
                    value: characterViewModel.speechBubbleText != nil)
         .animation(.spring(response: 0.38, dampingFraction: 0.78), value: demoManager.sideLabel != nil)
         .animation(.easeInOut(duration: 0.3), value: characterViewModel.showConfetti)
+    }
+}
+
+// MARK: - Demo pill
+
+/// Small "V3 DEMO" badge anchored to the character body.
+/// Extracted so the pill label is stable and never shifts with window height changes.
+private struct DemoPill: View {
+    let variant: DemoModeManager.DemoVariant?
+    var body: some View {
+        let label: String = {
+            switch variant {
+            case .v1: return "V1 DEMO"
+            case .v2: return "V2 DEMO"
+            case .v3: return "V3.1 DEMO"
+            case nil: return "DEMO"
+            }
+        }()
+        Text(label)
+            .font(.system(size: 9, weight: .bold, design: .monospaced))
+            .foregroundStyle(.white)
+            .padding(.horizontal, 6)
+            .padding(.vertical, 2)
+            .background(Color.orange.opacity(0.7), in: RoundedRectangle(cornerRadius: 4))
+    }
+}
+
+// MARK: - Context menu isolation
+
+/// Hosts the right-click context menu in complete isolation from animated state.
+///
+/// `CharacterSceneView` re-renders on every animation tick because its body reads
+/// `irisOffset`, `isBlinking`, `tickleIntensity`, etc. If `.contextMenu` lives
+/// directly in that view, macOS tears down submenu tracking on every re-render.
+///
+/// By moving the context menu here — a separate `struct` that reads NO animated
+/// properties — SwiftUI never re-evaluates this view's body during animation,
+/// so submenus stay open when the mouse moves into them.
+private struct ContextMenuTarget: View {
+    let characterViewModel: CharacterViewModel
+    let chatViewModel: ChatViewModel
+    let demoManager: DemoModeManager
+    let onAddQuickAlarm: (Int) -> Void
+    let onShowFocusAdder: (FocusToolAdderSheet.ToolType) -> Void
+    let onShowHelp: () -> Void
+    let onShowDonate: () -> Void
+    let onShowScratchpad: () -> Void
+    let onDragBegan: () -> Void
+    let onDragChanged: (CGSize) -> Void
+    let onDragEnded: () -> Void
+
+    @State private var dragActive = false
+
+    var body: some View {
+        Color.clear
+            .contentShape(Circle())
+            // Forward drag events — contentShape gives this overlay a hit area,
+            // so without an explicit DragGesture it swallows all drags.
+            .gesture(
+                DragGesture(minimumDistance: 3, coordinateSpace: .global)
+                    .onChanged { value in
+                        if !dragActive { dragActive = true; onDragBegan() }
+                        onDragChanged(value.translation)
+                    }
+                    .onEnded { _ in dragActive = false; onDragEnded() }
+            )
+            .contextMenu {
+                CharacterContextMenu(
+                    characterViewModel: characterViewModel,
+                    chatViewModel: chatViewModel,
+                    demoManager: demoManager,
+                    onAddQuickAlarm: onAddQuickAlarm,
+                    onShowFocusAdder: onShowFocusAdder,
+                    onShowHelp: onShowHelp,
+                    onShowDonate: onShowDonate,
+                    onShowScratchpad: onShowScratchpad
+                )
+            }
     }
 }

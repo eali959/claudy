@@ -69,7 +69,9 @@ struct FocusTimerSettingsSection: View {
             }
             .frame(minHeight: 44)
         } header: {
-            Label("Focus Tools", systemImage: "timer").font(.headline)
+            Label("Focus Tools", systemImage: "timer")
+                .font(.system(size: 13, weight: .semibold))
+                .foregroundStyle(Color(red: 0.784, green: 0.361, blue: 0.220))
         }
     }
 

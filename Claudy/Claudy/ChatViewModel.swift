@@ -94,6 +94,21 @@ final class ChatViewModel {
         // Restore last-used mode; fall back to companion (the default)
         let saved = UserDefaults.standard.string(forKey: DefaultsKeys.chatMode) ?? ""
         chatMode = ChatMode(rawValue: saved) ?? .companion
+
+        NotificationCenter.default.addObserver(
+            forName: .claudyLanguageChanged,
+            object: nil,
+            queue: .main
+        ) { [weak self] notification in
+            guard let self,
+                  let lang = notification.object as? AppLanguage,
+                  self.isOpen else { return }
+            Task { @MainActor [weak self] in
+                guard let self else { return }
+                try? await Task.sleep(for: .milliseconds(400))
+                self.messages.append(ChatMessage(role: .assistant, content: lang.switchAcknowledgment))
+            }
+        }
     }
 
     // MARK: - Send

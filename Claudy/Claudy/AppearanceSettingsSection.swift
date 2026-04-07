@@ -82,7 +82,9 @@ struct AppearanceSettingsSection: View {
             }
             .padding(.vertical, 4)
         } header: {
-            Label("Appearance", systemImage: "paintbrush.fill").font(.headline)
+            Label("Appearance", systemImage: "paintbrush.fill")
+                .font(.system(size: 13, weight: .semibold))
+                .foregroundStyle(Color(red: 0.784, green: 0.361, blue: 0.220))
         }
     }
 

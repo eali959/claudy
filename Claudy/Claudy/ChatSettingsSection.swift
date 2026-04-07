@@ -24,7 +24,9 @@ struct ChatSettingsSection: View {
     }
 
     var body: some View {
-        Section(header: Label("Chat", systemImage: "bubble.left.and.bubble.right.fill").font(.headline)) {
+        Section(header: Label("Chat", systemImage: "bubble.left.and.bubble.right.fill")
+            .font(.system(size: 13, weight: .semibold))
+            .foregroundStyle(Color(red: 0.784, green: 0.361, blue: 0.220))) {
 
             // CHAT-05: Markdown rendering toggle
             Toggle("Render Markdown in responses", isOn: $renderMarkdown)

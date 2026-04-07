@@ -28,9 +28,9 @@ enum CharacterAccessory: String, CaseIterable {
         case .none:          return "minus.circle"
         case .glasses:       return "eyeglasses"
         case .tintedSunnies: return "sunglasses"
-        case .heisenbergHat: return "theatermasks"
-        case .capForward:    return "baseball.cap"
-        case .capBackward:   return "baseball.cap"
+        case .heisenbergHat: return "hat.widebrim"
+        case .capForward:    return "graduationcap.fill"
+        case .capBackward:   return "graduationcap"
         }
     }
 

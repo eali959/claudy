@@ -25,6 +25,13 @@ struct HelpView: View {
                 Divider().padding(.horizontal, 16)
 
                 VStack(alignment: .leading, spacing: 1) {
+                    helpSection("What's New in v3.1") {
+                        helpRow("Language switch acknowledgment",
+                                "When you change the response language in Settings, Claud-y now waves and says a short greeting in the new language — immediately showing the change is live. If the chat panel is open, the same message appears there too.")
+                        helpRow("Bug fixes — v3.1",
+                                "• Status bar personality checkmarks now stay in sync when you change personality from the right-click menu.\n• 'Cap Forward' and 'Cap Backward' accessory icons now display correctly.\n• 60-minute Pomodoro preset icon fixed.\n• Quick Launch empty-state icon fixed.\n• Auto-Walk disable icon fixed.\n• Language info text correctly shows the selected language name.\n• Tamagotchi care actions safely guarded against unavailable state.")
+                    }
+
                     helpSection("Getting Started") {
                         helpRow("What is Claud-y?",
                                 "A small animated companion that lives on your screen. It reacts to what you're building, celebrates your wins, and keeps you company while you work.")
@@ -103,6 +110,8 @@ struct HelpView: View {
                     }
 
                     helpSection("Language Support") {
+                        helpRow("⚠️ Important: API key required for AI responses in non-English",
+                                "Changing the language in Settings → Language affects two things: (1) Companion mode reactions — these come from a built-in translated library and work offline, no API key needed. (2) AI chat responses — Claud-y injects a language directive into the system prompt so your AI provider replies in the chosen language. This requires an active API key for Claude, ChatGPT, or Gemini. Without a key, the chat panel will not send messages regardless of language selected.")
                         helpRow("Supported languages",
                                 "Claud-y supports 10 languages: English (UK), Español, Français, Deutsch, Português, 日本語, 中文（简体）, हिन्दी, اردو, and العربية. Change the active language in Settings → Language.")
                         helpRow("What language affects",

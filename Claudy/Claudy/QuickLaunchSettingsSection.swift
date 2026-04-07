@@ -11,7 +11,7 @@ struct QuickLaunchSettingsSection: View {
     var body: some View {
         Section {
             if quickShortcuts.isEmpty {
-                Label("No shortcuts yet - add up to \(QuickLaunchManager.maxShortcuts) below.", systemImage: "rocket")
+                Label("No shortcuts yet - add up to \(QuickLaunchManager.maxShortcuts) below.", systemImage: "bolt.circle")
                     .font(.caption)
                     .foregroundStyle(.secondary)
                     .padding(.vertical, 4)
@@ -122,7 +122,9 @@ struct QuickLaunchSettingsSection: View {
                 .padding(.top, 4)
             }
         } header: {
-            Label("Quick Launch", systemImage: "bolt.fill").font(.headline)
+            Label("Quick Launch", systemImage: "bolt.fill")
+                .font(.system(size: 13, weight: .semibold))
+                .foregroundStyle(Color(red: 0.784, green: 0.361, blue: 0.220))
         } footer: {
             Text("Shortcuts appear in the right-click context menu. The optional ⌘ key activates them from the menu bar.")
                 .font(.caption)

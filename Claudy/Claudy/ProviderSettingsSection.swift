@@ -133,7 +133,9 @@ struct ProviderSettingsSection: View {
             Text("No key needed — Claud-y works in Companion mode without one. Local, private, and free forever.")
                 .font(.caption).foregroundStyle(.secondary)
         } header: {
-            Label("API Provider", systemImage: "key.fill").font(.headline)
+            Label("API Provider", systemImage: "key.fill")
+                .font(.system(size: 13, weight: .semibold))
+                .foregroundStyle(Color(red: 0.784, green: 0.361, blue: 0.220))
         }
     }
 

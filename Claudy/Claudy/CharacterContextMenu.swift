@@ -77,7 +77,6 @@ struct CharacterContextMenu: View {
         Divider()
 
         // ── Tamagotchi ────────────────────────────────────────────────────────
-        let tama = characterViewModel.tamagotchiManager!
         Menu {
             // Toggle on/off from the menu
             Button {
@@ -89,23 +88,23 @@ struct CharacterContextMenu: View {
                 )
             }
 
-            // Care actions — only when enabled
-            if tamagotchiEnabled {
+            // Care actions — only when enabled and manager is available
+            if tamagotchiEnabled, let tama = characterViewModel.tamagotchiManager {
                 Divider()
                 Button {
                     tama.feed()
                 } label: {
-                    Label(String(format: "Feed  (%.0f%% full)", tama.fullness), systemImage: "fork.knife")
+                    Label("Feed", systemImage: "fork.knife")
                 }
                 Button {
                     tama.play()
                 } label: {
-                    Label(String(format: "Play  (%.0f%% happy)", tama.happiness), systemImage: "gamecontroller")
+                    Label("Play", systemImage: "gamecontroller")
                 }
                 Button {
                     tama.rest()
                 } label: {
-                    Label(String(format: "Rest  (%.0f%% energy)", tama.energy), systemImage: "hand.raised.fill")
+                    Label("Rest", systemImage: "hand.raised.fill")
                 }
             }
         } label: {
@@ -124,16 +123,16 @@ struct CharacterContextMenu: View {
                     Button { pom.selectedPreset = .short;   pom.start() } label: { Label("Short — 15 min",   systemImage: "15.circle") }
                     Button { pom.selectedPreset = .classic; pom.start() } label: { Label("Classic — 25 min", systemImage: "25.circle") }
                     Button { pom.selectedPreset = .long;    pom.start() } label: { Label("Long — 45 min",    systemImage: "45.circle") }
-                    Button { pom.selectedPreset = .deep;    pom.start() } label: { Label("Deep — 60 min",    systemImage: "60.circle") }
+                    Button { pom.selectedPreset = .deep;    pom.start() } label: { Label("Deep — 60 min",    systemImage: "timer.circle") }
                     Divider()
                     Button { pom.selectedPreset = .custom;  pom.start() } label: { Label("Custom — \(pom.customMinutes) min", systemImage: "slider.horizontal.3") }
                 } label: { Label("Start Pomodoro", systemImage: "timer") }
             case .running:
-                Button { pom.pause() } label: { Label("Pause  (\(pom.displayTime))", systemImage: "pause.circle.fill") }
-                Button { pom.stop()  } label: { Label("Stop Timer",                  systemImage: "stop.circle") }
+                Button { pom.pause() } label: { Label("Pause Timer", systemImage: "pause.circle.fill") }
+                Button { pom.stop()  } label: { Label("Stop Timer",  systemImage: "stop.circle") }
             case .paused:
-                Button { pom.resume() } label: { Label("Resume  (\(pom.displayTime))", systemImage: "play.circle.fill") }
-                Button { pom.stop()   } label: { Label("Stop Timer",                   systemImage: "stop.circle") }
+                Button { pom.resume() } label: { Label("Resume Timer", systemImage: "play.circle.fill") }
+                Button { pom.stop()   } label: { Label("Stop Timer",   systemImage: "stop.circle") }
             }
 
             Divider()
@@ -175,18 +174,7 @@ struct CharacterContextMenu: View {
                     } label: { Label("Clear All", systemImage: "trash") }
                 }
             } label: {
-                Label(
-                    pending.isEmpty ? "Reminders" : "Reminders  (\(pending.count))",
-                    systemImage: "checklist"
-                )
-            }
-
-            let stats = FocusStatsManager.shared
-            if stats.pomodorosToday > 0 {
-                Divider()
-                Text(stats.summaryLine)
-                    .font(.system(size: 11))
-                    .foregroundStyle(.secondary)
+                Label("Reminders", systemImage: "checklist")
             }
         } label: { Label("Focus Tools", systemImage: "target") }
 
@@ -249,7 +237,7 @@ struct CharacterContextMenu: View {
             } label: {
                 Label(
                     walk.isEnabled ? "Disable Auto-Walk" : "Enable Auto-Walk",
-                    systemImage: walk.isEnabled ? "figure.walk.slash" : "figure.walk"
+                    systemImage: walk.isEnabled ? "figure.stand" : "figure.walk"
                 )
             }
         }

@@ -88,6 +88,23 @@ enum AppLanguage: String, CaseIterable, Codable {
         default:             return false
         }
     }
+
+    /// Short in-character acknowledgment shown when the user switches to this language.
+    /// Written in the target language so it immediately demonstrates the change.
+    var switchAcknowledgment: String {
+        switch self {
+        case .english:           return "Back to English. Feels like home."
+        case .spanish:           return "¡Cambiado al español! Hola de nuevo."
+        case .french:            return "Français activé. Bonjour !"
+        case .german:            return "Auf Deutsch jetzt. Verstanden."
+        case .portuguese:        return "Português ativado. Olá!"
+        case .japanese:          return "日本語モードに切り替えました。よろしく！"
+        case .chineseSimplified: return "切换到中文了。你好！"
+        case .hindi:             return "हिन्दी मोड चालू। नमस्ते!"
+        case .urdu:              return "اردو موڈ فعال۔ آداب!"
+        case .arabic:            return "تم التبديل للعربية. مرحباً!"
+        }
+    }
 }
 
 // MARK: - LanguageManager
@@ -101,9 +118,15 @@ final class LanguageManager {
 
     var activeLanguage: AppLanguage {
         didSet {
+            guard activeLanguage != oldValue else { return }
             UserDefaults.standard.set(activeLanguage.rawValue, forKey: DefaultsKeys.activeLanguage)
             // Reload the reaction library for the new language
             ReactionLibraryService.shared.reloadForLanguage(activeLanguage)
+            // Notify character + chat to acknowledge the switch in the new language
+            NotificationCenter.default.post(
+                name: .claudyLanguageChanged,
+                object: activeLanguage
+            )
         }
     }
 

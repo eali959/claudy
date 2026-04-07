@@ -6,9 +6,6 @@ final class FloatingPanel: NSPanel {
     override var canBecomeMain: Bool { false }
 
     override func rightMouseDown(with event: NSEvent) {
-        // Activate the app so submenu tracking works correctly on this non-activating panel.
-        // Without this, submenus dismiss immediately when the mouse moves into them.
-        NSApp.activate(ignoringOtherApps: true)
         super.rightMouseDown(with: event)
     }
 }

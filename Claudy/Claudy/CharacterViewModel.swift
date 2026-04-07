@@ -134,6 +134,19 @@ final class CharacterViewModel {
                 self?.setState(.surprised, duration: 0.3)
             }
         }
+
+        NotificationCenter.default.addObserver(
+            forName: .claudyLanguageChanged,
+            object: nil,
+            queue: .main
+        ) { [weak self] notification in
+            guard let lang = notification.object as? AppLanguage else { return }
+            Task { @MainActor [weak self] in
+                self?.wave()
+                try? await Task.sleep(for: .milliseconds(300))
+                self?.showBubbleDirect(lang.switchAcknowledgment, duration: 4)
+            }
+        }
     }
 
     // MARK: - Setup (call once WindowManager is ready)
@@ -548,6 +561,7 @@ final class CharacterViewModel {
 extension Notification.Name {
     static let claudyChatSendTapped      = Notification.Name("claudyChatSendTapped")
     static let claudyPersonalitySwitched = Notification.Name("claudyPersonalitySwitched")
+    static let claudyLanguageChanged     = Notification.Name("claudyLanguageChanged")
     static let claudyStartDemo           = Notification.Name("claudyStartDemo")
     static let claudyOpenSettings        = Notification.Name("claudyOpenSettings")
     static let claudyContextTrimmed      = Notification.Name("claudyContextTrimmed")
