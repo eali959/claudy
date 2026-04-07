@@ -6,6 +6,8 @@ import UniformTypeIdentifiers
 
 struct ChatMessageBubble: View {
     let message: ChatMessage
+    /// When false, assistant messages render as plain text instead of Markdown (CHAT-05)
+    var renderMarkdown: Bool = true
     @State private var showCopied = false
     @AppStorage(DefaultsKeys.chatFontSize) private var chatFontSize: Double = 14
     @AppStorage(DefaultsKeys.userBubbleColor) private var userBubbleColor: String = "orange"
@@ -66,8 +68,21 @@ struct ChatMessageBubble: View {
                         .fill(bubbleColor)
                 )
                 .textSelection(.enabled)
-        } else {
+        } else if renderMarkdown {
             MarkdownBubble(text: message.content.isEmpty ? "…" : message.content)
+        } else {
+            // CHAT-05: plain text mode
+            Text(message.content.isEmpty ? "…" : message.content)
+                .font(.system(size: chatFontSize))
+                .foregroundStyle(.primary)
+                .padding(.horizontal, 13)
+                .padding(.vertical, 9)
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .background(
+                    RoundedRectangle(cornerRadius: 14, style: .continuous)
+                        .fill(Color.primary.opacity(0.1))
+                )
+                .textSelection(.enabled)
         }
     }
 }

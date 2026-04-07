@@ -13,10 +13,11 @@ struct CharacterContextMenu: View {
     let onShowScratchpad: () -> Void
 
     @Environment(WindowManager.self) private var windowManager
+    @AppStorage(DefaultsKeys.tamagotchiOverlayEnabled) private var tamagotchiEnabled = false
 
     var body: some View {
 
-        // ── Personality ──────────────────────────────────────────────────────
+        // ── Look & Feel ──────────────────────────────────────────────────────
         Menu {
             ForEach(PersonalityMode.allCases, id: \.self) { mode in
                 Button {
@@ -33,7 +34,6 @@ struct CharacterContextMenu: View {
             }
         } label: { Label("Personality", systemImage: "theatermasks") }
 
-        // ── Mode ─────────────────────────────────────────────────────────────
         Menu {
             ForEach(BehaviorMode.allCases, id: \.self) { mode in
                 Button {
@@ -48,7 +48,19 @@ struct CharacterContextMenu: View {
             }
         } label: { Label("Mode", systemImage: "dial.high") }
 
-        // ── Size ─────────────────────────────────────────────────────────────
+        Menu {
+            ForEach(CharacterAccessory.allCases, id: \.self) { acc in
+                Button {
+                    CharacterAccessory.active = acc
+                } label: {
+                    Label(
+                        acc.displayName,
+                        systemImage: CharacterAccessory.active == acc ? "checkmark" : acc.icon
+                    )
+                }
+            }
+        } label: { Label("Accessory", systemImage: "star.circle") }
+
         Menu {
             ForEach(WindowManager.SizePreset.allCases, id: \.self) { preset in
                 Button {
@@ -64,11 +76,48 @@ struct CharacterContextMenu: View {
 
         Divider()
 
+        // ── Tamagotchi ────────────────────────────────────────────────────────
+        let tama = characterViewModel.tamagotchiManager!
+        Menu {
+            // Toggle on/off from the menu
+            Button {
+                tamagotchiEnabled.toggle()
+            } label: {
+                Label(
+                    tamagotchiEnabled ? "Disable Tamagotchi" : "Enable Tamagotchi",
+                    systemImage: tamagotchiEnabled ? "heart.slash" : "heart.fill"
+                )
+            }
+
+            // Care actions — only when enabled
+            if tamagotchiEnabled {
+                Divider()
+                Button {
+                    tama.feed()
+                } label: {
+                    Label(String(format: "Feed  (%.0f%% full)", tama.fullness), systemImage: "fork.knife")
+                }
+                Button {
+                    tama.play()
+                } label: {
+                    Label(String(format: "Play  (%.0f%% happy)", tama.happiness), systemImage: "gamecontroller")
+                }
+                Button {
+                    tama.rest()
+                } label: {
+                    Label(String(format: "Rest  (%.0f%% energy)", tama.energy), systemImage: "hand.raised.fill")
+                }
+            }
+        } label: {
+            Label(
+                tamagotchiEnabled ? "Take Care of Claud-y" : "Tamagotchi",
+                systemImage: tamagotchiEnabled ? "heart.fill" : "heart"
+            )
+        }
+
         // ── Focus Tools ───────────────────────────────────────────────────────
         let pom: PomodoroManager = characterViewModel.pomodoroManager
         Menu {
-
-            // — Pomodoro —
             switch pom.state {
             case .idle, .complete:
                 Menu {
@@ -89,7 +138,6 @@ struct CharacterContextMenu: View {
 
             Divider()
 
-            // — Alarm —
             Menu {
                 Button { onAddQuickAlarm(5)   } label: { Label("In 5 minutes",  systemImage: "5.circle") }
                 Button { onAddQuickAlarm(10)  } label: { Label("In 10 minutes", systemImage: "10.circle") }
@@ -99,18 +147,12 @@ struct CharacterContextMenu: View {
                 Button { onAddQuickAlarm(120) } label: { Label("In 2 hours",    systemImage: "2.circle") }
                 Button { onAddQuickAlarm(240) } label: { Label("In 4 hours",    systemImage: "4.circle") }
                 Divider()
-                Button {
-                    onShowFocusAdder(.alarm)
-                } label: { Label("Set Custom Alarm…", systemImage: "alarm.waves.left.and.right") }
+                Button { onShowFocusAdder(.alarm) } label: { Label("Set Custom Alarm…", systemImage: "alarm.waves.left.and.right") }
             } label: { Label("Set Alarm", systemImage: "alarm") }
 
-            // — Reminders —
             let pending = characterViewModel.alarmReminderManager.reminders.filter { !$0.fired }
             Menu {
-                Button {
-                    onShowFocusAdder(.reminder)
-                } label: { Label("New Reminder…", systemImage: "plus.circle.fill") }
-
+                Button { onShowFocusAdder(.reminder) } label: { Label("New Reminder…", systemImage: "plus.circle.fill") }
                 if !pending.isEmpty {
                     Divider()
                     ForEach(pending) { reminder in
@@ -139,7 +181,6 @@ struct CharacterContextMenu: View {
                 )
             }
 
-            // — Stats footer —
             let stats = FocusStatsManager.shared
             if stats.pomodorosToday > 0 {
                 Divider()
@@ -147,10 +188,7 @@ struct CharacterContextMenu: View {
                     .font(.system(size: 11))
                     .foregroundStyle(.secondary)
             }
-
         } label: { Label("Focus Tools", systemImage: "target") }
-
-        Divider()
 
         // ── Quick Launch ──────────────────────────────────────────────────────
         let shortcuts = QuickLaunchManager.shared.shortcuts
@@ -171,15 +209,12 @@ struct CharacterContextMenu: View {
                         }
                     }
                 }
-            } label: { Label("Launch", systemImage: "bolt") }
-            Divider()
+            } label: { Label("Launch", systemImage: "bolt.fill") }
         }
 
-        // ── Actions ───────────────────────────────────────────────────────────
-        Button {
-            windowManager.resetPosition()
-        } label: { Label("Reset Position", systemImage: "arrow.clockwise") }
+        Divider()
 
+        // ── Character state ───────────────────────────────────────────────────
         Button {
             if characterViewModel.animationState == .sleeping {
                 characterViewModel.setState(.idle)
@@ -189,7 +224,7 @@ struct CharacterContextMenu: View {
         } label: {
             Label(
                 characterViewModel.animationState == .sleeping ? "Wake Up" : "Sleep",
-                systemImage: characterViewModel.animationState == .sleeping ? "sun.max" : "moon.zzz"
+                systemImage: characterViewModel.animationState == .sleeping ? "sun.max" : "moon.zzz.fill"
             )
         }
 
@@ -198,14 +233,37 @@ struct CharacterContextMenu: View {
         } label: {
             Label(
                 characterViewModel.isMuted ? "Unmute" : "Mute",
-                systemImage: characterViewModel.isMuted ? "speaker.wave.2" : "speaker.slash"
+                systemImage: characterViewModel.isMuted ? "speaker.wave.2.fill" : "speaker.slash.fill"
             )
         }
         .keyboardShortcut("m", modifiers: .option)
 
+        if let walk = characterViewModel.walkManager {
+            Button {
+                walk.walkNow()
+            } label: { Label("Walk Now", systemImage: "figure.walk") }
+            .disabled(walk.isWalking)
+
+            Button {
+                walk.isEnabled.toggle()
+            } label: {
+                Label(
+                    walk.isEnabled ? "Disable Auto-Walk" : "Enable Auto-Walk",
+                    systemImage: walk.isEnabled ? "figure.walk.slash" : "figure.walk"
+                )
+            }
+        }
+
+        Button {
+            windowManager.resetPosition()
+        } label: { Label("Reset Position", systemImage: "arrow.counterclockwise") }
+
+        Divider()
+
+        // ── Fun ───────────────────────────────────────────────────────────────
         Button {
             characterViewModel.roastMe()
-        } label: { Label("Roast Me", systemImage: "flame") }
+        } label: { Label("Roast Me", systemImage: "flame.fill") }
         .disabled(characterViewModel.roastModeManager.isRoasting)
 
         let anyDemoRunning = demoManager.isRunning
@@ -213,14 +271,21 @@ struct CharacterContextMenu: View {
             Button {
                 demoManager.start(.v1)
             } label: {
-                Label("V1 Demo", systemImage: "play.rectangle")
+                Label("V1 Demo", systemImage: "1.circle")
             }
             .disabled(anyDemoRunning)
 
             Button {
                 demoManager.start(.v2)
             } label: {
-                Label("V2 Demo", systemImage: "play.rectangle.on.rectangle")
+                Label("V2 Demo", systemImage: "2.circle")
+            }
+            .disabled(anyDemoRunning)
+
+            Button {
+                demoManager.start(.v3)
+            } label: {
+                Label("V3 Demo", systemImage: "3.circle")
             }
             .disabled(anyDemoRunning)
 
@@ -229,28 +294,28 @@ struct CharacterContextMenu: View {
                 Button {
                     demoManager.stop()
                 } label: {
-                    Label("Stop Demo", systemImage: "stop.circle")
+                    Label("Stop Demo", systemImage: "stop.circle.fill")
                 }
             }
         } label: {
             Label(
                 anyDemoRunning ? "Stop Demo" : "Demo",
-                systemImage: anyDemoRunning ? "stop.circle" : "play.rectangle"
+                systemImage: anyDemoRunning ? "stop.circle.fill" : "play.rectangle.fill"
             )
         }
 
         Divider()
 
-        // ── Settings & help ───────────────────────────────────────────────────
-        Button {
-            NotificationCenter.default.post(name: .claudyOpenSettings, object: nil)
-        } label: { Label("Settings…", systemImage: "gear") }
-
+        // ── Utilities ─────────────────────────────────────────────────────────
         Button { onShowScratchpad() } label: { Label("Scratchpad", systemImage: "note.text") }
 
-        Button { onShowHelp() } label: { Label("Help", systemImage: "questionmark.circle") }
+        Button {
+            NotificationCenter.default.post(name: .claudyOpenSettings, object: nil)
+        } label: { Label("Settings…", systemImage: "gearshape.fill") }
 
-        Button { onShowDonate() } label: { Label("Support Claud-y…", systemImage: "heart") }
+        Button { onShowHelp() } label: { Label("Help", systemImage: "questionmark.circle.fill") }
+
+        Button { onShowDonate() } label: { Label("Support Claud-y…", systemImage: "heart.fill") }
 
         Divider()
 

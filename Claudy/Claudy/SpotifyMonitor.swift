@@ -1,4 +1,4 @@
-import Foundation
+@preconcurrency import Foundation
 import OSLog
 
 private let logger = Logger(subsystem: "com.claudy", category: "SpotifyMonitor")
@@ -31,7 +31,7 @@ enum SpotifyGenre {
 final class SpotifyMonitor {
 
     @ObservationIgnored private weak var viewModel: CharacterViewModel?
-    @ObservationIgnored private var observer: NSObjectProtocol?
+    @ObservationIgnored private nonisolated(unsafe) var observer: NSObjectProtocol?
     @ObservationIgnored private var lastTrack: String = ""
 
     // MARK: - Init / deinit

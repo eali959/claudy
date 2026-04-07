@@ -176,10 +176,42 @@ final class ReactionLibraryService {
         let choices   = available.isEmpty ? pool : available
         let picked    = choices.randomElement() ?? pool[0]
 
+        // Keep up to half the pool size as the rolling window, max 8 (RESP-04)
+        let windowSize = min(8, max(3, pool.count / 2))
         var updated = recent + [picked]
-        if updated.count > 3 { updated.removeFirst() }
+        while updated.count > windowSize { updated.removeFirst() }
         recentlyUsed[key] = updated
         return picked
+    }
+
+    // MARK: - Language reload (LANG-01)
+
+    /// Reload the reaction pool for a new language.
+    /// Starts from the English base, then overlays any translated keys from the
+    /// language-specific JSON file (e.g. ReactionLibrary_es.json).
+    /// Calling with .english restores the pure English library.
+    func reloadForLanguage(_ language: AppLanguage) {
+        loadLibrary()  // reset to English base
+        recentlyUsed.removeAll()
+
+        guard let fileName = language.reactionLibraryFileName else {
+            logger.info("Language reset to English — using ReactionLibrary.json")
+            return
+        }
+        guard let url = Bundle.main.url(forResource: fileName, withExtension: "json") else {
+            logger.warning("No reaction file for language \(language.rawValue) — using English")
+            return
+        }
+        guard let data = try? Data(contentsOf: url),
+              let overlay = try? JSONDecoder().decode([String: [String]].self, from: data) else {
+            logger.error("Failed to decode \(fileName).json — using English")
+            return
+        }
+        // Merge: language-specific keys override English; missing keys fall back to English
+        for (key, strings) in overlay where !strings.isEmpty {
+            library[key] = strings
+        }
+        logger.info("Loaded \(overlay.count) translated triggers from \(fileName).json")
     }
 
     // MARK: - Load

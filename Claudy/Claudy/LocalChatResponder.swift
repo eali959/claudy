@@ -39,7 +39,7 @@ final class LocalChatResponder {
 
     func respond(to input: String, personality: PersonalityMode = .companion) -> String {
         let s = input.lowercased().trimmingCharacters(in: .whitespacesAndNewlines)
-        guard !s.isEmpty else { return pick(fallback) }
+        guard !s.isEmpty else { return pick(fallbackResponses) }
 
         // Consecutive message tracking
         let now = Date()
@@ -577,9 +577,9 @@ final class LocalChatResponder {
 
         // Fallback - optionally append bonus at count 3
         if consecutiveCount == 3 {
-            return "\(pick(fallback))\n\n\(pick(bonusAtThree))"
+            return "\(pick(fallbackResponses))\n\n\(pick(bonusAtThree))"
         }
-        return pick(fallback)
+        return pick(fallbackResponses)
     }
 
     // MARK: - Helpers

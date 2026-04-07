@@ -1,5 +1,6 @@
 import AppKit
 import SwiftUI
+import SwiftData
 import OSLog
 
 @MainActor
@@ -9,9 +10,16 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     private var statusItem: NSStatusItem?
     private var settingsWindow: NSWindow?
 
+    /// The app's SwiftData container — local-only, never synced to iCloud.
+    /// Nil only if the container fails to initialise (store corruption, disk full).
+    /// Access from TamagotchiManager: `(NSApp.delegate as? AppDelegate)?.modelContainer`
+    private(set) var modelContainer: ModelContainer?
+
     func applicationDidFinishLaunching(_ notification: Notification) {
         // Accessory mode: no Dock icon, no menu bar (app menu is replaced by our status item)
         NSApp.setActivationPolicy(.accessory)
+
+        initSwiftData()
 
         floatingWindowController = FloatingWindowController()
         floatingWindowController?.showWindow(nil)
@@ -36,6 +44,37 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
 
     func applicationWillTerminate(_ notification: Notification) {
         floatingWindowController?.savePosition()
+    }
+
+    // MARK: - SwiftData
+
+    private func initSwiftData() {
+        do {
+            let container = try TamagotchiContainer.make()
+            modelContainer = container
+            smokeTestSwiftData(container: container)
+            logger.info("SwiftData container ready")
+        } catch {
+            logger.error("SwiftData container failed: \(error.localizedDescription) — Tamagotchi features unavailable")
+        }
+    }
+
+    private func smokeTestSwiftData(container: ModelContainer) {
+        let context = ModelContext(container)
+        do {
+            let existing = try context.fetch(FetchDescriptor<TamagotchiState>())
+            if existing.isEmpty {
+                let state = TamagotchiState()
+                context.insert(state)
+                try context.save()
+                logger.info("SwiftData: TamagotchiState created (first launch)")
+            } else {
+                let s = existing[0]
+                logger.info("SwiftData: TamagotchiState loaded — hunger=\(s.hunger) happiness=\(s.happiness) energy=\(s.energy)")
+            }
+        } catch {
+            logger.error("SwiftData smoke test failed: \(error.localizedDescription)")
+        }
     }
 
     // MARK: - Menu Bar
@@ -175,7 +214,9 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
                 object: window,
                 queue: .main
             ) { _ in
-                NSApp.setActivationPolicy(.accessory)
+                Task { @MainActor in
+                    NSApp.setActivationPolicy(.accessory)
+                }
             }
         }
 

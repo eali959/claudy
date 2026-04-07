@@ -82,7 +82,7 @@ struct AppearanceSettingsSection: View {
             }
             .padding(.vertical, 4)
         } header: {
-            Text("Appearance").font(.headline)
+            Label("Appearance", systemImage: "paintbrush.fill").font(.headline)
         }
     }
 

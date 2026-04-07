@@ -1,11 +1,12 @@
 {
   "images" : [
     {
-      "filename" : "claudy-menubar.png",
+      "filename" : "claudy-menubar@1x.png",
       "idiom" : "universal",
       "scale" : "1x"
     },
     {
+      "filename" : "claudy-menubar@2x.png",
       "idiom" : "universal",
       "scale" : "2x"
     },

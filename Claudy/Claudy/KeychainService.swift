@@ -42,7 +42,7 @@ enum APIProvider: String, CaseIterable, Sendable {
         }
     }
 
-    var keychainAccount: String {
+    nonisolated var keychainAccount: String {
         switch self {
         case .claude: return "claude-api-key"
         case .openai: return "openai-api-key"
@@ -104,7 +104,7 @@ enum APIProvider: String, CaseIterable, Sendable {
         }
     }
 
-    static var selected: APIProvider {
+    nonisolated static var selected: APIProvider {
         let raw = UserDefaults.standard.string(forKey: "SelectedProvider") ?? "claude"
         return APIProvider(rawValue: raw) ?? .claude
     }

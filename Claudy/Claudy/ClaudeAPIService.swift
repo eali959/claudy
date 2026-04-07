@@ -71,10 +71,6 @@ actor ClaudeAPIService {
         APIProvider.allCases.contains { KeychainService.has(for: $0) }
     }
 
-    private var model: String {
-        UserDefaults.standard.string(forKey: DefaultsKeys.selectedModel) ?? Self.defaultModel
-    }
-
     private var lastUnpromptedTime: Date = .distantPast
     private let unpromptedInterval: TimeInterval = 60
 

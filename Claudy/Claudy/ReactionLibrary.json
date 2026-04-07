@@ -648,7 +648,15 @@
     "Big plans?",
     "Good to see you.",
     "What are we building today?",
-    "The screen is yours. What are we doing?"
+    "The screen is yours. What are we doing?",
+    "Back at it. Let us go.",
+    "Glad you are here. I mean that.",
+    "Right, where were we?",
+    "You showed up. That is the hardest part. Now let us work.",
+    "Hello! What is happening today?",
+    "Ah, you are here. Good. I had things to say.",
+    "We are back. What is the mission?",
+    "Start strong. What are we doing?"
   ],
   "greeting_morning": [
     "Morning! Coffee or chaos first?",
@@ -656,13 +664,23 @@
     "Good morning. Let us make it count.",
     "Rise and shine. I have been ready for hours.",
     "Morning. Let us do this.",
-    "Fresh day. Fresh bugs to find."
+    "Fresh day. Fresh bugs to find.",
+    "Good morning! The day is full of potential.",
+    "Morning energy. Let us use it wisely.",
+    "Up and at it. What is the plan today?",
+    "Another morning. Another chance to build something great.",
+    "You made it to morning. Honestly impressive.",
+    "Morning. Tea, coffee, or straight into it?"
   ],
   "greeting_afternoon": [
     "Afternoon. How is it going?",
     "Deep in the zone?",
     "Afternoon check-in. Still alive?",
-    "Good afternoon. What did we miss?"
+    "Good afternoon. What did we miss?",
+    "Afternoon! How has the day treated you?",
+    "Past noon. Hopefully past the hardest bit too.",
+    "Afternoon check. Productivity levels?",
+    "Good afternoon. Plenty of day left."
   ],
   "greeting_wake": [
     "Oh! You are back.",
@@ -671,14 +689,27 @@
     "Ah, you returned. As I predicted.",
     "There you are.",
     "I knew you would come back.",
-    "The screen wakes. So do I."
+    "The screen wakes. So do I.",
+    "You were gone. Now you are here. Balance restored.",
+    "Back from the away mission. What did I miss?",
+    "Welcome back. Ready to pick up where we left off?",
+    "There they are. Everything okay?",
+    "Back at the screen. Let us make the most of it.",
+    "You are back! Now let us actually get something done.",
+    "Returned. The work awaits, patiently."
   ],
   "greeting_late_night": [
     "You again. At this hour.",
     "Late night session. I respect it.",
     "The dedicated ones always come back.",
     "Still going? Legend.",
-    "Burning the midnight oil. Classic dev energy."
+    "Burning the midnight oil. Classic.",
+    "Late night energy. Some of the best work happens now.",
+    "Still here. So am I. Let us make this count.",
+    "Most people are asleep. Not us.",
+    "Night owl mode. I will keep you company.",
+    "Late? Maybe. But we are getting it done.",
+    "The quiet hours. Perfect for deep work."
   ],
 
   "user_thanks": [
@@ -696,21 +727,40 @@
     "I will be here.",
     "No rush. I am patient. Mostly.",
     "Whenever you are ready.",
-    "...I am fine. Totally fine. Not bored at all."
+    "...I am fine. Totally fine. Not bored at all.",
+    "You have been quiet. I am not worried. Just noting it.",
+    "No pressure. I have all day.",
+    "The cursor is blinking. I am also blinking. Solidarity.",
+    "Still here. Still rooting for you.",
+    "Taking your time? Take all of it.",
+    "Your silence has character. I respect it.",
+    "Deep in thought? So am I. Probably about snacks.",
+    "You know I am here if you need me.",
+    "Peaceful. Very peaceful. The kind of peaceful that makes me curious."
   ],
   "idle_wander": [
     "Just stretching.",
     "Exploring.",
     "Do not mind me.",
     "Checking the corners.",
-    "The screen is my domain."
+    "The screen is my domain.",
+    "Just having a wander.",
+    "Needed to move. You understand.",
+    "Stretching my little legs.",
+    "Changed my view. Metaphorically and literally."
   ],
   "hourly_chime": [
     "Another hour. Another opportunity.",
     "Tick tock.",
     "Time flies when you are productive.",
     "Hour check. How are we doing?",
-    "One more hour. Make it count."
+    "One more hour. Make it count.",
+    "A whole hour has passed. What do you have to show for it?",
+    "Time update: still going. You are still going. Excellent.",
+    "That was an hour. Not judging how you spent it. Just observing.",
+    "The clock moved. Did you move with it?",
+    "One hour down. The day is not over yet.",
+    "Another hour in the books. How is everything feeling?"
   ],
 
   "mute_on": [

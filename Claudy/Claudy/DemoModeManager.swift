@@ -3,18 +3,19 @@ import SwiftUI
 import OSLog
 
 /// Scripted demo mode for promotional screen recordings.
-/// Supports two variants:
+/// Supports three variants:
 ///   - .v1 — Original ~32-second sequence (Shift+Option+D or right-click → V1 Demo)
 ///   - .v2 — Extended ~55-second sequence with side labels (Shift+Option+V or right-click → V2 Demo)
+///   - .v3 — v3.0 feature showcase ~56-second sequence (right-click → V3 Demo)
 ///
-/// Both variants run from a single manager instance.
+/// All variants run from a single manager instance.
 @Observable
 @MainActor
 final class DemoModeManager {
 
     // MARK: - Demo variant
 
-    enum DemoVariant { case v1, v2 }
+    enum DemoVariant { case v1, v2, v3 }
 
     // MARK: - Observable state (drives UI in CharacterRootView / CharacterSceneView)
 
@@ -116,8 +117,9 @@ final class DemoModeManager {
             logger.warning("Demo start called but not ready - isRunning=\(self.isRunning), character=\(self.character != nil), chat=\(self.chat != nil)")
             return
         }
-        logger.info("Demo mode starting (\(variant == .v1 ? "V1" : "V2"))")
-        if variant == .v2 { savedMode = character.behaviorModeManager.currentMode }
+        let variantName = variant == .v1 ? "V1" : variant == .v2 ? "V2" : "V3"
+        logger.info("Demo mode starting (\(variantName))")
+        if variant == .v2 || variant == .v3 { savedMode = character.behaviorModeManager.currentMode }
         isRunning = true
         stopInterruptMonitor()
         startInterruptMonitor()
@@ -128,6 +130,7 @@ final class DemoModeManager {
             switch variant {
             case .v1: await self.runV1Sequence(character: character, chat: chat)
             case .v2: await self.runV2Sequence(character: character, chat: chat)
+            case .v3: await self.runV3Sequence(character: character, chat: chat)
             }
             if self.isRunning { self.stop() }
         }
@@ -527,6 +530,172 @@ final class DemoModeManager {
 
         // ── Wind down ──────────────────────────────────────────────────────────
         hideLabel()
+        character.setState(.sleeping)
+        guard await wait(0.8) else { return }
+        character.setState(.idle)
+    }
+
+    // MARK: - V3 Demo sequence (~55 seconds)
+    //
+    // Showcases v3.0 features for social media: cute, Claud-y-humour style.
+    // Structure: Intro → Tamagotchi → 10 Languages → Accessories →
+    //            Personality Blend → Activity States → AI Chat UX → CTA
+
+    private func runV3Sequence(character: CharacterViewModel, chat: ChatViewModel) async {
+
+        // ── Scene 1 — Intro (0s) ─────────────────────────────────────────────
+        character.wave()
+        SoundManager.shared.play(.bubblePop)
+        character.showBubbleDirect("v3.0. I got an upgrade.", duration: 3.0)
+        look(character, x: 8, y: -3)
+        guard await wait(0.7) else { return }
+        lookCenter(character)
+        guard await wait(2.5) else { return }
+
+        SoundManager.shared.play(.bubblePop)
+        character.showBubbleDirect("Several, actually.", duration: 2.5)
+        guard await wait(3.0) else { return }
+
+        // ── Scene 2 — Tamagotchi (6s) ────────────────────────────────────────
+        showLabel("Tamagotchi", items: ["Hunger", "Happiness", "Energy"], active: "Happiness")
+        character.beSurprised()
+        guard await wait(0.5) else { return }
+        SoundManager.shared.play(.bubblePop)
+        character.showBubbleDirect("I have feelings now. Simulated. But still.", duration: 4.0)
+        look(character, x: -5, y: 2)
+        guard await wait(2.0) else { return }
+        lookCenter(character)
+        guard await wait(2.5) else { return }
+        hideLabel()
+        guard await wait(0.4) else { return }
+
+        // ── Scene 3 — 10 Languages (12.9s) ───────────────────────────────────
+        let langs = ["🇬🇧 English", "🇪🇸 Español", "🇫🇷 Français", "🇩🇪 Deutsch",
+                     "🇧🇷 Português", "🇯🇵 日本語", "🇨🇳 中文", "🇮🇳 हिन्दी", "🇵🇰 اردو", "🇸🇦 العربية"]
+        showLabel("10 Languages", items: langs, active: "🇬🇧 English")
+        SoundManager.shared.play(.bubblePop)
+        character.showBubbleDirect("Available in 10 languages. Right-to-left included.", duration: 3.5)
+        guard await wait(1.2) else { return }
+        // Cycle through a few language highlights
+        for lang in ["🇯🇵 日本語", "🇸🇦 العربية", "🇪🇸 Español"] {
+            highlightItem(lang)
+            guard await wait(0.8) else { return }
+        }
+        highlightItem("🇬🇧 English")
+        guard await wait(1.5) else { return }
+        hideLabel()
+        guard await wait(0.4) else { return }
+
+        // ── Scene 4 — Accessories (19.3s) ────────────────────────────────────
+        showLabel("6 Accessories", items: ["Glasses", "Tinted Sunnies", "Top Hat", "Cap Forward", "Cap Backward", "None"], active: "None")
+        SoundManager.shared.play(.bubblePop)
+        character.showBubbleDirect("I got new hats. Multiple.", duration: 3.5)
+        guard await wait(1.0) else { return }
+
+        // Cycle accessories quickly
+        highlightItem("Top Hat")
+        CharacterAccessory.active = .heisenbergHat
+        guard await wait(1.0) else { return }
+        highlightItem("Tinted Sunnies")
+        CharacterAccessory.active = .tintedSunnies
+        guard await wait(1.0) else { return }
+        highlightItem("Cap Backward")
+        CharacterAccessory.active = .capBackward
+        guard await wait(1.0) else { return }
+        highlightItem("None")
+        CharacterAccessory.active = .none
+        guard await wait(0.8) else { return }
+        hideLabel()
+        guard await wait(0.3) else { return }
+
+        // ── Scene 5 — Personality Blend (25.4s) ──────────────────────────────
+        showLabel("Personality Blend", items: ["Listener × Hype Coach", "0–100% slider", "Works in all modes"], active: "Listener × Hype Coach")
+        SoundManager.shared.play(.bubblePop)
+        character.showBubbleDirect(
+            "Mix two personalities. Listener × Hype Coach is… a lot.",
+            duration: 4.5
+        )
+        character.setTalking()
+        look(character, x: 5, y: -4)
+        guard await wait(2.5) else { return }
+        lookCenter(character)
+        guard await wait(2.5) else { return }
+        character.stopTalking()
+        hideLabel()
+        guard await wait(0.3) else { return }
+
+        // ── Scene 6 — Activity States + Walk (32.7s) ─────────────────────────
+        showLabel("Activity States", items: ["Coding", "Studying", "Walking", "Sleeping"], active: "Walking")
+        character.setState(.walking)
+        SoundManager.shared.play(.bubblePop)
+        character.showBubbleDirect("I go for walks now. Along your dock. Very professional.", duration: 4.5)
+        guard await wait(3.5) else { return }
+        character.setState(.idle)
+        hideLabel()
+        guard await wait(0.4) else { return }
+
+        // ── Scene 7 — AI Chat UX (37.6s) ─────────────────────────────────────
+        showLabel("Chat UX", items: ["Markdown", "Token counter", "System prompts"], active: "Markdown")
+        look(character, x: 0, y: 8)
+        guard await wait(0.3) else { return }
+        withAnimation(.spring(response: 0.35, dampingFraction: 0.8)) { chat.isOpen = true }
+        SoundManager.shared.play(.chatOpen)
+        lookCenter(character)
+        guard await wait(0.8) else { return }
+
+        chat.injectMessage("can you help me write a commit message", role: .user)
+        guard await wait(0.6) else { return }
+        character.setThinking()
+        look(character, x: -5, y: -5)
+        guard await wait(1.5) else { return }
+
+        highlightItem("Markdown")
+        chat.injectMessage(
+            "**`fix: resolve null pointer in UserService`**\n\nKeep it short. Past tense. Honest about what actually broke.",
+            role: .assistant
+        )
+        SoundManager.shared.play(.bubblePop)
+        character.setTalking()
+        lookCenter(character)
+        guard await wait(1.0) else { return }
+        character.nod()
+        guard await wait(3.5) else { return }
+        character.stopTalking()
+        guard await wait(0.5) else { return }
+
+        chat.injectMessage("perfect thank you", role: .user)
+        guard await wait(0.4) else { return }
+        character.celebrate()
+        character.triggerConfetti()
+        SoundManager.shared.play(.celebrate)
+        chat.injectMessage("I know. You're welcome. Now push it.", role: .assistant)
+        guard await wait(3.5) else { return }
+
+        hideLabel()
+        withAnimation(.spring(response: 0.35, dampingFraction: 0.8)) { chat.isOpen = false }
+        guard await wait(0.5) else { return }
+        character.setState(.idle)
+
+        // ── Scene 8 — CTA (51s) ──────────────────────────────────────────────
+        character.wave()
+        SoundManager.shared.play(.bubblePop)
+        character.showBubbleDirect("Still free. Still here.\nJust with better hats.", duration: 5.0)
+        look(character, x: 7, y: -2)
+        guard await wait(1.0) else { return }
+        lookCenter(character)
+        guard await wait(2.0) else { return }
+
+        // Slow double blink — warm goodbye
+        character.isBlinking = true
+        guard await wait(0.35) else { return }
+        character.isBlinking = false
+        guard await wait(0.45) else { return }
+        character.isBlinking = true
+        guard await wait(0.35) else { return }
+        character.isBlinking = false
+        guard await wait(1.2) else { return }
+
+        // ── Wind down (~56s) ─────────────────────────────────────────────────
         character.setState(.sleeping)
         guard await wait(0.8) else { return }
         character.setState(.idle)

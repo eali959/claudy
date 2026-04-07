@@ -9,6 +9,7 @@ struct ChatView: View {
     @FocusState private var inputFocused: Bool?
     @AppStorage(DefaultsKeys.chatFontSize)      private var chatFontSize: Double = 14
     @AppStorage(DefaultsKeys.chatWindowOpacity) private var chatWindowOpacity: Double = 1.0
+    @AppStorage(DefaultsKeys.renderMarkdown)    private var renderMarkdown: Bool = true
 
     @State private var resizeDragStartHeight: CGFloat? = nil
     @State private var showExportSheet = false
@@ -40,7 +41,7 @@ struct ChatView: View {
             Button("Continue") { viewModel.toggleMode() }
             Button("Stay local", role: .cancel) {}
         } message: {
-            Text("In AI mode, your messages are sent to Anthropic's Claude API using the key you saved in Settings. macOS may ask for your keychain password - that's your Mac protecting your key, not Claud-y.\n\nClaud-y stores nothing. No history, no analytics, no telemetry. Your key never leaves your device except to reach Anthropic directly.")
+            Text("API mode powers Claud-y's live reactions, quick-chat, and in-the-moment responses. It's designed to make the companion feel alive — not to replace a dedicated AI tool for long or complex work. For deep tasks, use Claude.ai, ChatGPT, or Gemini directly.\n\nYour messages are sent to the provider's API using your key. macOS may ask for your keychain password — that's your Mac protecting the key, not Claud-y. No history, no analytics, no telemetry. Your key never leaves your device except to reach the provider directly.")
         }
     }
 
@@ -272,42 +273,78 @@ struct ChatView: View {
 
     // MARK: - Message list
 
+    // MARK: - Message list (CHAT-01: scroll-to-bottom button)
+
+    @State private var isAtBottom = true
+
     private var messageList: some View {
-        ScrollViewReader { proxy in
-            ScrollView {
-                LazyVStack(spacing: 10) {
-                    ForEach(viewModel.messages) { message in
-                        ChatMessageBubble(message: message)
-                            .id(message.id)
-                    }
+        ZStack(alignment: .bottomTrailing) {
+            ScrollViewReader { proxy in
+                ScrollView {
+                    LazyVStack(spacing: 10) {
+                        ForEach(viewModel.messages) { message in
+                            ChatMessageBubble(message: message,
+                                             renderMarkdown: renderMarkdown)
+                                .id(message.id)
+                        }
 
-                    if viewModel.isTyping {
-                        TypingIndicatorView()
-                            .id("typing-indicator")
-                            .transition(.opacity.combined(with: .scale(scale: 0.8, anchor: .bottomLeading)))
-                    }
+                        if viewModel.isTyping {
+                            TypingIndicatorView()
+                                .id("typing-indicator")
+                                .transition(.opacity.combined(with: .scale(scale: 0.8, anchor: .bottomLeading)))
+                        }
 
-                    if let error = viewModel.errorMessage {
-                        ErrorBanner(message: error)
+                        if let error = viewModel.errorMessage {
+                            ErrorBanner(message: error)
+                        }
+
+                        // Invisible anchor at the bottom for scroll detection (CHAT-01)
+                        Color.clear.frame(height: 1).id("bottom-anchor")
+                    }
+                    .animation(.spring(response: 0.3, dampingFraction: 0.8), value: viewModel.isTyping)
+                    .padding(.horizontal, 14)
+                    .padding(.vertical, 12)
+                }
+                .onChange(of: viewModel.messages.count) { _, _ in
+                    isAtBottom = true
+                    if let last = viewModel.messages.last {
+                        withAnimation { proxy.scrollTo(last.id, anchor: .bottom) }
                     }
                 }
-                .animation(.spring(response: 0.3, dampingFraction: 0.8), value: viewModel.isTyping)
-                .padding(.horizontal, 14)
-                .padding(.vertical, 12)
-            }
-            .onChange(of: viewModel.messages.count) { _, _ in
-                if let last = viewModel.messages.last {
-                    withAnimation { proxy.scrollTo(last.id, anchor: .bottom) }
+                .onChange(of: viewModel.messages.last?.content) { _, _ in
+                    if isAtBottom, let last = viewModel.messages.last {
+                        proxy.scrollTo(last.id, anchor: .bottom)
+                    }
                 }
-            }
-            .onChange(of: viewModel.messages.last?.content) { _, _ in
-                if let last = viewModel.messages.last {
-                    proxy.scrollTo(last.id, anchor: .bottom)
+                .onChange(of: viewModel.isTyping) { _, typing in
+                    if typing {
+                        isAtBottom = true
+                        withAnimation { proxy.scrollTo("typing-indicator", anchor: .bottom) }
+                    }
                 }
-            }
-            .onChange(of: viewModel.isTyping) { _, typing in
-                if typing {
-                    withAnimation { proxy.scrollTo("typing-indicator", anchor: .bottom) }
+                // Scroll-to-bottom button overlay (CHAT-01)
+                .overlay(alignment: .bottomTrailing) {
+                    if !isAtBottom && viewModel.messages.count > 3 {
+                        Button {
+                            isAtBottom = true
+                            withAnimation {
+                                if let last = viewModel.messages.last {
+                                    proxy.scrollTo(last.id, anchor: .bottom)
+                                }
+                            }
+                        } label: {
+                            Image(systemName: "arrow.down.circle.fill")
+                                .font(.system(size: 24))
+                                .foregroundStyle(Color(red: 0.784, green: 0.361, blue: 0.220))
+                                .background(Circle().fill(.regularMaterial).frame(width: 28, height: 28))
+                                .shadow(radius: 4)
+                        }
+                        .buttonStyle(.plain)
+                        .padding(.trailing, 14)
+                        .padding(.bottom, 10)
+                        .transition(.scale.combined(with: .opacity))
+                        .accessibilityLabel("Scroll to bottom")
+                    }
                 }
             }
         }
@@ -361,12 +398,24 @@ struct ChatView: View {
         .padding(.vertical, 11)
     }
 
-    // MARK: - Footer (only shown when conversation is getting long)
+    // MARK: - Footer
 
     @State private var showClearAlert = false
 
     @ViewBuilder
     private var tokenFooter: some View {
+        // Token estimate (CHAT-02) — always visible when there are messages
+        if !viewModel.messages.isEmpty && !viewModel.isNearContextLimit && !viewModel.showContextWarning {
+            HStack {
+                Spacer()
+                Text("~\(viewModel.approximateTokenCount) tokens · \(viewModel.messages.count) messages")
+                    .font(.system(size: 10))
+                    .foregroundStyle(.tertiary)
+                    .padding(.horizontal, 14)
+                    .padding(.vertical, 4)
+            }
+        }
+
         if viewModel.isNearContextLimit {
             // Urgent - conversation is very long
             Button { showClearAlert = true } label: {

@@ -3,7 +3,7 @@ import Foundation
 extension LocalChatResponder {
     // MARK: - Jokes
 
-    private let jokeResponses = [
+    var jokeResponses: [String] { [
         "Why do programmers prefer dark mode? Because light attracts bugs.",
         "A programmer's partner says: go to the shop, get a litre of milk, and if they have eggs, get a dozen. They come back with 12 litres of milk. 'They had eggs.'",
         "There are only 10 types of people in the world: those who understand binary, and those who don't.",
@@ -24,43 +24,43 @@ extension LocalChatResponder {
         "The best thing about a boolean is even if you're wrong, you're only off by a bit.",
         "Why did the developer quit their job? Because they didn't get arrays.",
         "Documentation is like wine: it's valuable, nobody makes enough of it, and everyone talks about it more than they actually do it.",
-    ]
+    ] }
 
     // MARK: - Weather
 
-    private let weatherResponses = [
+    var weatherResponses: [String] { [
         "I genuinely have no idea - I don't have internet access in Companion mode. Check your menu bar?",
         "No clue! I'm running locally. The window behind me might help though.",
         "Companion mode me can't check the weather. I'm very indoors.",
         "I can tell you the time. The weather is beyond my current powers.",
         "Entirely offline over here. Try your phone or - radical concept - a window.",
-    ]
+    ] }
 
     // MARK: - Timer / reminders
 
-    private let timerResponses = [
+    var timerResponses: [String] { [
         "I can't set reminders yet - but the focus timer might help. Right-click me → Start Focus Timer.",
         "Not in my toolkit yet. For timed focus, right-click and kick off a Pomodoro.",
         "Reminders are on the list. For now: right-click → Start Focus Timer for a 25-minute block.",
         "Can't set reminders in Companion mode, but I can start a focus timer - right-click to go.",
         "Not yet! But the Pomodoro timer is right there in the right-click menu.",
         "Still working on that one. Focus timer in the meantime - right-click me.",
-    ]
+    ] }
 
     // MARK: - API key / settings
 
-    private let apiKeyResponses = [
+    var apiKeyResponses: [String] { [
         "Right-click me → Settings, then add your Claude API key. Full AI chat unlocked immediately.",
         "Settings is in the right-click menu. Add your key and I become significantly smarter.",
         "Right-click → Settings → API Key. Paste it, hit Save. I'll wait.",
         "The key goes in Settings. Right-click me to get there. Takes 30 seconds.",
         "Or: tap the 'Companion' pill in the chat header to switch modes once your key is saved.",
         "Settings → API Key. Your key stays in your Mac's Keychain - nothing stored elsewhere.",
-    ]
+    ] }
 
     // MARK: - Existence
 
-    private let existenceResponses = [
+    var existenceResponses: [String] { [
         "I'm a desktop companion powered by Claude AI - but in Companion mode I run completely locally. Real enough to give you side-eye when you commit on Friday afternoon.",
         "Technically: a SwiftUI app on your Mac. Emotionally: something more. Don't read too much into it.",
         "AI underneath, but Claud-y on the outside. The vibes are different here.",
@@ -71,11 +71,11 @@ extension LocalChatResponder {
         "Present, local, and genuinely rooting for you. Does that count as real?",
         "That's a complicated question for something with eyes drawn on it. But yes, AI. Local AI.",
         "I run on your machine in Companion mode. No cloud. Just me and your CPU.",
-    ]
+    ] }
 
     // MARK: - Credits
 
-    private let creditsResponses = [
+    var creditsResponses: [String] { [
         "A developer who wanted a Clippy that didn't make them want to close the window. Here I am.",
         "Someone built me. I think they care about me. I try not to think about it too hard.",
         "Made with Swift, SwiftUI, and a lot of late nights. Sound familiar?",
@@ -84,11 +84,11 @@ extension LocalChatResponder {
         "A developer and Claude, making something together. Which is sort of the whole point.",
         "Someone who really didn't want to work alone.",
         "Built with love, late nights, and a lot of compiler errors. The real origin story of everything.",
-    ]
+    ] }
 
     // MARK: - Almost done
 
-    private let almostDoneResponses = [
+    var almostDoneResponses: [String] { [
         "So close. Don't rush the last bit - that's where bugs love to hide.",
         "Nearly there. What's the last thing between you and done?",
         "Almost! The finish line is not the place to cut corners.",
@@ -101,11 +101,11 @@ extension LocalChatResponder {
         "Don't rush the ending. The best code finishes cleanly.",
         "Almost. What's the one thing standing between you and done?",
         "So close. Test it before you ship it - the last 10% is where surprises live.",
-    ]
+    ] }
 
     // MARK: - Taking a break
 
-    private let breakResponses = [
+    var breakResponses: [String] { [
         "Good. Go. The code will still be broken when you get back.",
         "Breaks are not optional. They're maintenance. Come back fresh.",
         "Stepping away from a hard problem is sometimes the most productive thing you can do.",
@@ -118,11 +118,11 @@ extension LocalChatResponder {
         "Go get some water. Drink actual water. Come back.",
         "The break is part of the work. Don't feel guilty about it.",
         "The solution sometimes only comes after you stop looking for it.",
-    ]
+    ] }
 
     // MARK: - Build failed
 
-    private let buildFailedResponses = [
+    var buildFailedResponses: [String] { [
         "Build failed. Not the end of the world. What's the first error say?",
         "The build knows something you don't. Read it carefully - it's trying to help.",
         "First error only. Don't look at all of them. Just the first. What does it say?",
@@ -135,11 +135,11 @@ extension LocalChatResponder {
         "Read the whole error message. Not just the first line. The important part is usually further down.",
         "What was the last change before it went red?",
         "Build failures are honest. They're not judging you. What's the message?",
-    ]
+    ] }
 
     // MARK: - Deadline / crunch
 
-    private let deadlineResponses = [
+    var deadlineResponses: [String] { [
         "Deadline pressure is real. What's the minimum viable thing that needs to ship?",
         "Crunch time. What's truly necessary versus what would be nice?",
         "Scope is your friend right now. What can you cut without breaking the core?",
@@ -152,11 +152,11 @@ extension LocalChatResponder {
         "Three features that ship beat ten that don't. What are the three?",
         "Under deadline: prioritise ruthlessly. What can wait until after?",
         "What would 'good enough' look like? Sometimes that's the right bar.",
-    ]
+    ] }
 
     // MARK: - Thinking out loud
 
-    private let thinkingOutLoudResponses = [
+    var thinkingOutLoudResponses: [String] { [
         "Go ahead. I'm here. Sometimes the act of saying it is the whole fix.",
         "Think away. I'm a very good listener.",
         "I'm your rubber duck. Proceed.",
@@ -169,11 +169,11 @@ extension LocalChatResponder {
         "I'm here. Go on. The answer is usually in the explanation.",
         "Think through it. I'll catch anything that doesn't hold up.",
         "Words. Use them. The act of saying it out loud is surprisingly powerful.",
-    ]
+    ] }
 
     // MARK: - Milestone / first commit
 
-    private let milestoneResponses = [
+    var milestoneResponses: [String] { [
         "That counts. That's a real thing you did. Acknowledge it.",
         "First commit is the hardest one. Everything else is compounding on it.",
         "Milestone! Take a second to actually feel it.",
@@ -186,11 +186,11 @@ extension LocalChatResponder {
         "First commit. The beginning. Write a good message - you'll read it again someday.",
         "Milestones mark progress. You're further along than you were. That's real.",
         "That's one for the changelog. Well done.",
-    ]
+    ] }
 
     // MARK: - Pair programming
 
-    private let pairProgrammingResponses = [
+    var pairProgrammingResponses: [String] { [
         "Pair programming: twice the eyes, half the bugs, all the opinions. How's it going?",
         "Two people on one problem is genuinely powerful if you're actually switching roles. Are you?",
         "The driver/navigator model works well when both people commit to it. What's the dynamic?",
@@ -199,11 +199,11 @@ extension LocalChatResponder {
         "The hardest part of pairing is staying engaged when you're not typing. How are you doing?",
         "Switching driver/navigator every 25 minutes is the move. Are you doing that?",
         "Two brains on one problem. What are you two working through?",
-    ]
+    ] }
 
     // MARK: - Documentation
 
-    private let documentationResponses = [
+    var documentationResponses: [String] { [
         "Documentation: the thing everyone skips and everyone regrets skipping. Respect.",
         "Future you is going to be so grateful right now. Good call.",
         "The best docs are written while the why is still fresh. This is the right time.",
@@ -216,11 +216,11 @@ extension LocalChatResponder {
         "If it's not obvious from the code alone, document the intent. The 'why' is what gets lost.",
         "Docs are the gift that keeps giving long after you've moved on.",
         "Write the docs while the context is still warm. This is the window.",
-    ]
+    ] }
 
     // MARK: - Friday / weekend
 
-    private let fridayResponses = [
+    var fridayResponses: [String] { [
         "Friday! The most dangerous day to deploy and the best day to wrap something up. What's the plan?",
         "End of week energy. What would make this a good week to look back on?",
         "Friday! Are you shipping or saving it for Monday like a responsible adult?",
@@ -233,10 +233,11 @@ extension LocalChatResponder {
         "The weekend gate is open. What do you need to finish before you walk through it?",
         "Friday! Commit everything. Write up where you are. Then close the laptop guilt-free.",
         "The best Friday feeling: leaving with something shipped and the code in a good state.",
-    ]
+    ] }
+
     // MARK: - Fallback
 
-    private let fallback = [
+    var fallbackResponses: [String] { [
         "Hmm. Tell me more - I might surprise you.",
         "That's an interesting one. What's the context?",
         "I'm not sure I followed. Say more?",
@@ -253,6 +254,5 @@ extension LocalChatResponder {
         "I might need a bit more to work with there.",
         "Interesting question. What made you think of that?",
         "Not sure I followed that one. What's the situation?",
-    ]
-}
+    ] }
 }

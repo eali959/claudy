@@ -81,6 +81,11 @@ struct SettingsView: View {
                 timerBadgeScale: $timerBadgeScale,
                 chattinessLevel: $chattinessLevel
             )
+            LanguageSettingsSection()
+            PersonalityBlendSection()
+            ChatSettingsSection()
+            TamagotchiSettingsSection()
+            AccessorySettingsSection()
             QuickLaunchSettingsSection(
                 quickShortcuts: $quickShortcuts,
                 newShortcutName: $newShortcutName,

@@ -91,8 +91,11 @@ Right-click → Mode to switch. Every mode stacks with your personality — Dire
 - **Contextual reactions** — reacts to Xcode/Cursor builds, app switches, clipboard content, keyboard patterns, time of day, day of week, and more
 - **60+ apps detected** — Xcode, Cursor, Figma, Slack, Zoom, Notion, Obsidian, VS Code, full Microsoft Office suite, full Apple productivity suite, and more
 - **9 browsers** — Chrome, Safari, Edge, Firefox, Brave, Opera, DuckDuckGo, Helium, Arc — each with distinct personality-aware reactions
+- **Activity states** — Claud-y adopts different postures while you code, type, study, or browse
+- **Weather awareness** — reacts to your local weather using CoreLocation + Open-Meteo (no API key, no account)
 - **Public holiday awareness** — UK, US, Australia, Universal, and Islamic observances
 - **Spotify sync** — reacts to genre changes (metal → headbanging, lo-fi → vibing)
+- **10 languages** — full reaction pools and AI responses in English, Español, Français, Deutsch, Português, 日本語, 中文（简体）, हिन्दी, اردو, العربية
 
 ### Focus & productivity
 - **Pomodoro focus timer** — right-click to start; badge shows countdown; customisable durations
@@ -218,17 +221,20 @@ Requires macOS 15+ and Xcode 16+. Build and run the `Claudy` scheme. No dependen
 
 ---
 
-## v2.0 — what changed
+## v3.0 — what changed
 
-The big one. Highlights:
+The deep one. Highlights:
 
-- **3 AI providers** — Claude, ChatGPT, Gemini (your key, your choice, your data)
-- **Work Mode** — professional context, quieter, meeting/email/Slack aware
-- **8 new background systems** — global hotkey, Focus/DND sync, break nudges, focus stats, quick-action buttons, scratchpad, mood check-ins, daily wrap-up
-- **9 browsers detected** — including Helium ("A floating browser for a floating companion. We match.")
-- **60+ apps detected** — up from ~20
-- **400+ reactions** — up from ~200
-- **Brain Rot mode** — unhinged Gen Z energy that is somehow still helpful
+- **10 languages** — English, Español, Français, Deutsch, Português, 日本語, 中文（简体）, हिन्दी, اردو, العربية. Change in Settings → Language. Takes effect instantly.
+- **Tamagotchi system** — Claud-y has happiness, energy, and hunger. It has feelings now. (Simulated. But still.)
+- **Personality blending** — mix any two personalities on a 0–100% slider. Subtle whisper or full synthesis.
+- **Full mouth animation sync** — 15 distinct mouth shapes, all data-driven
+- **Activity states** — Claud-y adopts different postures for coding, typing, studying, reading
+- **Walk across screen** — roams to a new spot every ~10 minutes
+- **Weather awareness** — reacts to actual local weather (CoreLocation + Open-Meteo, no API key)
+- **6 accessories** — glasses, sunnies, hats. Dress Claud-y up.
+- **4,000+ reaction strings** — translated pools for all 10 languages
+- **Chat UX** — markdown toggle, scroll-to-bottom button, token counter, system prompt presets
 
 Full history in [CHANGELOG.md](CHANGELOG.md).
 
@@ -258,9 +264,9 @@ Your feedback and support genuinely shape what gets built next. Every bit of it 
 
 ## What's next
 
-- [ ] Persistent conversation history (opt-in)
 - [ ] More provider support
 - [ ] iOS companion (maybe, no promises)
+- [ ] More accessories and seasonal cosmetics
 
 Have ideas? [Open an issue](../../issues).
 

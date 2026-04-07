@@ -54,7 +54,12 @@ final class ClipboardMonitor {
 
     private func classify(_ text: String) -> ReactionTrigger {
         if let last = lastSeenContent, text == last { return .clipboardRepeat }
-        if isURL(text)        { return .clipboardUrl }
+        // CHAT-06: Detect StackOverflow / GitHub URLs specifically before generic URL
+        if isURL(text) {
+            if isStackOverflowURL(text) { return .stackOverflow }
+            if isGitHubURL(text)        { return .githubPR }
+            return .clipboardUrl
+        }
         if looksLikeCode(text) { return .clipboardCode }
         return .clipboardText
     }
@@ -62,6 +67,16 @@ final class ClipboardMonitor {
     private func isURL(_ text: String) -> Bool {
         let t = text.trimmingCharacters(in: .whitespacesAndNewlines)
         return t.hasPrefix("http://") || t.hasPrefix("https://")
+    }
+
+    private func isStackOverflowURL(_ text: String) -> Bool {
+        let lower = text.lowercased()
+        return lower.contains("stackoverflow.com") || lower.contains("stackexchange.com")
+    }
+
+    private func isGitHubURL(_ text: String) -> Bool {
+        let lower = text.lowercased()
+        return lower.contains("github.com") && (lower.contains("/pull/") || lower.contains("/issues/"))
     }
 
     private func looksLikeCode(_ text: String) -> Bool {

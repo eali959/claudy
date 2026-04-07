@@ -43,16 +43,26 @@ struct AboutSettingsSection: View {
                     .padding(.bottom, 8)
                 Grid(alignment: .leading, horizontalSpacing: 16, verticalSpacing: 6) {
                     shortcutRow("⌘⇧Space",         "Open / close chat (global)")
-                    shortcutRow("⌘ ,",            "Open Settings")
-                    shortcutRow("Escape",          "Close chat")
+                    shortcutRow("⌘ ,",             "Open Settings")
+                    shortcutRow("Escape",           "Close chat")
                     shortcutRow("⌥ M",             "Toggle mute")
                     shortcutRow("⇧ ⌥ D (hold 1s)", "Start Demo Mode")
                 }
                 .font(.system(size: 12))
             }
             .padding(.vertical, 6)
+
+            VStack(alignment: .leading, spacing: 6) {
+                Text("Language & Input")
+                    .font(.system(size: 12, weight: .semibold))
+                Text("Claud-y supports 10 languages — change in Settings → Language. The chat input works with any macOS input method (IME). For Japanese, Chinese, Hindi, Urdu, or Arabic, add the input source in System Settings → Keyboard → Input Sources and switch to it while typing. Arabic and Urdu flow right-to-left automatically.")
+                    .font(.system(size: 11))
+                    .foregroundStyle(.secondary)
+                    .fixedSize(horizontal: false, vertical: true)
+            }
+            .padding(.vertical, 6)
         } header: {
-            Text("About").font(.headline)
+            Label("About", systemImage: "info.circle.fill").font(.headline)
         }
     }
 

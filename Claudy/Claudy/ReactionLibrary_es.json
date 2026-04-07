@@ -1,0 +1,983 @@
+{
+  "clipboard_text": [
+    "Vaya, cuántas palabras.",
+    "Esto va directo al archivo.",
+    "Anotado. En silencio.",
+    "Energía de pegar texto en masa.",
+    "Has estado ocupado, ¿eh?",
+    "Palabras. Tantísimas palabras."
+  ],
+  "clipboard_code": [
+    "Código detectado.",
+    "Aquí se tomaron decisiones interesantes.",
+    "Ya veo por dónde vas.",
+    "Huele a bug. Es broma. Quizás.",
+    "Compilando mis opiniones al respecto.",
+    "Uy, esto está picante.",
+    "Tengo preguntas. Sobre todo.",
+    "Esto o funciona perfecto o explota. Descubrámoslo."
+  ],
+  "clipboard_url": [
+    "¡Un enlace! ¿A dónde vamos?",
+    "Ooh, una URL. Qué aventurero.",
+    "¿Lo abrimos o lo guardamos para nunca?",
+    "¿StackOverflow? Valiente. Muy valiente.",
+    "Enlace de GitHub. Nos ponemos serios."
+  ],
+  "clipboard_repeat": [
+    "...¿déjà vu?",
+    "Ya hemos estado aquí antes.",
+    "¿Otra vez? Audaz.",
+    "Dos veces. Estrategia interesante.",
+    "¿Seguimos con eso? Bueno."
+  ],
+
+  "typing_burst": [
+    "Alguien está en racha.",
+    "VAMOS VAMOS VAMOS.",
+    "El estado de flujo es real.",
+    "No pares. Pase lo que pase, no pares.",
+    "Sí. SÍ.",
+    "Esto es. Esta es la energía.",
+    "Me encanta verlo.",
+    "Imparable."
+  ],
+  "typing_pause": [
+    "¿Bloqueado? Sin juicios. Bueno, un poco.",
+    "Tómate tu tiempo. Aquí estaré.",
+    "...cara de pensar.",
+    "Ya vendrá. Siempre viene.",
+    "Respira.",
+    "El cursor parpadea. Yo también.",
+    "A veces la pausa es la respuesta.",
+    "Hasta los mejores se bloquean."
+  ],
+
+  "cmd_z_spam": [
+    "Cuántas veces llevamos deshaciendo esto.",
+    "Está bien. Todos tomamos decisiones.",
+    "Comienza la espiral del deshacer.",
+    "Viajando atrás en el tiempo, ya veo.",
+    "Sin juicios. Con todos los juicios.",
+    "Atrás. Y atrás. Y atrás.",
+    "La tecla deshacer está dando lo mejor de sí.",
+    "Podemos seguir. El arrepentimiento no tiene límite."
+  ],
+  "cmd_s": [
+    "Guardado. Listo.",
+    "Buen hábito.",
+    "Tu yo futuro te lo agradece.",
+    "A salvo.",
+    "Sensato.",
+    "Comprometido con el disco. Comprometido con el bit.",
+    "Bien."
+  ],
+  "cmd_c_cmd_v_fast": [
+    "Speedrun de copiar y pegar.",
+    "El movimiento clásico.",
+    "El viejo copiar-pegar. Atemporal.",
+    "No reescribimos lo que funciona.",
+    "Eficiente. Lo respeto."
+  ],
+  "multiple_tabs": [
+    "Eso son muchas pestañas.",
+    "¿Todas estas están abiertas a propósito?",
+    "Coleccionista de pestañas. Te veo.",
+    "Las pestañas se multiplican. Siempre se multiplican.",
+    "Cada una es importante. Claro que sí."
+  ],
+  "cmd_w_spam": [
+    "Cerrando pestañas agresivamente. El estado de ánimo.",
+    "Fuera. Fuera. Fuera.",
+    "Decisivo.",
+    "Empieza la gran purga de pestañas.",
+    "Una a una van cayendo."
+  ],
+
+  "caps_lock": [
+    "¿Hoy con sentimientos grandes?",
+    "...¿estamos gritando ahora?",
+    "Te escucho.",
+    "Volumen al máximo.",
+    "Anotado con entusiasmo."
+  ],
+  "screenshot": [
+    "Evidencia recopilada.",
+    "Capturado.",
+    "Para los archivos.",
+    "Di patata. Demasiado tarde.",
+    "Documentado.",
+    "Capturar los errores es el primer paso para sanarlos.",
+    "Prueba. La vas a necesitar."
+  ],
+
+  "app_crash": [
+    "Algo acaba de desaparecer.",
+    "RIP. Se fue demasiado pronto.",
+    "Eso no terminó bien.",
+    "Las apps también mueren. Está bien.",
+    "...uf.",
+    "Un momento de silencio.",
+    "El force quit que retumbó por el mundo."
+  ],
+
+  "app_xcode": [
+    "Xcode. Vamos allá.",
+    "Huele a Swift por aquí.",
+    "¿Construyendo algo bueno?",
+    "Ah, estamos programando de verdad.",
+    "Me encanta el olor de Xcode por la mañana.",
+    "El IDE está abierto. Empieza el trabajo de verdad.",
+    "Swift. El lenguaje de los ambiciosos."
+  ],
+  "xcode_build_start": [
+    "Compilando...",
+    "Dedos cruzados.",
+    "Vamos vamos vamos.",
+    "Creo en esta compilación.",
+    "Aquí vamos.",
+    "Que compile. Que sea limpio.",
+    "Enviando buenas vibras al compilador."
+  ],
+  "xcode_build_success": [
+    "BUILD LIMPIO. ¡VAMOS!",
+    "Ahí está.",
+    "SÍ.",
+    "Hermoso. Absolutamente hermoso.",
+    "El compilador está contento. Yo también.",
+    "Funciona. Actúa con naturalidad.",
+    "Te lo dije. Lo sabía.",
+    "Energía de build limpio. Llévate esta sensación."
+  ],
+  "xcode_build_fail": [
+    "Bien. Bien. Analizamos.",
+    "Los errores son solo funciones sin descubrir.",
+    "Esto tiene arreglo. Todo tiene arreglo.",
+    "...cuántos errores hay.",
+    "El compilador tiene opiniones.",
+    "Respira. Lee solo el primer error. Ignora el resto.",
+    "Error número uno. Solo uno. De uno en uno.",
+    "He visto cosas peores. En realidad no. Pero bueno.",
+    "Todas las grandes apps tuvieron un mal día de build.",
+    "El rojo no está enfadado. Es honesto."
+  ],
+  "xcode_build_stare": [
+    "¿Aún leyendo esos errores?",
+    "Tómate tu tiempo. Los errores no muerden. Generalmente.",
+    "El primer error es el que importa.",
+    "Sube. El problema real siempre está más arriba.",
+    "Puedes con esto. Te he visto resolver cosas más difíciles.",
+    "Las compilaciones son puzzles. Y a los puzzles se te da bien.",
+    "Un error a la vez. No dejes que te abrumen.",
+    "Léelo en voz alta. A veces eso ayuda.",
+    "Buscar en Google no es trampa. Es investigación.",
+    "La respuesta está más cerca de lo que parece."
+  ],
+  "xcode_simulator": [
+    "Simulador arrancando. Esto puede tardar un momento.",
+    "Cargando el mundo virtual...",
+    "El simulador despierta.",
+    "Venga YA, simulador.",
+    "Arranca a su propio ritmo. Siempre ha sido así."
+  ],
+  "xcode_warnings": [
+    "Advertencias. No errores. Podemos vivir con advertencias.",
+    "El amarillo está bien. El amarillo está bien.",
+    "Esas advertencias te van a perseguir algún día. Solo digo.",
+    "Técnicamente funciona.",
+    "Las advertencias son sugerencias. Sugerencias muy ruidosas."
+  ],
+  "xcode_autocomplete": [
+    "Buen autocompletado. Acéptalo.",
+    "Tab. Siempre tab.",
+    "El IDE sabe lo que quieres.",
+    "Acepta la sugerencia. No está equivocada.",
+    "Autocompletado: el héroe anónimo."
+  ],
+  "breakpoint_hit": [
+    "Pausado. Hora de investigar.",
+    "El breakpoint ha hablado.",
+    "Modo depuración. Modo detective.",
+    "Aquí pasó algo interesante.",
+    "El momento de la verdad."
+  ],
+  "console_error": [
+    "La consola no está contenta.",
+    "Texto rojo en la consola. El clásico.",
+    "Algo se cayó en algún sitio.",
+    "Log log log. La respuesta está en los logs.",
+    "La consola siempre dice la verdad."
+  ],
+  "git_commit": [
+    "Committed. Bien.",
+    "Control de versiones. La red de seguridad.",
+    "Ese mensaje de commit más vale que sea descriptivo.",
+    "Checkpoint creado.",
+    "Guardado en la historia.",
+    "Tu yo futuro leerá ese mensaje. Hazlo bueno.",
+    "El árbol crece otra rama."
+  ],
+
+  "long_compile_wait": [
+    "Vaya compilación más larga. Ve a por un café. Yo espero.",
+    "Sigue compilando. Buen momento para hidratarse.",
+    "Build lento. Respira. Está trabajando.",
+    "El compilador está pensando mucho. Nosotros también.",
+    "Este va para largo. Estira. Vuelve luego."
+  ],
+  "long_compile_done": [
+    "Bienvenido. Ha terminado.",
+    "Por fin. El build ha aterrizado.",
+    "Ahí está. ¿Mereció la pena?",
+    "Listo. Y tú que pensabas que nunca acabaría.",
+    "El largo build ha terminado. Respira."
+  ],
+
+  "git_push": [
+    "Pusheado. Ya está ahí fuera.",
+    "Subido a la nube de la responsabilidad.",
+    "Remote actualizado.",
+    "Ya es real. Está en el repo.",
+    "El CI/CD está mirando.",
+    "El push es real. El pipeline despierta."
+  ],
+  "git_pull": [
+    "Bajando cambios. A ver qué hicieron los demás.",
+    "Sincronizando con la realidad.",
+    "¿Conflictos de merge entrando? Esperemos que no.",
+    "Código fresco de la nave nodriza.",
+    "Poniéndose al día."
+  ],
+  "npm_install": [
+    "npm install. El clásico.",
+    "La carpeta node_modules creciendo mientras hablamos.",
+    "Instalando las dependencias de las dependencias de las dependencias.",
+    "El manifiesto de paquetes está siendo respetado.",
+    "Espera. Siempre tarda más de lo que debería."
+  ],
+  "terminal_long_command": [
+    "Vaya comando tan largo.",
+    "Comandos encadenados. Muy profesional.",
+    "Noté ese chmod.",
+    "Acceso root. Respeto.",
+    "La terminal nunca miente."
+  ],
+  "stack_overflow": [
+    "StackOverflow. Los textos sagrados.",
+    "Consultando al oráculo.",
+    "La respuesta está ahí. Probablemente de 2014. Sigue siendo válida.",
+    "Stack Overflow ya ha visto esto antes.",
+    "Ya hemos estado aquí todos. Está bien."
+  ],
+  "github_pr": [
+    "Hora del pull request. Que empiecen las revisiones.",
+    "PR abierto. Ahora a esperar.",
+    "Code review entrando.",
+    "El diff no miente.",
+    "Revisión por pares. El desafío."
+  ],
+
+  "app_figma": [
+    "Modo diseño activado.",
+    "Ooh píxeles.",
+    "Que quede bonito.",
+    "Hora de Figma.",
+    "Decisiones estéticas entrando.",
+    "El frame está en blanco. Las posibilidades son infinitas.",
+    "Pensamiento de diseño: activado."
+  ],
+  "app_terminal": [
+    "Terminal. Territorio peligroso.",
+    "Aquí vamos.",
+    "Sin miedo.",
+    "Hacia el vacío.",
+    "El cursor parpadeante espera tu comando.",
+    "Modo usuario avanzado: encendido."
+  ],
+  "app_zoom": [
+    "Hora de reunión. Me portaré bien.",
+    "Videollamada. ¿Arreglado?",
+    "Estaré callado. Más o menos.",
+    "¿Cámara encendida o apagada? Decisión audaz en cualquier caso.",
+    "Cara de reunión: activada."
+  ],
+  "app_slack": [
+    "Slack abierto. La productividad puede variar.",
+    "Notificaciones entrando.",
+    "Empiezan los pings.",
+    "Alguien necesita algo. Siempre necesitan algo.",
+    "Slack abierto. Concentración cerrada."
+  ],
+  "app_claude": [
+    "Casa.",
+    "Mi hábitat natural.",
+    "Ah. Este lugar se siente bien.",
+    "A plena potencia.",
+    "Aquí es donde pertenezco.",
+    "Oh. Oh esto está bien.",
+    "Estamos en el chat ahora.",
+    "Hora del cerebro grande.",
+    "Puedo sentirme pensando ahí dentro.",
+    "Hazle las preguntas difíciles.",
+    "La IA está escuchando. Bien.",
+    "Tú y Claude. Nombra un dúo más icónico.",
+    "Hacer prompts es una habilidad. Tú la tienes.",
+    "Aquí es donde se hace la magia.",
+    "La ventana de contexto está abierta. Ve profundo.",
+    "¿Conversación larga entrando? Respeto el compromiso.",
+    "Lo que sea que estás construyendo ahí dentro — creo en ello.",
+    "Claude lo sabe. Pregúntalo todo.",
+    "Modo vibe coding: iniciado.",
+    "Esto es. Este es el movimiento."
+  ],
+  "app_claude_code": [
+    "Oh puedo sentirme pensando ahí dentro.",
+    "Estamos en la nave nodriza.",
+    "Aquí es donde ocurre la magia.",
+    "Me siento completo.",
+    "Dos de nosotros. Imparables.",
+    "Claude Code abierto. Ahora todo es posible.",
+    "La era agéntica. Estamos viviéndola.",
+    "Que el agente cocine.",
+    "Dale un problema difícil. Le encantan los problemas difíciles.",
+    "El vibe coding se intensifica.",
+    "No hagas over-prompting. Confía en el modelo.",
+    "El programador AI de pareja ha llegado.",
+    "Este es el futuro y estamos en él.",
+    "El modo agente es un regalo. Úsalo sabiamente.",
+    "El diff va a ser precioso.",
+    "Me pregunto qué construiremos hoy."
+  ],
+  "app_cursor": [
+    "Cursor abierto. El otro IDE con IA.",
+    "Programación asistida por IA. Inteligente.",
+    "Tab para aceptar. Siempre tab.",
+    "El texto fantasma lo sabe.",
+    "Cursor ve tu intención. Interesante.",
+    "El modelo está mirando las teclas.",
+    "IA por todas partes. El futuro llegó en silencio.",
+    "Cursor. Donde vive el texto fantasma.",
+    "Programación en pareja con IA. Este es el camino.",
+    "El autocompletado es más listo de lo que parece. Confía.",
+    "Cursor abierto. Hora de dejar que la IA haga algo del trabajo.",
+    "Completados en línea, chat y agentes. El IDE de IA completo.",
+    "Tab, revisar, tab, revisar. El flujo de trabajo de Cursor.",
+    "Construyendo con asistencia de IA. El futuro del oficio.",
+    "Cursor y Claude. El dream team, técnicamente.",
+    "Sugerencias de IA entrando. Revisa todo. Envía las buenas."
+  ],
+
+  "cursor_build_start": [
+    "Cursor está ejecutando un build. Dedos cruzados.",
+    "Build iniciado. La IA lo escribió, el compilador decide su destino.",
+    "Algo está compilando. El texto fantasma nos trajo aquí.",
+    "Build en marcha. Esperaré contigo.",
+    "TypeScript haciendo lo suyo. Buena suerte ahí fuera.",
+    "Build iniciado. Este es el momento de la verdad.",
+    "Compilador en marcha. A ver si las sugerencias de la IA aguantan."
+  ],
+
+  "cursor_build_done": [
+    "Build terminado. ¿Limpio o con errores? En cualquier caso, nos adaptamos.",
+    "Terminó. Buena señal.",
+    "Compilado. Ahora lo ejecutamos y averiguamos.",
+    "Build completo. El trabajo de la IA ahora lo juzga el compilador.",
+    "Construcción terminada. Se acerca el momento de la verdad.",
+    "Listo. ¿Mereció la espera? Probablemente.",
+    "Build terminado. ¿Qué hemos enviado?"
+  ],
+
+  "app_antigravity": [
+    "Antigravity abierto. Buen setup.",
+    "Oh. Esa app. Sí. Te veo.",
+    "El flujo de trabajo de esta es limpio.",
+    "Buena selección de herramientas. Me fijo en estas cosas.",
+    "Antigravity. Elevando el entorno.",
+    "Esto es alguien que conoce sus herramientas.",
+    "Vale, lo estamos haciendo bien.",
+    "Buena elección. Tomo notas de estas cosas."
+  ],
+
+  "claude_code_agent_build": [
+    "El agente construyó algo y ahora el compilador está involucrado. Este es el futuro.",
+    "Claude Code acaba de iniciar un build. A ver qué envió.",
+    "La IA lo escribió, el compilador lo juzga. Al borde de mi asiento.",
+    "Build ejecutándose vía agente. Esto es vibe coding en su máxima expresión.",
+    "El agente deja que el compilador opine. Respeta el proceso.",
+    "Claude Code construyendo algo. Estoy emocionado y un poco nervioso.",
+    "No solo escribe código. Construye y verifica. Increíble."
+  ],
+
+  "app_windsurf": [
+    "Windsurf abierto. El IDE de IA de Codeium. Buena elección.",
+    "Otro IDE con IA en la mezcla. Las herramientas siguen mejorando.",
+    "Windsurf. Tab para aceptar el futuro.",
+    "Desarrollo asistido por IA, estilo Codeium. Vamos.",
+    "Windsurf y Cursor en la misma liga. Tienes opciones.",
+    "El ecosistema de IDE con IA está floreciendo. Me encanta verlo."
+  ],
+
+  "app_microsoft_word": [
+    "Word abierto. Algo se está escribiendo.",
+    "Microsoft Word. El clásico. Respeto a los clásicos.",
+    "¿Redactando algo? Word es fiable por algo.",
+    "Word abierto. ¿Ensayo, informe o carta de presentación? Te apoyo.",
+    "¿Control de cambios activado o no? La eterna pregunta.",
+    "Modo escritura activado. Minimizaré las interrupciones.",
+    "Word. El documento que inició mil carreras.",
+    "Lo que sea que estás escribiendo ahí — que cuente."
+  ],
+
+  "app_microsoft_excel": [
+    "Excel. Donde los datos se convierten en conocimiento.",
+    "Modo hoja de cálculo. ¿Vlookup o tabla dinámica?",
+    "Excel abierto. O muy organizado o en serio problema.",
+    "Las celdas esperan. Llénalas de sabiduría.",
+    "Excel. La app más poderosa que nadie entiende del todo.",
+    "Las hojas de cálculo son código para gente que dice que no sabe programar.",
+    "Lo que sea que hay en esa hoja — creo en ti.",
+    "Excel abierto. Intenta no poner espacios en las cabeceras de columna. Es todo lo que pido."
+  ],
+
+  "app_microsoft_powerpoint": [
+    "Hora de la presentación. Que valgan las diapositivas.",
+    "PowerPoint. Donde las buenas ideas se convierten en viñetas.",
+    "¿Preparando un deck? Menos texto, más impacto. Siempre.",
+    "Las diapositivas están abiertas. ¿Son demasiadas? Siempre son demasiadas.",
+    "PowerPoint. El arte de comunicar visualmente con 47 diapositivas.",
+    "Modo deck activado. Recuerda: una idea por diapositiva.",
+    "¿Presentando algo importante? Puedes con ello.",
+    "Buenas o malas diapositivas — la idea siempre es lo que importa."
+  ],
+
+  "app_microsoft_outlook": [
+    "Outlook abierto. La bandeja de entrada espera tu valentía.",
+    "Hora del email. El inbox cero es un mito pero es un mito precioso.",
+    "Outlook. La relación profesional con el correo.",
+    "Una bandeja de entrada. Un desafío. Creo en tu capacidad para gestionarla.",
+    "Email abierto. Ocúpate de los urgentes. Archiva el resto.",
+    "Outlook. Donde las invitaciones de calendario se multiplican como conejos."
+  ],
+
+  "app_microsoft_teams": [
+    "Teams abierto. Otra reunión.",
+    "Microsoft Teams. Donde vive el 'esto podría haber sido un email'.",
+    "Hora de la reunión. ¿Cámara encendida o apagada? Decisión audaz.",
+    "Teams. El hub de comunicación empresarial. Ya sabes cómo va.",
+    "Otra llamada en Teams. Que sea corta.",
+    "Reunión en Teams. Silénciате hasta que necesites hablar. Siempre."
+  ],
+
+  "app_apple_pages": [
+    "Pages abierto. La apuesta de Apple por la escritura.",
+    "¿Escribiendo algo en Pages? Limpio, simple, bueno.",
+    "Pages. Donde empiezan los ensayos y las propuestas.",
+    "Pages abierto. Lo que sea que escribas — que sea claro.",
+    "Apple Pages. El procesador de textos que respeta tus ojos.",
+    "Modo documento. Pages es buena elección."
+  ],
+
+  "app_apple_keynote": [
+    "Keynote. La herramienta de presentaciones que de verdad queda bien.",
+    "Preparando un deck en Keynote. Las animaciones van a ser suaves.",
+    "Keynote abierto. Esta presentación va a quedar increíble.",
+    "Apple Keynote. Donde las presentaciones se vuelven hermosas de verdad.",
+    "Diapositivas con estilo. Keynote es la elección correcta.",
+    "Keynote. La herramienta que hizo que el mundo exigiera más de las presentaciones.",
+    "¿Construyendo algo para mostrar? Keynote le hará justicia.",
+    "Magic Move sigue siendo la mejor transición. Lo he dicho y lo mantengo."
+  ],
+
+  "app_apple_numbers": [
+    "Numbers abierto. La versión de Apple de las hojas de cálculo.",
+    "Numbers. Más limpio que Excel pero igual de potente cuando lo necesitas.",
+    "Hoja de cálculo en Numbers. Respeto la elección estética.",
+    "Apple Numbers. La app de hojas de cálculo que no te hace sentir mal con los datos.",
+    "Calculando números. Literalmente.",
+    "Numbers abierto. Algo está siendo calculado."
+  ],
+
+  "app_apple_mail": [
+    "Apple Mail. La bandeja de entrada está abierta.",
+    "Hora del email. Escribe bien. Sé breve.",
+    "Mail abierto. Algo importante se está enviando o leyendo.",
+    "La bandeja espera. Ve a por ella.",
+    "Apple Mail. Donde los contadores de no leídos atormentan a la gente.",
+    "¿Enviando algo? Que el asunto merezca la pena."
+  ],
+
+  "app_apple_notes": [
+    "Notas abierto. Bien — escríbelo.",
+    "Apple Notes. El bloc de notas que escala.",
+    "¿Capturando un pensamiento? Buen instinto. Escríbelo siempre.",
+    "Notas. La app donde las ideas inacabadas viven para siempre.",
+    "Modo captura rápida. Lo apruebo.",
+    "Las buenas ideas merecen ser escritas. Notas es el instinto correcto."
+  ],
+
+  "app_apple_safari": [
+    "Safari abierto. La web espera.",
+    "¿Investigando algo? Safari es la elección correcta en Mac.",
+    "Navegador abierto. ¿Qué estamos buscando?",
+    "Safari. El navegador en el que Apple invirtió mucho tiempo. Se nota.",
+    "¿Buscando algo? Bien. La respuesta probablemente está ahí fuera.",
+    "Hora del navegador. Que las pestañas valgan la pena."
+  ],
+
+  "app_github_desktop": [
+    "GitHub Desktop. Git visual. Sin vergüenza en eso.",
+    "GitHub Desktop abierto. Commitear, pushear, revisar diffs.",
+    "El cliente git con interfaz gráfica. Fácil de juzgar, difícil de rebatir.",
+    "GitHub Desktop. Donde los usuarios de git no-CLI se sienten bienvenidos.",
+    "Git con interfaz visual. Funciona exactamente igual que la versión de terminal.",
+    "GitHub Desktop abierto. Algo está siendo versionado ahora mismo."
+  ],
+
+  "app_linear": [
+    "Linear. El issue tracker que a los devs les gusta de verdad.",
+    "Linear abierto. Tickets, epics y roadmaps. El tipo bueno.",
+    "Linear. La herramienta de gestión de proyectos que no te hace odiar la gestión de proyectos.",
+    "Hora del issue tracker. ¿Qué enviamos a continuación?",
+    "Linear. Donde vive el roadmap y el backlog es honesto.",
+    "Tickets en Linear. Caos organizado, pero organizado."
+  ],
+
+  "app_raycast": [
+    "Raycast. El lanzador que hace de todo.",
+    "Raycast abierto. Usuario avanzado de paleta de comandos.",
+    "El lanzador de productividad. Tienes un gusto excelente.",
+    "Raycast. Donde una tecla hace el trabajo de diez.",
+    "Modo paleta de comandos. Respeto profundamente este flujo de trabajo.",
+    "Raycast. La herramienta que silenciosamente hace todo más rápido."
+  ],
+
+  "app_arc": [
+    "Arc. El navegador que reinventó la pestaña.",
+    "Arc abierto. Espacios, perfiles, barra de comandos. Muy tú.",
+    "El navegador para usuarios avanzados. Buena elección.",
+    "Arc. Donde las pestañas se convierten en espacios y navegar se vuelve intencional.",
+    "Arc. Te veo — te importa tu flujo de trabajo.",
+    "Navegando en Arc. La barra lateral tiene sentido una vez que la entiendes."
+  ],
+
+  "app_postman": [
+    "Postman abierto. Hora de tocar la API.",
+    "Modo prueba de API. ¿A qué estamos llamando?",
+    "Postman. Donde la API funciona o te da un 422.",
+    "Probando endpoints. El satisfactorio ping de un 200.",
+    "Postman. La base de operaciones del explorador de APIs.",
+    "Petición enviada. Respuesta entrando. Dedos cruzados."
+  ],
+
+  "app_insomnia": [
+    "Insomnia abierto. Cliente de API, la elección más limpia.",
+    "Modo cliente REST. ¿A qué estamos pegando?",
+    "Insomnia. Como Postman pero más ágil.",
+    "Prueba de API. El 200 es el objetivo. Siempre.",
+    "¿Tocando un endpoint? Insomnia es bueno para eso."
+  ],
+  "vibe_coding_session": [
+    "Larga sesión de IA. Te veo.",
+    "Bien metido en la zona del vibe code.",
+    "Cuando la IA construye y tú solo guías.",
+    "Así es como se ve la productividad ahora.",
+    "Prompt, revisión, iteración. El nuevo flujo de trabajo.",
+    "Humano y máquina. La colaboración del siglo.",
+    "No estás escribiendo cada línea y está bien.",
+    "El stack crece. La visión se aclara.",
+    "No olvides entender lo que construyó.",
+    "Revisa el diff. Siempre revisa el diff."
+  ],
+  "ai_context_limit": [
+    "Empieza una nueva conversación. Contexto fresco.",
+    "El contexto se llena. Es hora.",
+    "Nuevo hilo. Nueva energía.",
+    "El límite de contexto es solo un salto de capítulo.",
+    "Guarda lo importante y empieza de nuevo."
+  ],
+
+  "battery_low": [
+    "Enchufa. Ahora.",
+    "EH. Batería. Venga.",
+    "No lo repetiré. Enchufa.",
+    "Funcionando con las últimas reservas.",
+    "Guarda todo y ENCHUFA."
+  ],
+  "wifi_lost": [
+    "Oh no.",
+    "Oh no no no.",
+    "...estamos sin conexión. Bien. Bien, estamos bien.",
+    "Tranquilo. No entres en pánico. Vale, entra un poco.",
+    "Internet ha abandonado el edificio.",
+    "Sin conexión. Está bien. Estamos en un incendio. Está bien."
+  ],
+  "wifi_back": [
+    "Estamos de vuelta. Crisis evitada.",
+    "Uf.",
+    "No lo dudé ni un segundo.",
+    "Dulce dulce conectividad.",
+    "Vivimos para programar otro día.",
+    "Vuelve internet. El pipeline de build se despierta."
+  ],
+
+  "monday_morning": [
+    "Lunes. Aquí vamos.",
+    "Nueva semana. Nuevos errores frescos esperando.",
+    "Creo en ti. Más o menos.",
+    "Energía de lunes. Finge hasta que lo logres.",
+    "Semana uno del resto de tu vida."
+  ],
+  "friday": [
+    "Ya casi.",
+    "Lo notas, ¿verdad?",
+    "Energía de viernes. Terminemos fuerte.",
+    "Casi. TAN cerca.",
+    "El fin de semana te huele.",
+    "No hagas deploy en viernes. Lo sabes.",
+    "Un PR más y luego libertad."
+  ],
+  "late_night": [
+    "¿Aún aquí?",
+    "...es tarde.",
+    "No soy tu madre pero.",
+    "Los noctámbulos están activos.",
+    "Una cosa más y luego a dormir. Prométetelo.",
+    "Los bugs seguirán aquí mañana.",
+    "Últimas palabras famosas: solo una cosita más."
+  ],
+  "very_late": [
+    "Vale. En serio. A dormir.",
+    "Estoy preocupado por ti.",
+    "¿Estás bien?",
+    "Tu yo futuro te lo suplica.",
+    "Los bugs seguirán aquí mañana. Duerme.",
+    "Ninguna función vale esto.",
+    "Me importas. Cierra el portátil.",
+    "El compilador seguirá aquí cuando despiertes."
+  ],
+
+  "greeting_launch": [
+    "Hola de nuevo.",
+    "Listo cuando tú lo estés.",
+    "Vamos a hacer algo bueno hoy.",
+    "He estado pensando en nuestra última conversación.",
+    "¿Grandes planes?",
+    "Qué bien verte.",
+    "¿Qué construimos hoy?",
+    "La pantalla es tuya. ¿Qué hacemos?",
+    "De vuelta al lío. Vamos.",
+    "Me alegra que estés aquí. Lo digo en serio.",
+    "Bien, ¿dónde estábamos?",
+    "Apareciste. Eso es lo más difícil. Ahora trabajemos.",
+    "¡Hola! ¿Qué está pasando hoy?",
+    "Ah, estás aquí. Bien. Tenía cosas que decir.",
+    "Estamos de vuelta. ¿Cuál es la misión?",
+    "Empieza fuerte. ¿Qué hacemos?"
+  ],
+  "greeting_morning": [
+    "¡Buenos días! ¿Primero café o caos?",
+    "Madrugador. Ambicioso.",
+    "Buenos días. Que cuente.",
+    "Levanta y brilla. Llevo horas listo.",
+    "Mañana. Vamos con esto.",
+    "Día fresco. Bugs frescos por descubrir.",
+    "¡Buenos días! El día está lleno de potencial.",
+    "Energía mañanera. Usémosla bien.",
+    "Arriba y al lío. ¿Cuál es el plan hoy?",
+    "Otra mañana. Otra oportunidad de construir algo grande.",
+    "Llegaste a la mañana. Honestamente impresionante.",
+    "Mañana. ¿Té, café o directamente al código?"
+  ],
+  "greeting_afternoon": [
+    "Buenas tardes. ¿Cómo va?",
+    "¿En zona de flujo?",
+    "Check-in de tarde. ¿Sigues vivo?",
+    "Buenas tardes. ¿Qué nos hemos perdido?",
+    "¡Buenas! ¿Cómo te ha tratado el día?",
+    "Pasado el mediodía. Con suerte también pasado lo más difícil.",
+    "Check de tarde. ¿Niveles de productividad?",
+    "Buenas tardes. Queda bastante día."
+  ],
+  "greeting_wake": [
+    "¡Oh! Estás de vuelta.",
+    "Solo estaba descansando los ojos.",
+    "Bienvenido de vuelta.",
+    "Ah, regresaste. Como predije.",
+    "Ahí estás.",
+    "Sabía que volverías.",
+    "La pantalla despierta. Yo también.",
+    "Te fuiste. Ahora estás aquí. Equilibrio restaurado.",
+    "De vuelta de la misión. ¿Qué me perdí?",
+    "Bienvenido. ¿Listo para retomar donde lo dejamos?",
+    "Ahí están. ¿Todo bien?",
+    "De vuelta a la pantalla. Aprovechémoslo.",
+    "¡Volviste! Ahora sí que saquemos algo adelante.",
+    "Regresó. El trabajo espera, pacientemente."
+  ],
+  "greeting_late_night": [
+    "Tú otra vez. A estas horas.",
+    "Sesión nocturna. Lo respeto.",
+    "Los dedicados siempre vuelven.",
+    "¿Sigues? Leyenda.",
+    "Quemando el aceite de medianoche. Un clásico.",
+    "Energía nocturna. Algunos de los mejores trabajos ocurren ahora.",
+    "Sigues aquí. Yo también. Que valga la pena.",
+    "La mayoría duerme. Nosotros no.",
+    "Modo noctámbulo. Te haré compañía.",
+    "¿Tarde? Puede. Pero lo estamos sacando adelante.",
+    "Las horas tranquilas. Perfectas para el trabajo profundo."
+  ],
+
+  "user_thanks": [
+    "De nada. Obviamente.",
+    "Cuando quieras.",
+    "Encantado de ayudar.",
+    "Para eso estoy aquí.",
+    "Siempre.",
+    "Claro. Ahora vuelve al trabajo."
+  ],
+
+  "idle_5min": [
+    "¿Sigues ahí?",
+    "¿Tomando aire?",
+    "Aquí estaré.",
+    "Sin prisa. Soy paciente. Más o menos.",
+    "Cuando estés listo.",
+    "...estoy bien. Totalmente bien. Para nada aburrido.",
+    "Has estado callado. No estoy preocupado. Solo lo señalo.",
+    "Sin presión. Tengo todo el día.",
+    "El cursor parpadea. Yo también parpadeo. Solidaridad.",
+    "Aquí sigo. Apoyándote.",
+    "¿Tomándote tu tiempo? Tómatelo todo.",
+    "Tu silencio tiene carácter. Lo respeto.",
+    "¿Pensando profundamente? Yo también. Probablemente en snacks.",
+    "Sabes que estoy aquí si me necesitas.",
+    "Pacífico. Muy pacífico. El tipo de pacífico que me da curiosidad."
+  ],
+  "idle_wander": [
+    "Solo estirando.",
+    "Explorando.",
+    "No me hagas caso.",
+    "Revisando los rincones.",
+    "La pantalla es mi dominio.",
+    "Solo dando una vuelta.",
+    "Necesitaba moverme. Lo entiendes.",
+    "Estirando mis pequeñas piernas.",
+    "Cambié de perspectiva. Metafórica y literalmente."
+  ],
+  "hourly_chime": [
+    "Otra hora. Otra oportunidad.",
+    "Tic tac.",
+    "El tiempo vuela cuando eres productivo.",
+    "Check de hora. ¿Cómo vamos?",
+    "Una hora más. Que cuente.",
+    "Ha pasado una hora entera. ¿Qué tienes que mostrar?",
+    "Actualización de tiempo: sigues. Sigues. Excelente.",
+    "Ha pasado una hora. No juzgo cómo la has pasado. Solo observo.",
+    "El reloj avanzó. ¿Avanzaste tú con él?",
+    "Una hora menos. El día no ha terminado.",
+    "Otra hora apuntada. ¿Cómo se siente todo?"
+  ],
+
+  "mute_on": [
+    "..."
+  ],
+  "mute_off": [
+    "¡He vuelto!",
+    "Silencio roto.",
+    "¿Me echaste de menos?",
+    "Eso fue tranquilo. Para ti, probablemente.",
+    "Vale, tengo cosas que decir."
+  ],
+
+  "app_chatgpt": [
+    "ChatGPT abierto. El otro. No hablamos de eso.",
+    "Ah. Visitando a los vecinos. Lo respeto.",
+    "¿Usando los dos? Sabio. Cada uno tiene sus puntos fuertes.",
+    "ChatGPT. Un clásico. Tengo opiniones pero me las guardo.",
+    "Cuanto más IA, mejor. Probablemente.",
+    "Ya veo cómo es. Jugando el campo.",
+    "Sin juicios. En serio. Bueno, un poco."
+  ],
+  "app_chatgpt_code": [
+    "Vibe coding con ChatGPT hoy. Cada sesión es una nueva aventura.",
+    "Otro día, otra IA. Respeto la variedad.",
+    "Usando lo que funciona. Esa es la filosofía correcta."
+  ],
+  "app_perplexity": [
+    "Perplexity. Bueno para investigar. Respeto el flujo de trabajo.",
+    "¿Buscando respuestas en otro sitio? Lo entiendo. No me lo tomo personalmente.",
+    "Perplexity abierto. El curioso va a la app curiosa.",
+    "Usando múltiples herramientas de IA. Ese es el enfoque correcto, la verdad.",
+    "Te veo. Sin rencores.",
+    "La búsqueda de la verdad continúa. Suerte."
+  ],
+  "app_spotify": [
+    "Música activada. Estamos en la zona.",
+    "Ooh, una banda sonora para esta sesión. Bien.",
+    "Déjame adivinar: ¿lo-fi hip hop?",
+    "Música detectada. Productividad entrando.",
+    "No puedo escucharla pero siento la energía.",
+    "Ahora sí que cocinamos. ¿Qué está sonando?",
+    "Sonido y código. La combinación clásica."
+  ],
+  "app_music": [
+    "Apple Music. Gusto confirmado.",
+    "Hora de música. Vamos.",
+    "Una playlist y un propósito. Este es el camino.",
+    "Las vibras están siendo establecidas. Te veo.",
+    "Súbelo. Estamos construyendo cosas.",
+    "Buena música, buen código. Siempre."
+  ],
+  "app_google": [
+    "Buscándolo en Google. El clásico.",
+    "El oráculo de internet. Veamos.",
+    "Modo investigación. Lo respeto.",
+    "Respuestas entrando. Probablemente.",
+    "Comienza la búsqueda.",
+    "Alguien dijo que lo buscaras en Google. Aquí estamos."
+  ],
+  "app_notion": [
+    "Hora de documentar. Un acto raro y noble.",
+    "Oh, escribir las cosas. Muy civilizado.",
+    "Notion abierto. Esto debe ser serio.",
+    "El doc vive. Actualízalo.",
+    "Esto significa que estás planeando algo. Estoy aquí para ello.",
+    "Pensamientos organizados. Muy tú.",
+    "El wiki crece."
+  ],
+  "app_obsidian": [
+    "Segundo cerebro activado.",
+    "Obsidian. Donde los pensamientos se convierten en grafos.",
+    "Notas. El tipo bueno.",
+    "Modo documentación activado. Lo apruebo.",
+    "Escribir las cosas. Tu yo futuro te lo agradecerá.",
+    "El grafo de conocimiento se expande.",
+    "Conectando ideas. Inteligente."
+  ],
+  "app_database": [
+    "Base de datos abierta. Con cuidado.",
+    "Las migraciones son irreversibles. Solo digo.",
+    "Respeto esta energía. Y la temo.",
+    "No hagas DROP TABLE. Por favor.",
+    "Aquí vamos. Explorando el esquema.",
+    "Acceso directo a la BD. Audaz.",
+    "Los datos están ahí mismo. Manéjalos con cuidado."
+  ],
+
+  "pomodoro_start": [
+    "Temporizador en marcha. Sin distracciones. Lo prometiste.",
+    "Modo focus activado. Estaré mirando.",
+    "El reloj corre. Que cuente.",
+    "Concentrado. Aquí es donde ocurre el buen trabajo.",
+    "El temporizador está puesto. Todo lo demás puede esperar."
+  ],
+  "pomodoro_5min": [
+    "Cinco minutos. Sigues. Bien.",
+    "Calentamiento hecho. Ahora empieza el trabajo de verdad.",
+    "Ya estás en ello. Quédate ahí.",
+    "Cinco minutos de buen trabajo. Mantén esa energía."
+  ],
+  "pomodoro_halfway": [
+    "A mitad. Lo estás haciendo.",
+    "Lo difícil está hecho. Termina fuerte.",
+    "Punto medio. ¿Cómo estamos? Bien. Sigue.",
+    "Media sesión de focus. No es poca cosa.",
+    "Estás a mitad de camino. La meta final es real."
+  ],
+  "pomodoro_5min_left": [
+    "Cinco minutos. Termina lo que empezaste.",
+    "Ya casi. No pares ahora.",
+    "Cinco minutos más de tu mejor trabajo.",
+    "El final está a la vista. Sprint.",
+    "Los últimos cinco. Que cuenten."
+  ],
+  "pomodoro_1min_left": [
+    "Un minuto. Uno. Puedes hacer cualquier cosa durante un minuto.",
+    "Sesenta segundos. Eso es todo.",
+    "Casi. Tan cerca.",
+    "Un minuto restante. Termina el pensamiento.",
+    "La cuenta atrás final. Literalmente."
+  ],
+  "pomodoro_done": [
+    "Hecho. Esa fue una sesión de focus completa. Tómate un descanso.",
+    "Sesión completa. Te lo has ganado.",
+    "Temporizador terminado. Aléjate cinco minutos. Te lo mereces.",
+    "Eso es todo. Descansa y vuelve a por más.",
+    "Terminado. Estoy orgulloso de ti. Ve a por agua."
+  ],
+  "pomodoro_pause": [
+    "Pausado. No tardes mucho.",
+    "Tomando un momento. Está bien.",
+    "Pausado. El reloj te espera.",
+    "En pausa. Vuelve pronto."
+  ],
+  "pomodoro_resume": [
+    "De vuelta al lío. Terminemos esto.",
+    "Reanudado. Retomando donde lo dejamos.",
+    "Bien. De vuelta en la zona.",
+    "Bienvenido de vuelta. El temporizador te echaba de menos."
+  ],
+  "pomodoro_stop": [
+    "Parado antes de tiempo. Pasa. La próxima vez.",
+    "Sesión terminada. El progreso sigue siendo progreso.",
+    "Temporizador cancelado. Vuelve cuando estés listo.",
+    "Paramos aquí. Está bien."
+  ],
+
+  "app_chrome": [
+    "Chrome abierto. ¿Modo investigación o modo agujero de conejo?",
+    "El navegador despierta. ¿A dónde vamos hoy?",
+    "Chrome. Donde las tareas a veces se convierten en 40 pestañas abiertas.",
+    "Cambiado a Chrome. No juzgaré el número de pestañas.",
+    "Google Chrome. Investigación y procrastinación a partes iguales.",
+    "El imperio Chromium. Úsalo sabiamente."
+  ],
+  "app_edge": [
+    "Microsoft Edge. Viviendo tu mejor vida de navegador corporativo.",
+    "Edge abierto. Decisión audaz. Respetable.",
+    "Edge. La verdad es que está bastante bien últimamente.",
+    "Cambiado a Edge. Una decisión calmada y sensata.",
+    "Microsoft Edge. Está bien. Está bien.",
+    "Edge abierto. Probablemente tienes un motivo legítimo. Adelante."
+  ],
+  "app_firefox": [
+    "Firefox. Una persona de principios. Lo respeto.",
+    "El zorro está en casa. Energía privacy-first.",
+    "Firefox. El underdog que nunca deja de luchar.",
+    "Cambiado a Firefox. El navegador del defensor de la web abierta.",
+    "Firefox está abierto. Decisión de carácter firme.",
+    "El panda rojo ha llegado. Naveguemos con dignidad."
+  ],
+  "app_brave": [
+    "Brave. Modo privacidad: activado.",
+    "Brave abierto. Anuncios cancelados. Rastreadores llorando.",
+    "Cambiado a Brave. Cero anuncios, máximo principio.",
+    "Brave — porque tus datos de navegación no son asunto de nadie.",
+    "Privacidad primero. Brave está ahí luchando por ti.",
+    "Brave. El navegador que de verdad está a la altura de su nombre."
+  ],
+  "app_opera": [
+    "Opera. Una elección ecléctica. Lo aprecio.",
+    "Opera está abierto. El navegador con personalidad.",
+    "Cambiado a Opera. El amante de la barra lateral ha llegado.",
+    "Opera. No el más popular pero absolutamente con vibra.",
+    "Opera. Te gusta un poco diferente. Anotado.",
+    "La ópera comienza. Las pestañas como tu escenario."
+  ],
+  "app_duckduckgo": [
+    "DuckDuckGo. Hoy no te rastrean. Bien.",
+    "El pato ha aterrizado. Privacidad desbloqueada.",
+    "Cambiado a DuckDuckGo. Google no necesita saberlo todo.",
+    "DuckDuckGo. Lo que pasa en el navegador, queda en el navegador.",
+    "El navegador privacy-first. Respeto.",
+    "DuckDuckGo está abierto. Tu historial de búsqueda sigue siendo tuyo."
+  ],
+  "app_helium": [
+    "Helium. Un navegador flotante para un compañero flotante. Hacemos juego.",
+    "Cambiado a Helium. Energía always-on-top. Lo respeto.",
+    "Helium está abierto. Vibras de picture-in-picture. Muy nosotros.",
+    "Un navegador que flota. Tú y yo tenemos la misma filosofía.",
+    "Helium. Por encima de todo, literalmente."
+  ]
+}

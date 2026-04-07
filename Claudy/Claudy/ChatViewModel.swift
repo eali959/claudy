@@ -50,6 +50,43 @@ final class ChatViewModel {
     var showContextWarning: Bool { approximateTokenCount >= 60_000 }
     var isNearContextLimit: Bool { approximateTokenCount >= 80_000 }
 
+    // MARK: - Response formatting toggle (CHAT-05)
+
+    /// When true, render assistant messages as Markdown; when false, plain text.
+    var renderMarkdown: Bool = {
+        let stored = UserDefaults.standard.object(forKey: DefaultsKeys.renderMarkdown)
+        return stored == nil ? true : UserDefaults.standard.bool(forKey: DefaultsKeys.renderMarkdown)
+    }() {
+        didSet { UserDefaults.standard.set(renderMarkdown, forKey: DefaultsKeys.renderMarkdown) }
+    }
+
+    // MARK: - System prompt presets (CHAT-04)
+
+    struct SystemPromptPreset: Codable, Identifiable {
+        let id: UUID
+        var name: String
+        var prompt: String
+        init(name: String, prompt: String) {
+            self.id = UUID()
+            self.name = name
+            self.prompt = prompt
+        }
+    }
+
+    var systemPromptPresets: [SystemPromptPreset] = {
+        guard let data = UserDefaults.standard.data(forKey: DefaultsKeys.systemPromptPresets),
+              let decoded = try? JSONDecoder().decode([SystemPromptPreset].self, from: data) else {
+            return []
+        }
+        return decoded
+    }()
+
+    func savePresets() {
+        if let data = try? JSONEncoder().encode(systemPromptPresets) {
+            UserDefaults.standard.set(data, forKey: DefaultsKeys.systemPromptPresets)
+        }
+    }
+
     private let logger = Logger(subsystem: "com.claudy", category: "Chat")
     private var streamingTask: Task<Void, Never>?
 
@@ -108,6 +145,7 @@ final class ChatViewModel {
 
         isTyping = true          // show dots while API roundtrip completes
         isStreaming = true
+        PersonalityManager.shared.isStreaming = true   // lock blend slider (BLEND-04)
         errorMessage = nil
 
         let placeholder = ChatMessage(role: .assistant, content: "")
@@ -143,6 +181,7 @@ final class ChatViewModel {
 
         isTyping = false
         isStreaming = false
+        PersonalityManager.shared.isStreaming = false  // unlock blend slider
 
         // Post-stream ambient reactions (local, no extra API calls)
         if let lastMsg = messages.last(where: { $0.role == .assistant }), !lastMsg.content.isEmpty {

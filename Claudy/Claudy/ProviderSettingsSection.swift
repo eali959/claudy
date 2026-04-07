@@ -75,6 +75,24 @@ struct ProviderSettingsSection: View {
             .overlay(RoundedRectangle(cornerRadius: 8).strokeBorder(.green.opacity(0.18), lineWidth: 0.5))
             .padding(.top, 2)
 
+            VStack(alignment: .leading, spacing: 5) {
+                HStack(spacing: 5) {
+                    Image(systemName: "sparkles")
+                        .font(.system(size: 11))
+                        .foregroundStyle(.orange)
+                    Text("What API mode is for")
+                        .font(.system(size: 11, weight: .semibold))
+                }
+                Text("API mode powers Claud-y's live reactions, quick-chat, ambient commentary, and in-the-moment responses — the things that make a desktop companion actually feel alive. It is not designed to replace a dedicated AI assistant for long, complex tasks. For deep work, use Claude.ai, ChatGPT, or Gemini directly. Claud-y stays in its lane: present, reactive, and genuinely useful on the fly.")
+                    .font(.caption).foregroundStyle(.secondary)
+                    .fixedSize(horizontal: false, vertical: true)
+            }
+            .padding(.vertical, 8)
+            .padding(.horizontal, 10)
+            .background(.orange.opacity(0.07), in: RoundedRectangle(cornerRadius: 8))
+            .overlay(RoundedRectangle(cornerRadius: 8).strokeBorder(.orange.opacity(0.18), lineWidth: 0.5))
+            .padding(.top, 2)
+
             HStack {
                 Button("Save Key") { saveAPIKey() }
                     .disabled(activeKeyBinding.wrappedValue.trimmingCharacters(in: .whitespaces).isEmpty)
@@ -115,7 +133,7 @@ struct ProviderSettingsSection: View {
             Text("No key needed — Claud-y works in Companion mode without one. Local, private, and free forever.")
                 .font(.caption).foregroundStyle(.secondary)
         } header: {
-            Text("API Provider").font(.headline)
+            Label("API Provider", systemImage: "key.fill").font(.headline)
         }
     }
 

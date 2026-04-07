@@ -64,7 +64,7 @@ struct GeneralSettingsSection: View {
             Text("Open or close the Claud-y chat from any app. Disable if it conflicts with another shortcut.")
                 .font(.caption).foregroundStyle(.secondary)
         } header: {
-            Text("General").font(.headline)
+            Label("General", systemImage: "gearshape.fill").font(.headline)
         }
     }
 }

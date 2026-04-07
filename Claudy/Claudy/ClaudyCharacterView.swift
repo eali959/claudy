@@ -9,6 +9,10 @@ struct ClaudyCharacterView: View {
     var irisOffset: CGPoint = .zero
     var tickleIntensity: TickleIntensity = .none
     var danceMove: DanceMove = .groove
+    /// Active accessory drawn above the face layer (ACC-02)
+    var accessory: CharacterAccessory = .none
+    /// Current character scale — passed down to AccessoryOverlayView so accessories scale correctly (ACC-04)
+    var characterScale: CGFloat = 0.8
     var onTap: () -> Void = {}
     var onDoubleTap: () -> Void = {}
     var onDragBegan: () -> Void = {}
@@ -121,6 +125,10 @@ struct ClaudyCharacterView: View {
                 rightArm
                 feet.offset(y: CharacterGeometry.feetGroupOffsetY)
                 face
+                // Accessories drawn above the face layer (ACC-02)
+                if accessory != .none {
+                    AccessoryOverlayView(accessory: accessory, scale: characterScale)
+                }
             }
             .offset(x: wiggleOffset, y: bobOffset + jumpOffset + danceJumpOffset - 10)
             .rotationEffect(.degrees(dragTilt + (animationState == .dancing ? danceSpinAngle : 0)))
@@ -185,15 +193,25 @@ struct ClaudyCharacterView: View {
             startCelebrationAnimation()
             if newState == .surprised { applyStartledJump() }
 
-            // Arm flair: waving, dancing, and headbanging use it
-            if newState == .waving || newState == .dancing || newState == .headbanging {
+            // Data-driven wiggle: read from AnimationConfig (ANIM-02)
+            let cfg = newState.animationConfig
+            if cfg.wiggleEnabled, !reduceMotion {
+                withAnimation(.easeInOut(duration: cfg.wiggleDuration).repeatForever(autoreverses: true)) {
+                    wiggleOffset = cfg.wiggleAmount
+                }
+            } else if newState != .tickled {
+                withAnimation(.spring(response: 0.4, dampingFraction: 0.6)) { wiggleOffset = 0 }
+            }
+
+            // Arm flair: data-driven via animationConfig (ANIM-02)
+            if cfg.armFlair {
                 startArmFlair()
             } else if newState != .tickled || tickleIntensity != .full {
                 stopArmFlair()
             }
 
-            // Dance glow: start when entering, clear when leaving
-            if newState == .dancing {
+            // Dance glow: data-driven via animationConfig (ANIM-02)
+            if cfg.hasGlow {
                 startDanceGlow()
             } else {
                 danceGlowPulse = false
@@ -335,50 +353,152 @@ struct ClaudyCharacterView: View {
 
     private var face: some View {
         ZStack {
+            // Blush overlay for embarrassed / blushing states
+            let blush = animationState.animationConfig.blushOpacity
+            if blush > 0 {
+                HStack(spacing: 22) {
+                    Ellipse().fill(Color.red.opacity(blush)).frame(width: 14, height: 8)
+                    Ellipse().fill(Color.red.opacity(blush)).frame(width: 14, height: 8)
+                }
+                .offset(y: CharacterGeometry.mouthOffsetY - 2)
+            }
             eyes.offset(y: CharacterGeometry.eyesOffsetY)
             mouth.offset(y: CharacterGeometry.mouthOffsetY)
         }
     }
 
-    // MARK: - Eyes
+    // MARK: - Eyes (ANIM-02: driven by AnimationConfig.EyeShape)
 
     @ViewBuilder
     private var eyes: some View {
-        switch animationState {
-        case .celebrating, .waving, .dancing:
+        switch animationState.animationConfig.eyeShape {
+        case .arcUp:
             HStack(spacing: 20) { arcEyeUp; arcEyeUp }
-        case .headbanging:
-            // Intense squint — rock face
-            HStack(spacing: 17) { squintyEye; squintyEye }
-        case .vibing:
-            // Half-closed content eyes — in the zone
+        case .arcDown:
+            HStack(spacing: 20) { arcEyeDown; arcEyeDown }
+        case .squint:
+            HStack(spacing: 20) { squintyEye; squintyEye }
+        case .angrySquint:
+            HStack(spacing: 17) { angrySquintEye(leftSide: true); angrySquintEye(leftSide: false) }
+        case .vibe:
             HStack(spacing: 17) { vibeEye(size: CharacterGeometry.eyeSizeLarge); vibeEye(size: CharacterGeometry.eyeSizeSmall) }
-        case .sleeping:
-            HStack(spacing: 22) { sleepEye; sleepEye }
         case .drowsy:
             HStack(spacing: 17) { drowsyEye(size: CharacterGeometry.eyeSizeLarge); drowsyEye(size: CharacterGeometry.eyeSizeSmall) }
-        case .thinking:
+        case .halfClosed:
+            HStack(spacing: 17) { halfClosedEye(size: CharacterGeometry.eyeSizeLarge); halfClosedEye(size: CharacterGeometry.eyeSizeSmall) }
+        case .sleep:
+            HStack(spacing: 22) { sleepEye; sleepEye }
+        case .peacefulClosed:
+            HStack(spacing: 22) { peacefulEye; peacefulEye }
+        case .thinkingDots:
             thinkingDots
-        case .tickled:
-            HStack(spacing: 20) { arcEyeDown; arcEyeDown }
-        case .alert:
+        case .wideAlert:
             HStack(spacing: 17) {
                 pixarEye(size: CharacterGeometry.eyeSizeLarge).scaleEffect(1.2)
                 pixarEye(size: CharacterGeometry.eyeSizeSmall).scaleEffect(1.2)
             }
-        case .surprised:
+        case .wideSurprised:
             HStack(spacing: 17) {
                 pixarEye(size: CharacterGeometry.eyeSizeLarge).scaleEffect(1.4)
                 pixarEye(size: CharacterGeometry.eyeSizeSmall).scaleEffect(1.4)
             }
-        case .facepalm:
-            HStack(spacing: 20) { squintyEye; squintyEye }
-        default:
+        case .hungryPleading:
+            HStack(spacing: 17) {
+                pixarEye(size: CharacterGeometry.eyeSizeLarge * 1.12)
+                pixarEye(size: CharacterGeometry.eyeSizeSmall * 1.12)
+            }
+        case .nervousWide:
+            HStack(spacing: 17) {
+                pixarEye(size: CharacterGeometry.eyeSizeLarge * 1.15)
+                pixarEye(size: CharacterGeometry.eyeSizeSmall * 1.15)
+            }
+        case .loveHeart:
+            HStack(spacing: 14) { heartEye; heartEye }
+        case .wink:
+            HStack(spacing: 17) {
+                squintyEye
+                pixarEye(size: CharacterGeometry.eyeSizeSmall)
+            }
+        case .pixar:
             HStack(spacing: 17) {
                 pixarEye(size: CharacterGeometry.eyeSizeLarge)
                 pixarEye(size: CharacterGeometry.eyeSizeSmall)
             }
         }
+    }
+
+    // MARK: - Eye primitives
+
+    /// Angry squint: tight horizontal eye with inward-angled brow line above
+    private func angrySquintEye(leftSide: Bool) -> some View {
+        ZStack {
+            squintyEye
+            Path { p in
+                if leftSide {
+                    p.move(to: CGPoint(x: 2,  y: 4))
+                    p.addLine(to: CGPoint(x: 18, y: 0))
+                } else {
+                    p.move(to: CGPoint(x: 0,  y: 0))
+                    p.addLine(to: CGPoint(x: 16, y: 4))
+                }
+            }
+            .stroke(darkBrown, style: StrokeStyle(lineWidth: 2, lineCap: .round))
+            .frame(width: 18, height: 4)
+            .offset(y: -10)
+        }
+    }
+
+    /// Bored / yawning: less droopy than drowsy, more than normal
+    private func halfClosedEye(size: CGFloat) -> some View {
+        ZStack {
+            Circle()
+                .fill(Color.white)
+                .frame(width: size, height: size * 0.55)
+            Circle()
+                .fill(darkBrown)
+                .frame(width: size * 0.38, height: size * 0.38)
+                .offset(y: size * 0.04)
+        }
+    }
+
+    /// Peaceful / meditating: thin closed crescent line
+    private var peacefulEye: some View {
+        Path { p in
+            p.move(to: CGPoint(x: 0, y: 4))
+            p.addQuadCurve(to: CGPoint(x: 14, y: 4), control: CGPoint(x: 7, y: 0))
+        }
+        .stroke(darkBrown, style: StrokeStyle(lineWidth: 2, lineCap: .round))
+        .frame(width: 14, height: 6)
+    }
+
+    /// Love heart eye (ANIM-03)
+    private var heartEye: some View {
+        let s: CGFloat = 16
+        return Path { p in
+            p.move(to: CGPoint(x: s * 0.5, y: s * 0.32))
+            p.addCurve(
+                to:      CGPoint(x: 0,       y: s * 0.28),
+                control1: CGPoint(x: s * 0.33, y: 0),
+                control2: CGPoint(x: 0,       y: s * 0.08)
+            )
+            p.addCurve(
+                to:      CGPoint(x: s * 0.5, y: s * 0.95),
+                control1: CGPoint(x: 0,       y: s * 0.58),
+                control2: CGPoint(x: s * 0.24, y: s * 0.80)
+            )
+            p.addCurve(
+                to:      CGPoint(x: s,       y: s * 0.28),
+                control1: CGPoint(x: s * 0.76, y: s * 0.80),
+                control2: CGPoint(x: s,       y: s * 0.58)
+            )
+            p.addCurve(
+                to:      CGPoint(x: s * 0.5, y: s * 0.32),
+                control1: CGPoint(x: s,       y: s * 0.08),
+                control2: CGPoint(x: s * 0.67, y: 0)
+            )
+        }
+        .fill(Color(red: 0.88, green: 0.20, blue: 0.32))
+        .frame(width: s, height: s)
     }
 
     /// Facepalm - tight frustrated squint, thinner than drowsy
@@ -504,10 +624,13 @@ struct ClaudyCharacterView: View {
 
     // MARK: - Mouth
 
+    // MARK: - Mouth (ANIM-02 — data-driven via AnimationConfig.MouthShape)
+
     @ViewBuilder
     private var mouth: some View {
-        switch animationState {
-        case .talking:
+        switch animationState.animationConfig.mouthShape {
+
+        case .talkingSync:
             // Lip-sync: interpolate width (11-17) and height (2-12) from mouthOpenAmount
             Ellipse()
                 .fill(Color(red: 0.22, green: 0.07, blue: 0.04))
@@ -517,7 +640,7 @@ struct ClaudyCharacterView: View {
                 )
                 .animation(.easeInOut(duration: 0.07), value: mouthOpenAmount)
 
-        case .sleeping, .drowsy:
+        case .sleepLine:
             Path { p in
                 p.move(to: CGPoint(x: 0, y: 0))
                 p.addQuadCurve(to: CGPoint(x: 10, y: 0), control: CGPoint(x: 5, y: 2))
@@ -525,15 +648,23 @@ struct ClaudyCharacterView: View {
             .stroke(darkBrown, style: StrokeStyle(lineWidth: 1.5, lineCap: .round))
             .frame(width: 10, height: 4)
 
-        case .tickled:
+        case .sadCurve:
+            Path { p in
+                p.move(to: CGPoint(x: 0, y: 0))
+                p.addQuadCurve(to: CGPoint(x: 14, y: 0), control: CGPoint(x: 7, y: -7))
+            }
+            .stroke(darkBrown, style: StrokeStyle(lineWidth: 2, lineCap: .round))
+            .frame(width: 14, height: 8)
+
+        case .hugeSmile:
+            // Maximum grin with teeth row
             VStack(spacing: 1) {
                 Path { p in
                     p.move(to: CGPoint(x: 0, y: 0))
-                    p.addQuadCurve(to: CGPoint(x: 18, y: 0), control: CGPoint(x: 9, y: 9))
+                    p.addQuadCurve(to: CGPoint(x: 22, y: 0), control: CGPoint(x: 11, y: 14))
                 }
-                .stroke(darkBrown, style: StrokeStyle(lineWidth: 2.5, lineCap: .round))
-                .frame(width: 18, height: 10)
-
+                .stroke(darkBrown, style: StrokeStyle(lineWidth: 3, lineCap: .round))
+                .frame(width: 22, height: 15)
                 HStack(spacing: 2) {
                     ForEach(0..<3, id: \.self) { _ in
                         RoundedRectangle(cornerRadius: 1)
@@ -543,22 +674,43 @@ struct ClaudyCharacterView: View {
                 }
             }
 
-        case .surprised, .confused:
+        case .bigSmile:
+            Path { p in
+                p.move(to: CGPoint(x: 0, y: 0))
+                p.addQuadCurve(to: CGPoint(x: 18, y: 0), control: CGPoint(x: 9, y: 11))
+            }
+            .stroke(darkBrown, style: StrokeStyle(lineWidth: 2.5, lineCap: .round))
+            .frame(width: 18, height: 12)
+
+        case .vibeSmile:
+            Path { p in
+                p.move(to: CGPoint(x: 0, y: 0))
+                p.addQuadCurve(to: CGPoint(x: 12, y: 0), control: CGPoint(x: 6, y: 6))
+            }
+            .stroke(darkBrown, style: StrokeStyle(lineWidth: 2, lineCap: .round))
+            .frame(width: 12, height: 7)
+
+        case .flatLine:
+            Capsule()
+                .fill(darkBrown)
+                .frame(width: 14, height: 2.5)
+
+        case .tinyOpen:
+            Ellipse()
+                .strokeBorder(darkBrown, lineWidth: 2)
+                .frame(width: 8, height: 7)
+
+        case .mediumOpen:
             Circle()
                 .strokeBorder(Color(red: 0.22, green: 0.07, blue: 0.04), lineWidth: 2)
                 .frame(width: 9, height: 9)
 
-        case .dancing:
-            // Wider, more open grin than celebrating
-            Path { p in
-                p.move(to: CGPoint(x: 0, y: 0))
-                p.addQuadCurve(to: CGPoint(x: 22, y: 0), control: CGPoint(x: 11, y: 14))
-            }
-            .stroke(darkBrown, style: StrokeStyle(lineWidth: 3, lineCap: .round))
-            .frame(width: 22, height: 15)
+        case .wideOpen:
+            Circle()
+                .strokeBorder(Color(red: 0.22, green: 0.07, blue: 0.04), lineWidth: 2.5)
+                .frame(width: 13, height: 13)
 
-        case .headbanging:
-            // Wide open rock mouth — teeth showing
+        case .rockMouth:
             ZStack {
                 Path { p in
                     p.move(to: CGPoint(x: 0, y: 0))
@@ -566,7 +718,6 @@ struct ClaudyCharacterView: View {
                 }
                 .stroke(darkBrown, style: StrokeStyle(lineWidth: 3, lineCap: .round))
                 .frame(width: 20, height: 14)
-                // Teeth
                 HStack(spacing: 2) {
                     ForEach(0..<4, id: \.self) { _ in
                         RoundedRectangle(cornerRadius: 1)
@@ -577,29 +728,34 @@ struct ClaudyCharacterView: View {
                 .offset(y: 2)
             }
 
-        case .vibing:
-            // Small relaxed smile — content, not ecstatic
+        case .smirk:
             Path { p in
-                p.move(to: CGPoint(x: 0, y: 0))
-                p.addQuadCurve(to: CGPoint(x: 12, y: 0), control: CGPoint(x: 6, y: 6))
+                p.move(to: CGPoint(x: 0, y: 4))
+                p.addQuadCurve(to: CGPoint(x: 14, y: 0), control: CGPoint(x: 10, y: 8))
             }
             .stroke(darkBrown, style: StrokeStyle(lineWidth: 2, lineCap: .round))
-            .frame(width: 12, height: 7)
+            .frame(width: 14, height: 9)
 
-        case .celebrating, .waving:
+        case .effortGrin:
+            // Slightly open effort grin — determined / exercising
             Path { p in
                 p.move(to: CGPoint(x: 0, y: 0))
-                p.addQuadCurve(to: CGPoint(x: 18, y: 0), control: CGPoint(x: 9, y: 11))
+                p.addQuadCurve(to: CGPoint(x: 16, y: 0), control: CGPoint(x: 8, y: 8))
             }
             .stroke(darkBrown, style: StrokeStyle(lineWidth: 2.5, lineCap: .round))
-            .frame(width: 18, height: 12)
+            .frame(width: 16, height: 9)
 
-        case .facepalm:
-            Capsule()
-                .fill(darkBrown)
-                .frame(width: 14, height: 2.5)
+        case .chewing:
+            // Alternating closed/open chew driven by bob phase (uses mouthOpenAmount offset)
+            Ellipse()
+                .fill(Color(red: 0.22, green: 0.07, blue: 0.04).opacity(0.85))
+                .frame(
+                    width:  10 + mouthOpenAmount * 4,
+                    height:  3 + mouthOpenAmount * 5
+                )
+                .animation(.easeInOut(duration: 0.18), value: mouthOpenAmount)
 
-        default:
+        case .default:
             Path { p in
                 p.move(to: CGPoint(x: 0, y: 0))
                 p.addQuadCurve(to: CGPoint(x: 13, y: 0), control: CGPoint(x: 6.5, y: 5))
@@ -625,22 +781,13 @@ struct ClaudyCharacterView: View {
 
     private func startBobAnimation() {
         guard !reduceMotion else { bobOffset = 0; return }
-        let duration: Double = animationState == .dancing      ? 0.36 :  // fast groove bounce
-                               animationState == .headbanging  ? 0.13 :  // ultra-fast headbang
-                               animationState == .vibing       ? 1.10 :  // slow chill sway
-                               animationState == .sleeping     ? 3.2  :
-                               animationState == .drowsy       ? 2.5  : 1.9
-        let target: CGFloat  = animationState == .dancing      ? -16  :  // big energetic bounce
-                               animationState == .headbanging  ? -26  :  // massive headbang
-                               animationState == .vibing       ? -8   :  // gentle vibe
-                               animationState == .sleeping     ? -2   :
-                               animationState == .drowsy       ? -4   : -6
-        // Reset to 0 without animation first - this cleanly cancels any existing
-        // repeatForever transaction on bobOffset so the new one starts fresh
-        // rather than stacking on top and causing interference.
+        // Read directly from the data-driven AnimationConfig (ANIM-02).
+        let config = animationState.animationConfig
+        // Reset to 0 without animation first — cleanly cancels any existing
+        // repeatForever so the new one starts fresh rather than stacking.
         bobOffset = 0
-        withAnimation(Animation.easeInOut(duration: duration).repeatForever(autoreverses: true)) {
-            bobOffset = target
+        withAnimation(Animation.easeInOut(duration: config.bobDuration).repeatForever(autoreverses: true)) {
+            bobOffset = config.bobAmplitude
         }
     }
 
@@ -671,8 +818,10 @@ struct ClaudyCharacterView: View {
         guard !reduceMotion else { celebrateScale = 1.0; return }
         // Reset without animation to cleanly replace any existing repeatForever.
         celebrateScale = 1.0
+        // Data-driven: use animationConfig.celebrateScale (ANIM-02)
+        guard animationState.animationConfig.celebrateScale else { return }
         withAnimation(Animation.easeInOut(duration: 0.28).repeatForever(autoreverses: true)) {
-            celebrateScale = animationState == .celebrating ? 1.07 : 1.0
+            celebrateScale = 1.07
         }
     }
 

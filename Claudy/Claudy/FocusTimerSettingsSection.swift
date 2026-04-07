@@ -69,7 +69,7 @@ struct FocusTimerSettingsSection: View {
             }
             .frame(minHeight: 44)
         } header: {
-            Text("Focus Tools").font(.headline)
+            Label("Focus Tools", systemImage: "timer").font(.headline)
         }
     }
 

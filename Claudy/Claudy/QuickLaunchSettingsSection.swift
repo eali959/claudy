@@ -122,7 +122,7 @@ struct QuickLaunchSettingsSection: View {
                 .padding(.top, 4)
             }
         } header: {
-            Text("Quick Launch").font(.headline)
+            Label("Quick Launch", systemImage: "bolt.fill").font(.headline)
         } footer: {
             Text("Shortcuts appear in the right-click context menu. The optional ⌘ key activates them from the menu bar.")
                 .font(.caption)

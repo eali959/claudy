@@ -58,6 +58,8 @@ struct CharacterSceneView: View {
                             irisOffset:      characterViewModel.irisOffset,
                             tickleIntensity: characterViewModel.tickleIntensity,
                             danceMove:       characterViewModel.danceModeManager.currentMove,
+                            accessory:       CharacterAccessory.active,
+                            characterScale:  windowManager.characterScale,
                             onTap:           onTap,
                             onDoubleTap:     onDoubleTap,
                             onDragBegan:     onDragBegan,
@@ -68,7 +70,11 @@ struct CharacterSceneView: View {
                         .scaleEffect(windowManager.characterScale)
                         .opacity(characterOpacity)
                         .accessibilityLabel("Claud-y")
-                        .accessibilityValue(characterViewModel.animationState.accessibilityDescription)
+                        .accessibilityValue({
+                            let base = characterViewModel.animationState.accessibilityDescription
+                            let acc = CharacterAccessory.active.accessibilityLabel
+                            return acc.isEmpty ? base : "\(base), \(acc)"
+                        }())
                         .accessibilityHint("Tap to \(chatViewModel.isOpen ? "close" : "open") chat. Long press for reaction history.")
                         .accessibilityAddTraits(.isButton)
                         .overlay(alignment: .bottomTrailing) {
@@ -90,6 +96,16 @@ struct CharacterSceneView: View {
                             } else {
                                 characterViewModel.tickleManager.resetTickle()
                             }
+                        }
+                        // Tamagotchi hover stats — floats above character, never overlaps speech bubble
+                        .overlay(alignment: .top) {
+                            TamagotchiHoverStatsIfEnabled(
+                                manager: characterViewModel.tamagotchiManager,
+                                isHovered: characterViewModel.isHovered
+                            )
+                            .offset(y: -44)
+                            .animation(.spring(response: 0.25, dampingFraction: 0.72),
+                                       value: characterViewModel.isHovered)
                         }
                         // Long-press 3s reveals reaction log
                         .onLongPressGesture(minimumDuration: 3.0, maximumDistance: 20) {
@@ -128,6 +144,9 @@ struct CharacterSceneView: View {
                                 .zIndex(15)
                         }
                     } // ZStack (character)
+
+                    // Tamagotchi overlay — compact stat bars + action buttons, below character
+                    TamagotchiOverlayIfEnabled(manager: characterViewModel.tamagotchiManager)
 
                     // Timer badge - sits below the character body, never overlaps anything
                     if characterViewModel.pomodoroManager.state != .idle {

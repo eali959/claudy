@@ -36,7 +36,7 @@ struct SoundSettingsSection: View {
                     .font(.caption).foregroundStyle(.secondary)
             }
         } header: {
-            Text("Sound").font(.headline)
+            Label("Sound", systemImage: "speaker.wave.2.fill").font(.headline)
         }
     }
 }

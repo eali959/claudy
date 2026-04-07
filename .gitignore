@@ -137,6 +137,9 @@ iOSInjectionProject/
 memory/
 Notary
 
+# Local marketing demo — NOT for GitHub
+**/V2DemoModeManager.swift
+
 # Internal planning files
 BACKLOG.md
 BUG_REPORT.md
@@ -151,6 +154,9 @@ Kapture*
 
 # Build artifacts
 GitHub-Release/scripts/*.dmg
+
+# Private release guide — local reference only, never push
+GitHub-Release/RELEASE-GUIDE.html
 SPEC.md
 claudy-system-prompt..txt
 
@@ -162,3 +168,4 @@ Notary
 *credentials*
 *secrets*
 *api-key*
+.planning/

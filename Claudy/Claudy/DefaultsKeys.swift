@@ -62,4 +62,26 @@ enum DefaultsKeys {
     // MARK: - Daily wrap-up
     static let wrapUpHour               = "WrapUpHour"
     static let lastWrapUpDate           = "LastWrapUpDate"
+
+    // MARK: - Tamagotchi
+    static let tamagotchiOverlayEnabled = "TamagotchiOverlayEnabled"
+    static let tamagotchiNudgeIntensity = "TamagotchiNudgeIntensity"  // "silent" | "subtle" | "normal"
+
+    // MARK: - Personality Blending
+    static let blendEnabled      = "BlendEnabled"
+    static let blendSecondaryMode = "BlendSecondaryMode"
+    static let blendRatio        = "BlendRatio"  // Int 0–100
+
+    // MARK: - Walk
+    static let walkEnabled = "WalkEnabled"
+
+    // MARK: - Accessories
+    static let activeAccessory = "ActiveAccessory"  // CharacterAccessory.rawValue
+
+    // MARK: - Chat UX
+    static let renderMarkdown       = "RenderMarkdown"
+    static let systemPromptPresets  = "SystemPromptPresets"  // JSON [SystemPromptPreset]
+
+    // MARK: - Language
+    static let activeLanguage = "ActiveLanguage"  // AppLanguage.rawValue
 }

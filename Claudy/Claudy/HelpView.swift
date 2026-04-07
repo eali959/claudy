@@ -102,6 +102,27 @@ struct HelpView: View {
                                 "At 6 pm (if you've completed at least one Pomodoro), Claud-y gives a personality-flavoured summary of your day — sessions done, total focus time, encouragement.")
                     }
 
+                    helpSection("Language Support") {
+                        helpRow("Supported languages",
+                                "Claud-y supports 10 languages: English (UK), Español, Français, Deutsch, Português, 日本語, 中文（简体）, हिन्दी, اردو, and العربية. Change the active language in Settings → Language.")
+                        helpRow("What language affects",
+                                "Both sides of Claud-y. In API mode, all AI responses come back in your chosen language. In Companion mode, the ambient reaction bubbles — build comments, greetings, idle nudges — are drawn from a translated pool. The character's personality still shines through in every language.")
+                        helpRow("Typing in your language",
+                                "The chat input works with any macOS input method. Switch your keyboard layout in System Settings → Keyboard → Input Sources. Japanese (Hiragana/Katakana/Kanji), Chinese (Pinyin → Simplified characters), Hindi (Devanagari), Urdu, and Arabic all work via their standard macOS IME — just set your input source and type.")
+                        helpRow("Right-to-left languages (Arabic & Urdu)",
+                                "Arabic and Urdu are written right-to-left. macOS handles text direction automatically in the chat input — your text will flow correctly as soon as you switch to an RTL input source. No extra setup needed.")
+                        helpRow("Arabic transliteration",
+                                "Arabic is the one language where Claud-y can optionally include transliteration (romanised pronunciation) alongside the Arabic script. This is on by design — useful for learners or users who read both. All other non-Latin languages (Japanese, Chinese, Hindi, Urdu) use their native scripts only, with no transliteration.")
+                        helpRow("Japanese — no romaji",
+                                "Japanese responses use natural mixed kanji/hiragana/katakana script throughout — exactly as a fluent speaker would write. Romaji (romanised Japanese) is never used. If you're reading Japanese text and need help, your macOS reading tools work as normal.")
+                        helpRow("Chinese — no pinyin",
+                                "Simplified Chinese responses use Mandarin character output only. Pinyin is never shown in responses. macOS's built-in lookup (right-click → Look Up) works on any Chinese character if you need pronunciation.")
+                        helpRow("Companion mode & API mode",
+                                "In Companion mode, reactions come from a translated library — no internet needed. In API mode, the language is enforced via a system prompt directive sent with every message, so your AI provider handles the translation. Changing language takes effect immediately for both.")
+                        helpRow("Changing language",
+                                "Settings → Language → pick from the list. The change takes effect instantly — no restart needed. Switch back to English (UK) at any time.")
+                    }
+
                     helpSection("Reactions & Awareness") {
                         helpRow("What Claud-y watches",
                                 "App switches (Xcode, Figma, Terminal, Zoom, Cursor, Office, browsers…), keyboard activity, clipboard content, and build events. All processing is local — nothing is logged or sent anywhere.")

@@ -2,6 +2,144 @@
 
 ---
 
+## v3.0.0 — The Deep One
+
+> Claud-y grew a soul. v3.0 is about depth — Tamagotchi needs, expanded animation life, ten languages, personality blending, a richer chat experience, and SwiftData foundations that make everything more real. The orange creature on your screen is no longer just watching you. It has feelings. (Simulated ones. But still.)
+>
+> ☕ If v3.0 earns a place in your day, [support development on Ko-fi](https://ko-fi.com/ealiii) — one-time, no account needed.
+
+---
+
+### The Numbers
+
+| What | v2.0 | v3.0 |
+|------|-------|-------|
+| Languages | 1 (English) | 10 |
+| Personalities | 7 | 7 + blending system |
+| Animation states | 10 | 15 + full mouth sync |
+| Reaction strings | 400+ | 4,000+ (translated pools) |
+| Character accessories | 0 | 6 |
+| Persistent storage | UserDefaults only | SwiftData + UserDefaults |
+
+---
+
+### SwiftData Infrastructure
+
+Claud-y now uses SwiftData for persistent storage. Conversation history, Tamagotchi state, and stats are stored on-device using a local SQLite store — no iCloud sync, no cloud dependency, no data ever leaves your Mac.
+
+- **Explicit local URL** — data lives in `~/Library/Application Support/Claudy/claudy.store`
+- **CloudKit disabled** — `cloudKitDatabase: .none` everywhere, by design
+- **Schema versioning** — `VersionedSchema` + `SchemaMigrationPlan` ready for future migrations
+
+---
+
+### Tamagotchi Core
+
+Claud-y has needs now. Real (simulated) needs.
+
+A Tamagotchi system tracks three hidden stats — **happiness**, **energy**, and **hunger** — that evolve over time based on your behaviour and how much attention you pay to Claud-y.
+
+| Stat | Depletes when | Replenishes when |
+|------|--------------|-----------------|
+| Happiness | Long idle periods, muted for too long | You chat, celebrate a build, send thanks |
+| Energy | Continuous screen time, late nights | You take breaks, Pomodoros complete |
+| Hunger | Time passing | You interact, complete focus sessions |
+
+When stats drop low, Claud-y enters expressive states: **hungryWobble**, **sadPulse**, **tiredDroop**. These layer on top of existing animation states without interrupting work flow. A dedicated Tamagotchi settings section lets you tune nudge intensity (silent / subtle / normal) or disable it entirely.
+
+---
+
+### Animation Expansion
+
+The character rendering was rebuilt from data-driven `AnimationConfig` structs.
+
+**Full mouth sync** — all 15 `MouthShape` cases now rendered distinctly:
+`talkingSync`, `sleepLine`, `sadCurve`, `hugeSmile`, `bigSmile`, `vibeSmile`, `flatLine`, `tinyOpen`, `mediumOpen`, `wideOpen`, `rockMouth`, `smirk`, `effortGrin`, `chewing`, plus default.
+
+**Activity states** — Claud-y adopts contextual postures based on your active app:
+- Coding editors (Xcode, Cursor, VS Code) → `.coding`
+- Communication apps (Slack, Messages, Mail) → `.typing`
+- Knowledge tools (Notion, Obsidian, Bear) → `.studying`
+- Browsers and reading apps → `.reading`
+
+**Walk across screen** — every ~10 minutes (±90s jitter) Claud-y smoothly slides to a new position using a 40-step easeInOut animation. Respects `visibleFrame`, pauses during sleep/talking/celebrating. Right-click → Walk Now to trigger manually.
+
+**Weather awareness** — Claud-y uses CoreLocation + Open-Meteo (no API key) to detect weather and fire a contextual ambient comment once per session. Falls back to hemisphere/season approximation if location is denied.
+
+**Accessories** — six wearable items overlaid above the face:
+
+| Accessory | |
+|-----------|---|
+| Glasses | |
+| Tinted Sunnies | |
+| Heisenberg Hat | |
+| Cap Forward | |
+| Cap Backward | |
+
+Set via Settings → Accessories or right-click → Accessories.
+
+---
+
+### Personality Blending
+
+Two personalities, one character. A new blending system lets you mix any two personalities on a 0–100% slider.
+
+- **Subtle (< 25%)** — dominant voice with a whisper of secondary flavour
+- **Balanced (25–75%)** — unified voice that synthesises both, never switches between them
+- **Strong (> 75%)** — secondary becomes dominant with the primary as texture
+
+The slider and secondary picker are locked during streaming (no mid-sentence personality shifts). Blend state persists across sessions. Custom persona blends cleanly with any built-in personality.
+
+---
+
+### Response Expansion & Anti-Repetition
+
+**Pool sizes doubled** — all greeting pools (launch, morning, afternoon, wake, late night) and idle/wander/hourly pools are 2× the v2.0 count. All 7 personality arrival pools expanded to 13–16 entries.
+
+**Anti-repetition rolling window** — `ReactionLibraryService` now tracks recently shown strings per trigger, with a window of `min(8, pool.count / 2)`. You won't hear the same thing twice in quick succession.
+
+**PersonalityManager** tracks a separate 12-entry anti-repetition window for ambient bubbles across all triggers.
+
+---
+
+### Chat UX Enhancements
+
+- **Markdown toggle** — Settings → Chat → Render Markdown. Switch between full Markdown rendering (code blocks, bold, inline code) and plain text. Persists across sessions.
+- **Scroll-to-bottom button** — appears when you've scrolled up and new messages arrive. `↓` button in the bottom corner, auto-hides when you're at the bottom.
+- **Token counter** — subtle `~N tokens · N messages` footer in the chat. Helps you track context usage at a glance.
+- **System prompt presets** — save and name custom system prompts in Settings → Chat. Load any preset into the active session from the preset picker.
+- **StackOverflow / GitHub PR detection** — clipboard monitor now routes `stackoverflow.com`, `stackexchange.com` and GitHub `/pull/` and `/issues/` URLs to dedicated reaction pools.
+
+---
+
+### Multilingual UI — 10 Languages
+
+Claud-y now speaks ten languages. Change in Settings → Language — takes effect instantly, no restart.
+
+| Language | Code | Script | RTL |
+|----------|------|--------|-----|
+| English (UK) | `en` | Latin | — |
+| Español | `es` | Latin | — |
+| Français | `fr` | Latin | — |
+| Deutsch | `de` | Latin | — |
+| Português | `pt` | Latin | — |
+| 日本語 | `ja` | Kanji/Kana | — |
+| 中文（简体） | `zh-Hans` | Simplified Chinese | — |
+| हिन्दी | `hi` | Devanagari | — |
+| اردو | `ur` | Nastaliq | ✅ |
+| العربية | `ar` | Arabic | ✅ |
+
+**API mode**: A language directive is injected at the end of every system prompt — all AI responses come back in your chosen language.
+
+**Companion mode**: Each language has its own translated reaction library (`ReactionLibrary_{lang}.json`) — 107 trigger pools per language, 4,000+ strings across all languages. Missing keys fall back to English seamlessly.
+
+**Japanese**: Natural mixed kanji/hiragana/katakana — no romaji, ever.
+**Chinese**: Simplified character output — no pinyin, ever.
+**Arabic**: Transliteration optionally included alongside Arabic script (enabled by design — useful for learners).
+**Urdu & Arabic**: RTL layout — macOS handles text direction automatically in the chat input.
+
+---
+
 ## v2.0.0 — The Big One
 
 > Claud-y grew up. What started as a cute floating orange blob that reacted to Xcode builds is now a full productivity companion — aware of your schedule, your rhythm, your apps, your mood, and your browser choices. Eight new background intelligence systems. Three AI providers. Nine browsers. Six modes. 42+ new app detections. Hundreds of new reaction strings. And it's still free, still local-first, and still has absolutely no telemetry.

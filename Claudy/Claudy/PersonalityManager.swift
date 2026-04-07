@@ -114,7 +114,8 @@ enum PersonalityMode: String, CaseIterable, Codable, Sendable {
 /// Manages the active personality mode and builds the system prompt injected into every API call.
 ///
 /// The system prompt is assembled from a base template (SystemPrompt.txt in the bundle) plus
-/// the active personality's `promptBlock` and, when set, the active BehaviorMode's `modePromptBlock`.
+/// the active personality's `promptBlock` (or blended prompt if BLEND is active) and, when set,
+/// the active BehaviorMode's `modePromptBlock`.
 /// Custom mode replaces the personality block with user-supplied text.
 /// Greeting logic uses `asyncGreeting(for:)` which makes a lightweight API call for expressive
 /// personalities (Director, HypeCoach, Chatty, BrainRot) and falls back to the local reaction library.
@@ -130,6 +131,52 @@ final class PersonalityManager {
         didSet { UserDefaults.standard.set(customPersonaText, forKey: DefaultsKeys.customPersonaText) }
     }
 
+    // MARK: - Personality Blending (BLEND-01 / BLEND-02)
+
+    /// Whether blending is active. When false, only `currentMode` is used. (BLEND-05: max 2 personalities)
+    var blendEnabled: Bool = {
+        UserDefaults.standard.bool(forKey: DefaultsKeys.blendEnabled)
+    }() {
+        didSet { UserDefaults.standard.set(blendEnabled, forKey: DefaultsKeys.blendEnabled) }
+    }
+
+    /// The secondary personality to blend in. (BLEND-05: cannot equal `currentMode`)
+    var secondaryMode: PersonalityMode = {
+        let raw = UserDefaults.standard.string(forKey: DefaultsKeys.blendSecondaryMode) ?? ""
+        return PersonalityMode(rawValue: raw) ?? .listener
+    }() {
+        didSet { UserDefaults.standard.set(secondaryMode.rawValue, forKey: DefaultsKeys.blendSecondaryMode) }
+    }
+
+    /// 0.0 = pure primary, 1.0 = pure secondary. Stored as 0–100 Int in UserDefaults.
+    var blendRatio: Double = {
+        let saved = UserDefaults.standard.integer(forKey: DefaultsKeys.blendRatio)
+        return Double(saved) / 100.0
+    }() {
+        didSet {
+            let pct = Int((blendRatio * 100).rounded())
+            UserDefaults.standard.set(pct, forKey: DefaultsKeys.blendRatio)
+        }
+    }
+
+    /// Set true by ChatViewModel during streaming to lock the blend slider (BLEND-04).
+    var isStreaming: Bool = false
+
+    // MARK: - Anti-repetition rolling window (RESP-04)
+
+    private var recentBubbles: [String] = []
+    private static let antiRepeatWindowSize = 12
+
+    /// Marks a bubble as recently shown. Returns false if it was shown too recently.
+    func markShown(_ text: String) -> Bool {
+        if recentBubbles.contains(text) { return false }
+        recentBubbles.append(text)
+        if recentBubbles.count > Self.antiRepeatWindowSize {
+            recentBubbles.removeFirst()
+        }
+        return true
+    }
+
     /// Set by BehaviorModeManager.activate() so every API call reflects the current mode.
     var activeBehaviorMode: BehaviorMode = .normal
 
@@ -139,14 +186,66 @@ final class PersonalityManager {
         customPersonaText = UserDefaults.standard.string(forKey: DefaultsKeys.customPersonaText) ?? ""
     }
 
+    // MARK: - Blended prompt block (BLEND-03)
+
+    /// Builds a personality prompt using dominant-voice + modifier pattern.
+    /// At low blend ratios (<0.25) adds just a subtle secondary accent line.
+    /// At mid ratios (0.25–0.75) blends tone descriptors from both.
+    /// At high ratios (>0.75) secondary becomes the dominant flavour.
+    /// Never naively concatenates two full prompt blocks. (BLEND-05/06)
+    func blendedPromptBlock() -> String {
+        guard blendEnabled, secondaryMode != currentMode, blendRatio > 0.01 else {
+            if currentMode == .custom && !customPersonaText.isEmpty {
+                return "### MODE: YOU DO YOU\n\(customPersonaText)"
+            }
+            return currentMode.promptBlock
+        }
+
+        let primary = currentMode
+        let secondary = secondaryMode
+        let ratio = blendRatio
+
+        let primaryBlock = primary == .custom && !customPersonaText.isEmpty
+            ? "### MODE: YOU DO YOU\n\(customPersonaText)"
+            : primary.promptBlock
+
+        // Subtle: primary voice with just a whisper of secondary
+        if ratio < 0.25 {
+            return primaryBlock + "\n\n### SECONDARY INFLUENCE (subtle)\nAdd a touch of \(secondary.displayName) flavour — very lightly, without overshadowing your primary character."
+        }
+
+        // Balanced blend — build a unified voice descriptor
+        if ratio < 0.75 {
+            let blendNote = """
+
+            ### BLENDED PERSONALITY
+            Your primary voice is \(primary.displayName) (dominant), with meaningful influence from \(secondary.displayName). \
+            Express yourself primarily as \(primary.displayName) but let the \(secondary.displayName) energy \
+            colour your responses — especially in tone, word choice, and emotional register. \
+            Do not switch between voices — synthesise them into one unified character.
+            """
+            return primaryBlock + blendNote
+        }
+
+        // High ratio: secondary is the main voice with primary texture
+        let secondaryBlock = secondary == .custom && !customPersonaText.isEmpty
+            ? "### MODE: YOU DO YOU\n\(customPersonaText)"
+            : secondary.promptBlock
+
+        return secondaryBlock + """
+
+        ### PRIMARY TEXTURE
+        Underneath your \(secondary.displayName) character, there is a strong flavour of \(primary.displayName). \
+        Let it subtly inform your language and approach without dominating.
+        """
+    }
+
     var systemPrompt: String {
         guard let base = Bundle.main.url(forResource: "SystemPrompt", withExtension: "txt"),
               let rawText = try? String(contentsOf: base, encoding: .utf8) else {
             return buildFallbackPrompt()
         }
-        let personalityBlock = currentMode == .custom && !customPersonaText.isEmpty
-            ? "### MODE: YOU DO YOU\n\(customPersonaText)"
-            : currentMode.promptBlock
+        let personalityBlock = blendedPromptBlock()
         let stripped = rawText.replacingOccurrences(
             of: "[PERSONALITY_BLOCK]\n\n*Replaced at runtime by PersonalityManager.swift*\n\n",
             with: ""
@@ -159,13 +258,21 @@ final class PersonalityManager {
             prompt += "\n\n" + modeBlock
         }
 
+        // Inject language directive last so it takes highest precedence (LANG-02)
+        if let langLine = LanguageManager.shared.systemPromptLanguageLine {
+            prompt += "\n\n" + langLine
+        }
+
         return prompt
     }
 
     private func buildFallbackPrompt() -> String {
-        var base = "You are Claud-y, a small round orange AI companion on the user's Mac. \(currentMode.promptBlock)"
+        var base = "You are Claud-y, a small round orange AI companion on the user's Mac. \(blendedPromptBlock())"
         let modeBlock = activeBehaviorMode.modePromptBlock
         if !modeBlock.isEmpty { base += "\n\n" + modeBlock }
+        if let langLine = LanguageManager.shared.systemPromptLanguageLine {
+            base += "\n\n" + langLine
+        }
         return base
     }
 

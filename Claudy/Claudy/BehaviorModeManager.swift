@@ -180,10 +180,49 @@ final class BehaviorModeManager {
         lastActivityTime = Date()
     }
 
+    // MARK: - Activity state inference (ANIM-04)
+
+    /// Maps a frontmost bundle ID to an activity animation state.
+    /// Returns nil when the app isn't specifically recognised — character stays in current state.
+    private func activityState(for lower: String) -> CharacterAnimationState? {
+        let isCode    = lower.contains("xcode") || lower.contains("cursor")
+                     || lower.contains("vscode") || lower.contains("windsurf")
+                     || lower.contains("nova") || lower.contains("antigravity")
+        let isTyping  = lower.contains("slack") || lower.contains("messages")
+                     || lower.contains("mail")  || lower.contains("outlook")
+                     || lower.contains("discord") || lower.contains("telegram")
+                     || lower.contains("whatsapp")
+        let isReading = lower.contains("safari") || lower.contains("chrome")
+                     || lower.contains("firefox") || lower.contains("arc")
+                     || lower.contains("brave")   || lower.contains("edge")
+                     || lower.contains("reeder")  || lower.contains("instapaper")
+                     || lower.contains("kindle")
+        let isNotes   = lower.contains("notion") || lower.contains("obsidian")
+                     || lower.contains("bear")   || lower.contains("craft")
+                     || lower.contains("logseq")
+        let isStudy   = lower.contains("anki") || lower.contains("duolingo")
+                     || lower.contains("coursera") || lower.contains("udemy")
+
+        if isCode    { return .coding  }
+        if isTyping  { return .typing  }
+        if isNotes   { return .studying }
+        if isStudy   { return .studying }
+        if isReading { return .reading  }
+        return nil
+    }
+
     // MARK: - App switch hook — called from AppContextMonitor.handleActivation()
 
     func onAppSwitch(bundleID: String) {
         let lower = bundleID.lowercased()
+
+        // Set activity animation state (ANIM-04) — only when character is in a neutral state
+        if let activity = activityState(for: lower) {
+            let neutral: Set<CharacterAnimationState> = [.idle, .thinking, .typing, .coding, .reading, .studying, .vibing, .bored]
+            if let vm = viewModel, neutral.contains(vm.animationState) {
+                vm.setState(activity, duration: 25)
+            }
+        }
 
         switch currentMode {
         case .study:

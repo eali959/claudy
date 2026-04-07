@@ -54,6 +54,9 @@ final class CharacterViewModel {
     @ObservationIgnored private var keyboardMonitor: KeyboardMonitor?
     @ObservationIgnored private var systemEventMonitor: SystemEventMonitor?
     @ObservationIgnored private var spotifyMonitor: SpotifyMonitor?
+    @ObservationIgnored private(set) var tamagotchiManager: TamagotchiManager!
+    @ObservationIgnored private(set) var walkManager: WalkManager?
+    @ObservationIgnored private var weatherMonitor: WeatherContextMonitor?
 
     @ObservationIgnored private var blinkTask: Task<Void, Never>?
     @ObservationIgnored private var speechTask: Task<Void, Never>?
@@ -105,6 +108,7 @@ final class CharacterViewModel {
         focusModeMonitor     = FocusModeMonitor(viewModel: self)
         moodCheckInManager   = MoodCheckInManager(viewModel: self)
         dailyWrapUpManager   = DailyWrapUpManager(viewModel: self)
+        tamagotchiManager    = TamagotchiManager(viewModel: self)
         checkHolidayOnLaunch()
         GlobalHotkeyManager.shared.refresh()
         startBlinkLoop()
@@ -142,6 +146,8 @@ final class CharacterViewModel {
         keyboardMonitor    = KeyboardMonitor(viewModel: self)
         systemEventMonitor = SystemEventMonitor(viewModel: self)
         spotifyMonitor     = SpotifyMonitor(viewModel: self)
+        walkManager        = WalkManager(viewModel: self, windowManager: windowManager)
+        weatherMonitor     = WeatherContextMonitor(viewModel: self)
     }
 
     // MARK: - State helpers
