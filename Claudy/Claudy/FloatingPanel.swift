@@ -19,10 +19,12 @@ final class FloatingPanel: NSPanel {
             object: nil,
             queue: .main
         ) { [weak self] _ in
-            self?.ignoresMouseEvents = false
-            if let obs = self?.menuTrackingObserver {
-                NotificationCenter.default.removeObserver(obs)
-                self?.menuTrackingObserver = nil
+            Task { @MainActor [weak self] in
+                self?.ignoresMouseEvents = false
+                if let obs = self?.menuTrackingObserver {
+                    NotificationCenter.default.removeObserver(obs)
+                    self?.menuTrackingObserver = nil
+                }
             }
         }
 
