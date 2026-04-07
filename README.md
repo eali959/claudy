@@ -221,6 +221,24 @@ Requires macOS 15+ and Xcode 16+. Build and run the `Claudy` scheme. No dependen
 
 ---
 
+## v3.1 — what changed
+
+A polish release. One new feature, a handful of bug fixes, nothing broken.
+
+### New
+- **Language switch acknowledgment** — when you change the response language in Settings, Claud-y immediately waves and greets you in the new language, confirming the change is live. If the chat panel is open, the greeting appears there too. Covers all 10 languages.
+- **Settings section headers** — now bold and orange instead of the muted macOS default gray. Much easier to scan.
+
+### Fixed
+- Personality checkmarks in the menu bar status item now stay correct after changing personality from the right-click context menu (they were going stale)
+- Language picker in Settings now correctly shows flag + language name (only the flag was showing)
+- Missing SF Symbol icons: `baseball.cap` doesn't exist on macOS — cap accessories now use `hat.widebrim` / `graduationcap`; `60.circle` fixed to `timer.circle`; `rocket` fixed to `bolt.circle`; `figure.walk.slash` fixed to `figure.stand`
+- Tamagotchi care actions (Feed / Play / Rest) in the right-click menu are now safely guarded — no force-unwrap crash if the Tamagotchi manager is unavailable
+- Language info text in Settings was referencing an undefined variable — corrected
+- AppDelegate `NSMenuDelegate` conformance cleaned up — no more Swift 6 warning
+
+---
+
 ## v3.0 — what changed
 
 The deep one. Highlights:
