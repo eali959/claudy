@@ -21,40 +21,60 @@ enum KeychainError: LocalizedError {
 
 /// The AI backend currently in use. Persisted in UserDefaults ("SelectedProvider").
 enum APIProvider: String, CaseIterable, Sendable {
-    case claude = "claude"
-    case openai = "openai"
-    case gemini = "gemini"
+    case claude   = "claude"
+    case openai   = "openai"
+    case gemini   = "gemini"
+    // v4.0 — local providers (no API key required)
+    case ollama   = "ollama"
+    case lmStudio = "lmstudio"
+    // v4.0 — cloud OpenAI-compatible
+    case deepseek = "deepseek"
+
+    /// True for providers that run entirely on-device and need no API key.
+    nonisolated var isLocal: Bool {
+        self == .ollama || self == .lmStudio
+    }
 
     var displayName: String {
         switch self {
-        case .claude: return "Claude (Anthropic)"
-        case .openai: return "ChatGPT (OpenAI)"
-        case .gemini: return "Gemini (Google)"
+        case .claude:   return "Claude (Anthropic)"
+        case .openai:   return "ChatGPT (OpenAI)"
+        case .gemini:   return "Gemini (Google)"
+        case .ollama:   return "Ollama"
+        case .lmStudio: return "LM Studio"
+        case .deepseek: return "DeepSeek"
         }
     }
 
     /// Icon SF Symbol for the provider
     var icon: String {
         switch self {
-        case .claude: return "sparkles"
-        case .openai: return "bubble.left.and.bubble.right"
-        case .gemini: return "g.circle"
+        case .claude:   return "sparkles"
+        case .openai:   return "bubble.left.and.bubble.right"
+        case .gemini:   return "g.circle"
+        case .ollama:   return "cpu"
+        case .lmStudio: return "server.rack"
+        case .deepseek: return "waveform"
         }
     }
 
     nonisolated var keychainAccount: String {
         switch self {
-        case .claude: return "claude-api-key"
-        case .openai: return "openai-api-key"
-        case .gemini: return "gemini-api-key"
+        case .claude:   return "claude-api-key"
+        case .openai:   return "openai-api-key"
+        case .gemini:   return "gemini-api-key"
+        case .deepseek: return "deepseek-api-key"
+        case .ollama, .lmStudio: return ""  // no key needed for local providers
         }
     }
 
     var keyPlaceholder: String {
         switch self {
-        case .claude: return "sk-ant-api03-…"
-        case .openai: return "sk-proj-…"
-        case .gemini: return "AIzaSy…"
+        case .claude:   return "sk-ant-api03-…"
+        case .openai:   return "sk-proj-…"
+        case .gemini:   return "AIzaSy…"
+        case .deepseek: return "sk-…"
+        case .ollama, .lmStudio: return ""
         }
     }
 
@@ -66,47 +86,68 @@ enum APIProvider: String, CaseIterable, Sendable {
             return "Keychain-stored (kSecAttrAccessibleWhenUnlockedThisDeviceOnly) — device-only, encrypted by macOS. Sent only to api.openai.com over HTTPS."
         case .gemini:
             return "Keychain-stored (kSecAttrAccessibleWhenUnlockedThisDeviceOnly) — device-only, encrypted by macOS. Sent only to generativelanguage.googleapis.com over HTTPS."
+        case .deepseek:
+            return "Keychain-stored (kSecAttrAccessibleWhenUnlockedThisDeviceOnly) — device-only, encrypted by macOS. Sent only to api.deepseek.com over HTTPS."
+        case .ollama, .lmStudio:
+            return "Local provider — runs entirely on your Mac. No data ever leaves your device."
         }
     }
 
     var docsURL: String {
         switch self {
-        case .claude: return "https://console.anthropic.com/settings/keys"
-        case .openai: return "https://platform.openai.com/api-keys"
-        case .gemini: return "https://aistudio.google.com/app/apikey"
+        case .claude:   return "https://console.anthropic.com/settings/keys"
+        case .openai:   return "https://platform.openai.com/api-keys"
+        case .gemini:   return "https://aistudio.google.com/app/apikey"
+        case .deepseek: return "https://platform.deepseek.com/api_keys"
+        case .ollama:   return "https://ollama.com"
+        case .lmStudio: return "https://lmstudio.ai"
         }
     }
 
     /// Default fast model for reactions / ambient commentary
     var fastModel: String {
         switch self {
-        case .claude: return "claude-3-5-haiku-20241022"
-        case .openai: return "gpt-4o-mini"
-        case .gemini: return "gemini-2.0-flash"
+        case .claude:   return "claude-3-5-haiku-20241022"
+        case .openai:   return "gpt-4o-mini"
+        case .gemini:   return "gemini-2.0-flash"
+        case .ollama:   return UserDefaults.standard.string(forKey: DefaultsKeys.ollamaModel) ?? "llama3.2:3b"
+        case .lmStudio: return UserDefaults.standard.string(forKey: DefaultsKeys.lmStudioModel) ?? ""
+        case .deepseek: return "deepseek-chat"
         }
     }
 
     /// Default chat model
     var defaultModel: String {
         switch self {
-        case .claude: return "claude-haiku-4-5-20251001"
-        case .openai: return "gpt-4o-mini"
-        case .gemini: return "gemini-2.0-flash"
+        case .claude:   return "claude-haiku-4-5-20251001"
+        case .openai:   return "gpt-4o-mini"
+        case .gemini:   return "gemini-2.0-flash"
+        case .ollama:   return UserDefaults.standard.string(forKey: DefaultsKeys.ollamaModel) ?? "llama3.2:3b"
+        case .lmStudio: return UserDefaults.standard.string(forKey: DefaultsKeys.lmStudioModel) ?? ""
+        case .deepseek: return "deepseek-chat"
         }
     }
 
     /// Smarter / larger model
     var smartModel: String {
         switch self {
-        case .claude: return "claude-sonnet-4-6"
-        case .openai: return "gpt-4o"
-        case .gemini: return "gemini-1.5-pro"
+        case .claude:   return "claude-sonnet-4-6"
+        case .openai:   return "gpt-4o"
+        case .gemini:   return "gemini-1.5-pro"
+        case .ollama:   return UserDefaults.standard.string(forKey: DefaultsKeys.ollamaModel) ?? "llama3.2:3b"
+        case .lmStudio: return UserDefaults.standard.string(forKey: DefaultsKeys.lmStudioModel) ?? ""
+        case .deepseek: return "deepseek-reasoner"
         }
     }
 
     nonisolated static var selected: APIProvider {
-        let raw = UserDefaults.standard.string(forKey: "SelectedProvider") ?? "claude"
-        return APIProvider(rawValue: raw) ?? .claude
+        get {
+            let raw = UserDefaults.standard.string(forKey: "SelectedProvider") ?? "claude"
+            return APIProvider(rawValue: raw) ?? .claude
+        }
+        set {
+            UserDefaults.standard.set(newValue.rawValue, forKey: "SelectedProvider")
+        }
     }
 }
 
@@ -216,8 +257,11 @@ enum KeychainService {
     }
 
     nonisolated static func has(for provider: APIProvider) -> Bool {
+        // Local providers (Ollama, LM Studio) never need a key — always "available"
+        if provider.isLocal { return true }
         let service = "com.claudy"
         let account = provider.keychainAccount
+        guard !account.isEmpty else { return false }
         let query: [CFString: Any] = [
             kSecClass:       kSecClassGenericPassword,
             kSecAttrService: service,

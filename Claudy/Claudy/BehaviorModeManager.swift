@@ -170,6 +170,39 @@ final class BehaviorModeManager {
         case .dance:     activateDanceMode()
         case .brainRot:  activateBrainRotMode()
         }
+
+        playModeEntrySignature(mode)
+    }
+
+    /// Mode-entry signature gesture — tiny expressive animation when each
+    /// mode activates. Stacks on top of the existing bubble + state work
+    /// already done in activateXxxMode(). Cheap, non-blocking.
+    private func playModeEntrySignature(_ mode: BehaviorMode) {
+        guard let vm = viewModel else { return }
+        switch mode {
+        case .normal:
+            // Tiny wave — "back to default"
+            vm.setState(.waving, duration: 1.2)
+        case .study:
+            // Quiet sit + slow blink
+            vm.setState(.meditating, duration: 1.6)
+        case .dev:
+            // Ready-to-go nod + small pump
+            vm.setState(.excited, duration: 1.0)
+        case .work:
+            // Upright posture lock — focused
+            vm.setState(.typing, duration: 1.4)
+        case .dance:
+            // Arms-up cheer
+            vm.setState(.celebrating, duration: 1.2)
+        case .brainRot:
+            // Whoa twirl — chaotic surprise
+            vm.setState(.surprised, duration: 0.8)
+            Task { @MainActor [weak vm] in
+                try? await Task.sleep(for: .milliseconds(700))
+                vm?.setState(.dab, duration: 1.4)
+            }
+        }
     }
 
     func deactivate() { activate(.normal) }

@@ -6,8 +6,13 @@
 	objectVersion = 77;
 	objects = {
 
+/* Begin PBXBuildFile section */
+		EEB8DF13D70640B3887CF0F0 /* RealityKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = BC554D9ABBA74C7EAFDE4DA2 /* RealityKit.framework */; };
+/* End PBXBuildFile section */
+
 /* Begin PBXFileReference section */
 		2C856CEE2F7415BF0037696B /* Claudy.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Claudy.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		BC554D9ABBA74C7EAFDE4DA2 /* RealityKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = RealityKit.framework; path = System/Library/Frameworks/RealityKit.framework; sourceTree = SDKROOT; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
@@ -23,17 +28,27 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				EEB8DF13D70640B3887CF0F0 /* RealityKit.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		2C0615C82F9B678D009ECA93 /* Recovered References */ = {
+			isa = PBXGroup;
+			children = (
+				BC554D9ABBA74C7EAFDE4DA2 /* RealityKit.framework */,
+			);
+			name = "Recovered References";
+			sourceTree = "<group>";
+		};
 		2C856CE52F7415BF0037696B = {
 			isa = PBXGroup;
 			children = (
 				2C856CF02F7415BF0037696B /* Claudy */,
 				2C856CEF2F7415BF0037696B /* Products */,
+				2C0615C82F9B678D009ECA93 /* Recovered References */,
 			);
 			sourceTree = "<group>";
 		};
@@ -259,7 +274,7 @@
 				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
-				CURRENT_PROJECT_VERSION = 3;
+				CURRENT_PROJECT_VERSION = 4;
 				DEAD_CODE_STRIPPING = YES;
 				ENABLE_APP_SANDBOX = YES;
 				ENABLE_HARDENED_RUNTIME = YES;
@@ -276,11 +291,13 @@
 				INFOPLIST_KEY_LSUIElement = YES;
 				INFOPLIST_KEY_NSHumanReadableCopyright = "";
 				INFOPLIST_KEY_NSLocationWhenInUseUsageDescription = "Claud-y uses your approximate location to make weather-aware comments. Location is never stored or shared.";
+				INFOPLIST_KEY_NSMicrophoneUsageDescription = "Claud-y uses your microphone for Voice Mode so you can talk to it. Audio is processed on-device and never recorded or sent anywhere.";
+				INFOPLIST_KEY_NSSpeechRecognitionUsageDescription = "Claud-y uses Apple's on-device speech recognition to turn your spoken words into chat messages. Speech stays on your Mac.";
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/../Frameworks",
 				);
-				MARKETING_VERSION = 3.1;
+				MARKETING_VERSION = 4.0;
 				PRODUCT_BUNDLE_IDENTIFIER = com.eali.claudy.Claudy;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				REGISTER_APP_GROUPS = YES;
@@ -310,7 +327,7 @@
 				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
-				CURRENT_PROJECT_VERSION = 3;
+				CURRENT_PROJECT_VERSION = 4;
 				DEAD_CODE_STRIPPING = YES;
 				ENABLE_APP_SANDBOX = YES;
 				ENABLE_HARDENED_RUNTIME = YES;
@@ -327,11 +344,13 @@
 				INFOPLIST_KEY_LSUIElement = YES;
 				INFOPLIST_KEY_NSHumanReadableCopyright = "";
 				INFOPLIST_KEY_NSLocationWhenInUseUsageDescription = "Claud-y uses your approximate location to make weather-aware comments. Location is never stored or shared.";
+				INFOPLIST_KEY_NSMicrophoneUsageDescription = "Claud-y uses your microphone for Voice Mode so you can talk to it. Audio is processed on-device and never recorded or sent anywhere.";
+				INFOPLIST_KEY_NSSpeechRecognitionUsageDescription = "Claud-y uses Apple's on-device speech recognition to turn your spoken words into chat messages. Speech stays on your Mac.";
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/../Frameworks",
 				);
-				MARKETING_VERSION = 3.1;
+				MARKETING_VERSION = 4.0;
 				PRODUCT_BUNDLE_IDENTIFIER = com.eali.claudy.Claudy;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				REGISTER_APP_GROUPS = YES;

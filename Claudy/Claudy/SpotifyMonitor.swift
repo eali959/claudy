@@ -16,6 +16,21 @@ enum SpotifyGenre {
     case rnb          // groove / celebrating
     case pop          // celebrating
     case unknown      // generic reaction
+
+    /// Keyword passed to SpotifyBPMReactor.applyGenres() for tint classification.
+    var bpmKeyword: String {
+        switch self {
+        case .metal:      return "metal"
+        case .electronic: return "electronic"
+        case .hiphop:     return "hip-hop"
+        case .lofi:       return "lo-fi"
+        case .classical:  return "classical"
+        case .country:    return "country"
+        case .rnb:        return "r&b"
+        case .pop:        return "pop"
+        case .unknown:    return ""
+        }
+    }
 }
 
 // MARK: - SpotifyMonitor

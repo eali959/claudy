@@ -29,11 +29,14 @@ Tap it to open a chat. It'll talk to you. Really talk to you.
 
 Out of the box, Claud-y runs completely locally — curated response pools, 400+ contextual reactions, personality modes, a Pomodoro focus timer, break nudges, a daily wrap-up, mood check-ins, and a few hidden Easter eggs. Everything works on your machine, offline, always.
 
-If you have an API key, you can unlock full AI responses — streaming, code review, debugging help, anything. Claud-y supports three providers:
+If you have an API key, you can unlock full AI responses — streaming, code review, debugging help, anything. Claud-y supports five providers, plus two fully local options:
 
 - **[Anthropic Claude](https://console.anthropic.com)** — the original
 - **[OpenAI (ChatGPT)](https://platform.openai.com/api-keys)** — GPT-4o and GPT-4o mini
 - **[Google Gemini](https://aistudio.google.com/app/apikey)** — 2.0 Flash and 1.5 Pro
+- **[Ollama](https://ollama.ai)** — run any open model fully on-device, zero cloud, zero API key
+- **[LM Studio](https://lmstudio.ai)** — local model runner with an OpenAI-compatible API
+- **DeepSeek** — cloud API option for an alternative frontier model
 
 Your key stays in your Mac's Keychain and goes nowhere except that provider's API.
 
@@ -41,14 +44,14 @@ Your key stays in your Mac's Keychain and goes nowhere except that provider's AP
 
 ## Companion mode vs AI mode
 
-| | Companion | AI |
-|---|---|---|
-| **Setup** | None | API key (your choice of provider) |
-| **Cost** | Free forever | API usage (pay-as-you-go) |
-| **Data sent** | Nothing | Messages → provider API |
-| **Works offline** | Yes | No |
-| **Response quality** | Warm & witty | Full AI |
-| **Providers** | — | Claude · ChatGPT · Gemini |
+| | Companion | AI | Local LLM |
+|---|---|---|---|
+| **Setup** | None | API key | Ollama or LM Studio running locally |
+| **Cost** | Free forever | API usage (pay-as-you-go) | Free (your hardware) |
+| **Data sent** | Nothing | Messages → provider API | Nothing |
+| **Works offline** | Yes | No | Yes |
+| **Response quality** | Warm & witty | Full AI | Depends on model |
+| **Providers** | — | Claude · ChatGPT · Gemini · DeepSeek | Ollama · LM Studio |
 
 You start in Companion mode. Switch anytime from the chat header.
 
@@ -88,11 +91,14 @@ Right-click → Mode to switch. Every mode stacks with your personality — Dire
 ## Features
 
 ### Smart awareness
+- **3D character** — toggle between 2D and 3D from right-click → Appearance; full RealityKit renderer with pupil tracking and idle micro-behaviours
+- **Voice mode** — hold ⌘⇧V to talk; Claud-y listens and replies with real lip-sync; works with cloud and local AI
+- **Local LLM support** — Ollama and LM Studio: no cloud, no API key, zero data leaves your Mac
 - **Contextual reactions** — reacts to Xcode/Cursor builds, app switches, clipboard content, keyboard patterns, time of day, day of week, and more
 - **60+ apps detected** — Xcode, Cursor, Figma, Slack, Zoom, Notion, Obsidian, VS Code, full Microsoft Office suite, full Apple productivity suite, and more
 - **9 browsers** — Chrome, Safari, Edge, Firefox, Brave, Opera, DuckDuckGo, Helium, Arc — each with distinct personality-aware reactions
 - **Activity states** — Claud-y adopts different postures while you code, type, study, or browse
-- **Weather awareness** — reacts to your local weather using CoreLocation + Open-Meteo (no API key, no account)
+- **Weather awareness** — opt-in; reacts to your local weather using CoreLocation + Open-Meteo (no API key, no account)
 - **Public holiday awareness** — UK, US, Australia, Universal, and Islamic observances
 - **Spotify sync** — reacts to genre changes (metal → headbanging, lo-fi → vibing)
 - **10 languages** — full reaction pools and AI responses in English, Español, Français, Deutsch, Português, 日本語, 中文（简体）, हिन्दी, اردو, العربية
@@ -112,6 +118,8 @@ Right-click → Mode to switch. Every mode stacks with your personality — Dire
 - **Mini scratchpad** — persistent notepad in the right-click menu; pin notes, edit inline, survives restarts
 
 ### Ambience
+- **Care score** — 7-day rolling interaction score; thriving gives a golden rim glow, neglected causes subtle desaturation
+- **Optional chat history** — persist chat sessions locally, off by default; toggle in Settings → Privacy & Storage
 - **macOS Focus / DND sync** — Claud-y sees your Focus mode and quiets down automatically
 - **Sound effects** — optional audio feedback with a GTA-style character mumble voice
 - **Reaction log** — hold for 3 seconds to see what it's been thinking
@@ -162,7 +170,7 @@ In **AI mode**: your messages go directly from your Mac to the provider's API us
 - Watches `NSPasteboard.changeCount`. On change, reads content and classifies it as plain text, code, or URL — the classification drives the reaction type
 - **Clipboard content is never stored, logged, or sent anywhere**
 
-**No microphone, camera, location, or contacts access** — Claud-y never requests any of these.
+**Permission model — opt-in only:** macOS Input Monitoring (keyboard reactions and global hotkey), Location (weather), and microphone (voice mode) are all off by default. Claud-y requests zero system permissions on first launch. Every prompt is tied to an explicit toggle you enable in Settings.
 
 ### What's stored locally (UserDefaults)
 
@@ -189,8 +197,13 @@ Everything except API keys lives in `UserDefaults` on your Mac:
 | `PomodoroCustomMinutes` | `Int` — custom timer duration |
 | `FocusStats` | `Data` — JSON: today's Pomodoros, focus seconds, streak days |
 | `ScratchpadNotes` | `Data` — JSON-encoded scratchpad notes |
+| `RenderMode3D` | Bool — 3D character renderer enabled |
+| `VoiceModeEnabled` | Bool — voice mode active |
+| `ChatHistoryEnabled` | Bool — local chat history persistence (default OFF) |
+| `KeyboardReactionsEnabled` | Bool — typing-burst / undo-streak reactions (default OFF) |
+| `WeatherCommentsEnabled` | Bool — weather context monitoring (default OFF) |
 
-**Chat history is never persisted.** It lives in memory for the session only. Use the export function to save it.
+**Chat history is stored in memory only by default.** Enable "Save chat history" in Settings → Privacy & Storage to persist locally to `~/Library/Application Support/Claudy/chat_history.json` — never uploaded, never synced. Per-data-type toggles also cover scratchpad notes, Tamagotchi state, focus stats, and alarms.
 
 ### No telemetry, analytics, or crash reporting
 
@@ -221,7 +234,27 @@ Requires macOS 15+ and Xcode 16+. Build and run the `Claudy` scheme. No dependen
 
 ---
 
-## v3.1 — what changed
+## v4.0 — what changed
+
+The biggest Claud-y release yet. Claud-y is now a fully expressive 3D character with voice mode, local LLM support, and a living ambient personality.
+
+### Highlights
+- **3D character** — Claud-y renders in full 3D via RealityKit. Pupil-tracking eyes, procedural limbs, lip-sync mouth, and 12 idle micro-behaviours (yawns, head scratches, double takes, peeks). Toggle between 2D and 3D any time from right-click → Appearance.
+- **Voice mode** — tap the mic or hold ⌘⇧V to talk. Claud-y listens, thinks, then speaks back with real lip-sync. Works with all AI providers including local ones.
+- **Local LLM** — run Claud-y fully on-device with Ollama or LM Studio. Nothing leaves your Mac. DeepSeek also supported as a cloud option.
+- **Floating voice overlay** — a compact panel docks directly below Claud-y when voice mode is active. Animated waveform bars, live transcript, state-aware mic pulse.
+- **Care score** — a 7-day rolling score tracks how much you've interacted with Claud-y. High score → golden rim glow (thriving). Low score → subtle desaturation (neglected). Reset any time from Settings.
+- **Optional chat history** — off by default. Enable in Settings → Privacy & Storage to persist chat sessions locally to `~/Library/Application Support/Claudy/chat_history.json`. Per-data-type toggles for scratchpad, Tamagotchi state, focus stats, and alarms too.
+- **Privacy-first permissions** — no unexpected system permission prompts on first launch. Input Monitoring, Location, and keyboard monitoring are now all opt-in via Settings toggles.
+- **7 accessories in 3D** — all accessories (glasses, tinted sunnies, Heisenberg hat, cap forward, cap backward, cinema 3D glasses) now have full 3D counterparts with PBR materials. Santa hat added.
+- **Response pool +81%** — `ReactionLibrary.json` grew from 728 → 1,320 lines of Companion-voice content.
+- **Settings search bar** — type "voice", "ollama", "pomodoro" to filter any setting instantly.
+
+Full history in [CHANGELOG.md](CHANGELOG.md).
+
+---
+
+## v3.1 — what changed (see v4.0 above for latest)
 
 A polish release. One new feature, a handful of bug fixes, nothing broken.
 
@@ -282,7 +315,8 @@ Your feedback and support genuinely shape what gets built next. Every bit of it 
 
 ## What's next
 
-- [ ] More provider support
+- [ ] Apple Intelligence integration — on-device foundation model, zero API key required
+- [ ] Personality export/import — share your custom Claud-y persona as a `.claudyprofile` file
 - [ ] iOS companion (maybe, no promises)
 - [ ] More accessories and seasonal cosmetics
 
@@ -295,7 +329,9 @@ Have ideas? [Open an issue](../../issues).
 - **Platform:** macOS 15+
 - **Language:** Swift 6.0 (strict concurrency)
 - **UI:** SwiftUI
-- **AI:** Claude · ChatGPT · Gemini (all optional)
+- **3D engine:** RealityKit
+- **Voice:** AVSpeechSynthesizer · SFSpeechRecognizer
+- **AI:** Claude · ChatGPT · Gemini · Ollama · LM Studio · DeepSeek (all optional)
 - **Architecture:** MVVM with `@Observable`
 - **License:** MIT
 

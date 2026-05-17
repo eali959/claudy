@@ -35,6 +35,14 @@ final class CharacterViewModel {
     var isMuted: Bool = UserDefaults.standard.bool(forKey: DefaultsKeys.isMuted)
     var isFocusModeActive: Bool = false
     var showConfetti: Bool = false
+    /// V4 — incremented every trigger so SwiftUI re-creates the burst
+    /// view (forces ConfettiBurst3D's @State to re-randomise pieces).
+    var confettiTriggerID: Int = 0
+    
+    // 3D View properties
+    var weatherCondition: WeatherCondition = .unknown
+    var spotifyPlaying: Bool = false
+    var spotifyGenre: SpotifyGenre = .unknown
 
     // MARK: - @ObservationIgnored internals
     @ObservationIgnored private(set) var tickleManager: TickleManager!
@@ -53,10 +61,14 @@ final class CharacterViewModel {
     @ObservationIgnored private var contextMonitor: ContextMonitor?
     @ObservationIgnored private var keyboardMonitor: KeyboardMonitor?
     @ObservationIgnored private var systemEventMonitor: SystemEventMonitor?
-    @ObservationIgnored private var spotifyMonitor: SpotifyMonitor?
+    @ObservationIgnored private(set) var spotifyMonitor: SpotifyMonitor?
     @ObservationIgnored private(set) var tamagotchiManager: TamagotchiManager!
     @ObservationIgnored private(set) var walkManager: WalkManager?
-    @ObservationIgnored private var weatherMonitor: WeatherContextMonitor?
+    @ObservationIgnored private(set) var weatherMonitor: WeatherContextMonitor?
+    @ObservationIgnored private(set) var appWatcher: AppWatcher!
+    @ObservationIgnored private(set) var careScoreTracker: CareScoreTracker!
+    @ObservationIgnored private(set) var spotifyBPMReactor: SpotifyBPMReactor!
+    @ObservationIgnored private(set) var personalityExporter: PersonalityExporter!
 
     @ObservationIgnored private var blinkTask: Task<Void, Never>?
     @ObservationIgnored private var speechTask: Task<Void, Never>?
@@ -109,6 +121,10 @@ final class CharacterViewModel {
         moodCheckInManager   = MoodCheckInManager(viewModel: self)
         dailyWrapUpManager   = DailyWrapUpManager(viewModel: self)
         tamagotchiManager    = TamagotchiManager(viewModel: self)
+        appWatcher           = AppWatcher(viewModel: self)
+        careScoreTracker     = CareScoreTracker()
+        spotifyBPMReactor    = SpotifyBPMReactor(viewModel: self)
+        personalityExporter  = PersonalityExporter()
         checkHolidayOnLaunch()
         GlobalHotkeyManager.shared.refresh()
         startBlinkLoop()
@@ -161,6 +177,14 @@ final class CharacterViewModel {
         spotifyMonitor     = SpotifyMonitor(viewModel: self)
         walkManager        = WalkManager(viewModel: self, windowManager: windowManager)
         weatherMonitor     = WeatherContextMonitor(viewModel: self)
+        appWatcher.start()
+        SeasonalThemeEngine.shared.startUpdating()
+        // Apply seasonal accessory hint on first launch if no accessory is set
+        if SeasonalThemeEngine.shared.isEnabled,
+           CharacterAccessory.active == .none,
+           SeasonalThemeEngine.shared.sessionAccessoryHint != .none {
+            CharacterAccessory.active = SeasonalThemeEngine.shared.sessionAccessoryHint
+        }
     }
 
     // MARK: - State helpers
@@ -178,6 +202,10 @@ final class CharacterViewModel {
     func setThinking() { baseState = .thinking; setState(.thinking) }
     func setTalking()  { baseState = .talking;  setState(.talking) }
     func stopTalking() { baseState = .idle;     setState(.idle) }
+    /// V4 voice-mode poses — listening (alert), speaking (talking), end (idle).
+    func setVoiceListening() { baseState = .alert;   setState(.alert) }
+    func setVoiceSpeaking()  { baseState = .talking; setState(.talking) }
+    func endVoiceMode()      { baseState = .idle;    setState(.idle) }
 
     func celebrate()   { setState(.celebrating, duration: 3.0) }
     func beConfused()  { setState(.confused,    duration: 2.5) }
@@ -215,6 +243,9 @@ final class CharacterViewModel {
 
     /// Called when Spotify starts playing a new track.
     func onSpotifyTrackChanged(track: String, artist: String, genre: SpotifyGenre) {
+        spotifyPlaying = true
+        spotifyGenre = genre
+        spotifyBPMReactor.applyGenres([genre.bpmKeyword])
         // Build a short speech bubble
         let bubble: String
         switch genre {
@@ -308,6 +339,8 @@ final class CharacterViewModel {
 
     /// Called when Spotify is paused or stopped.
     func onSpotifyPaused() {
+        spotifyPlaying = false
+        spotifyBPMReactor.stopDanceBursts()
         // Only react if we put the character in a music-driven state
         if animationState == .headbanging || animationState == .vibing {
             baseState = .idle
@@ -341,6 +374,7 @@ final class CharacterViewModel {
 
     func triggerConfetti() {
         confettiTask?.cancel()
+        confettiTriggerID &+= 1   // V4 — re-id so SwiftUI re-builds burst
         showConfetti = true
         SoundManager.shared.play(.celebrate)
         confettiTask = Task {
@@ -457,6 +491,7 @@ final class CharacterViewModel {
 
         reactionLog.append((Date(), text))
         if reactionLog.count > 50 { reactionLog.removeFirst() }
+        careScoreTracker.recordInteraction()
 
         // Activate lip-sync mouth for ambient states (idle, alert, drowsy, waving).
         // States like celebrating, confused, thinking, facepalm keep their own expression.
@@ -550,9 +585,54 @@ final class CharacterViewModel {
 
     private func blink() async {
         guard animationState != .sleeping && animationState != .drowsy else { return }
+        // V5.3 — also skip auto-blink while being dragged.  isHeldClosedEyes
+        // already keeps the eyes closed; firing isBlinking on/off in the
+        // background just creates fight conditions in observers.
+        guard !isHeldClosedEyes else { return }
         isBlinking = true
         try? await Task.sleep(for: .milliseconds(120))
         isBlinking = false
+    }
+
+    // MARK: - Drag (pleasure pose)
+    //
+    // V5.3 — When Claudy is picked up and dragged, 2D Claudy closes his eyes
+    // in pleasure (like being petted).  3D used to fire .excited which mapped
+    // to a big-smile + body-bounce that looked overdone.  These two methods
+    // match the 2D behaviour: eyes closed, mouth at default size, no body
+    // animation kicked off — just a gentle "being held" pose.
+
+    /// Persistent "eyes held closed" flag — separate from `isBlinking` (which
+    /// is owned by the auto-blink loop).  When true, both 2D and 3D views
+    /// render eyes closed regardless of the auto-blink state.  Without this
+    /// separation, the auto-blink loop unblinks the eyes for ~120 ms every
+    /// few seconds during a drag — flashing the iris and catchlights for
+    /// a fraction of a second.  This flag overrides that.
+    var isHeldClosedEyes: Bool = false
+
+    /// Effective signal that should drive both views' "eyes closed" rendering.
+    /// Computes the OR of the auto-blink signal and the held-closed signal so
+    /// either source can close the eyes, without one fighting the other.
+    var effectiveBlinking: Bool { isBlinking || isHeldClosedEyes }
+
+    /// Called when the user begins dragging Claudy.  Closes eyes (pleasure)
+    /// and keeps the current mouth shape — no animation state change so the
+    /// big celebrate bounce doesn't fire.
+    func onDragBegin() {
+        // Hold eyes closed for the full drag duration.  This survives the
+        // auto-blink loop's periodic on/off cycle (which would otherwise
+        // briefly unblink the eyes mid-drag and flash the iris).
+        isHeldClosedEyes = true
+        // Keep the current animation state (don't fire .excited which triggers
+        // the big celebrate animation + larger smile).
+    }
+
+    /// Called when the user releases Claudy.  Opens eyes again and gives a
+    /// brief happy moment (subtle, not a full celebrate).
+    func onDragEnd() {
+        isHeldClosedEyes = false
+        // Brief tickle reaction — a tiny wiggle, much subtler than .excited.
+        setState(.tickled, duration: 0.3)
     }
 }
 
@@ -573,4 +653,18 @@ extension Notification.Name {
     /// Fired by QuickActionManager when the user taps a contextual button.
     /// userInfo["prompt"]: String — pre-fill value for the chat input.
     static let claudyQuickActionFired    = Notification.Name("claudyQuickActionFired")
+    /// Open the local-LLM setup wizard. Posted from menu / Settings.
+    static let claudyShowLocalLLMSetup   = Notification.Name("claudyShowLocalLLMSetup")
+    /// Open Voice Mode sheet. Posted from menu / chat header / global hotkey.
+    static let claudyShowVoiceMode       = Notification.Name("claudyShowVoiceMode")
+    /// V5.10 — Posted when user toggles "Keyboard reactions" in Settings, so
+    /// KeyboardMonitor can install / remove its NSEvent monitor at runtime
+    /// without an app restart.
+    static let claudyKeyboardReactionsToggled = Notification.Name("claudyKeyboardReactionsToggled")
+    /// V4 — VoiceModeManager state changed; object payload is the new
+    /// VoiceModeManager.VoiceCharacterState.
+    static let claudyVoiceStateChanged   = Notification.Name("claudyVoiceStateChanged")
+    /// V4 — Voice transcript ready to be sent to chat; object payload
+    /// is the transcript String.
+    static let claudyVoiceTranscriptReady = Notification.Name("claudyVoiceTranscriptReady")
 }

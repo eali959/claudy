@@ -20,6 +20,8 @@ final class WalkManager {
     // MARK: - State
 
     private(set) var isWalking = false
+    /// True while walking toward a destination whose x-coordinate is to the left of the current position.
+    private(set) var isWalkingLeft = false
 
     var isEnabled: Bool = {
         // Default on; key absent → true
@@ -126,6 +128,7 @@ final class WalkManager {
         }
 
         isWalking = true
+        isWalkingLeft = dest.x < window.frame.origin.x
         vm.setState(.walking)
 
         // Slide the window to the destination — 144 steps at ~16 ms each ≈ 60 fps
@@ -150,6 +153,7 @@ final class WalkManager {
         await walkTask?.value
 
         isWalking = false
+        isWalkingLeft = false
         vm.setState(.idle)
     }
 

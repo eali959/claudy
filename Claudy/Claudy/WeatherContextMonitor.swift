@@ -40,7 +40,13 @@ final class WeatherContextMonitor: NSObject {
         super.init()
         locationManager.delegate = self
         locationManager.desiredAccuracy = kCLLocationAccuracyThreeKilometers
-        scheduleComment()
+        // V5.11 — Only schedule the weather comment (which triggers a
+        // location permission prompt) if the user has opted into weather
+        // comments.  Default OFF for new installs; existing users who
+        // explicitly enabled it stay enabled.
+        if UserDefaults.standard.bool(forKey: DefaultsKeys.weatherCommentsEnabled) {
+            scheduleComment()
+        }
     }
 
     deinit {

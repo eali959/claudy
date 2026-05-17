@@ -53,6 +53,14 @@ final class ScratchpadManager {
         save()
     }
 
+    /// V5.11 — Clear every note.  Triggered by the Privacy & Storage
+    /// "Clear all notes" button.  Persisted via save(), so it removes
+    /// from disk too.
+    func clearAllNotes() {
+        notes.removeAll()
+        save()
+    }
+
     func togglePin(id: UUID) {
         guard let idx = notes.firstIndex(where: { $0.id == id }) else { return }
         notes[idx].isPinned.toggle()
@@ -69,11 +77,20 @@ final class ScratchpadManager {
     // MARK: - Persistence
 
     private func save() {
+        // V5.11 — respect the user's per-data-type save preference.
+        // Default-true; user can opt out via Privacy & Storage settings.
+        // When the toggle is off, in-memory notes still work for the current
+        // session but are not persisted to UserDefaults.
+        let key = DefaultsKeys.saveScratchpadNotes
+        let optedIn = UserDefaults.standard.object(forKey: key) == nil
+                   || UserDefaults.standard.bool(forKey: key)
+        guard optedIn else { return }
         guard let data = try? JSONEncoder().encode(notes) else { return }
         UserDefaults.standard.set(data, forKey: Self.defaultsKey)
     }
 
     private func load() {
+        // Always read existing data (so opting out then opting back in is non-destructive).
         guard let data = UserDefaults.standard.data(forKey: Self.defaultsKey),
               let decoded = try? JSONDecoder().decode([ScratchpadNote].self, from: data) else { return }
         notes = decoded

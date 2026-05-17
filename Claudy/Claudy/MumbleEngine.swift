@@ -3,11 +3,11 @@ import OSLog
 
 // MARK: - MumbleEngine
 
-/// Synthesises short pip tones that give Claud-y a cute chipmunk voice.
+/// Synthesises short pip tones that give Claud-y a cute, warm chipmunk voice.
 ///
-/// Each speech bubble triggers a burst of sine-wave pip tones scaled to text length,
-/// with bell-like harmonics and optional vibrato for variety.
-/// The two-tone name melody ("Claud-y") is available via `speakName()`.
+/// Pips are in the 300–520 Hz register (down an octave from the original) so they
+/// feel round and soothing rather than piercing. Gentle vibrato, soft envelopes,
+/// and relaxed spacing make the mumble feel like a friendly murmur, not a beep burst.
 ///
 /// Controlled by UserDefaults keys: "CharacterVoiceEnabled", "SoundEffectsEnabled", "IsMuted".
 @MainActor
@@ -35,31 +35,31 @@ final class MumbleEngine {
     func speak(_ text: String) {
         guard isEnabled else { return }
         stop()
-        let pipCount = min(20, max(1, text.count / 3))
+        let pipCount = min(12, max(1, text.count / 5))
         mumbleTask = Task { [weak self] in
             guard let self else { return }
             for _ in 0..<pipCount {
                 guard !Task.isCancelled else { return }
                 self.schedulePip()
-                let spacing = Double.random(in: 0.055...0.095)
+                let spacing = Double.random(in: 0.085...0.130)
                 try? await Task.sleep(for: .seconds(spacing))
             }
         }
     }
 
     /// Play the two-syllable name melody: "Claud-y".
-    /// C5 -> G5, gives Claud-y a recognisable musical signature.
+    /// A4 → E5 — warm and musical without being shrill.
     func speakName() {
         guard isEnabled else { return }
         stop()
         mumbleTask = Task { [weak self] in
             guard let self else { return }
-            // "Claud": C5, clean bell tone, 130ms
-            self.scheduleNameNote(frequency: 523.25, duration: 0.13, vibratoDepth: 0)
-            try? await Task.sleep(for: .seconds(0.16))
+            // "Claud": A4 clean bell tone, 145ms
+            self.scheduleNameNote(frequency: 440.0, duration: 0.145, vibratoDepth: 0)
+            try? await Task.sleep(for: .seconds(0.175))
             guard !Task.isCancelled else { return }
-            // "-y": G5, cute vibrato chirp, 95ms
-            self.scheduleNameNote(frequency: 783.99, duration: 0.095, vibratoDepth: 22)
+            // "-y": E5 gentle vibrato chirp, 110ms
+            self.scheduleNameNote(frequency: 659.25, duration: 0.110, vibratoDepth: 8)
         }
     }
 
@@ -86,14 +86,14 @@ final class MumbleEngine {
         return base * 0.25   // keep mumble quiet relative to other sounds
     }
 
-    /// A single cute pip: higher range, gentle vibrato on ~40% of pips,
-    /// 2nd harmonic at 15% for a soft bell/chime quality.
+    /// A single warm pip: lower frequency range (300–520 Hz) for a round, non-piercing tone.
+    /// Gentle vibrato on ~55% of pips. 2nd + 3rd harmonics for bell warmth.
     private func schedulePip() {
         let sampleRate: Double = 44100
-        let frequency  = Double.random(in: 520...840)   // higher = cuter
-        let duration   = 0.040                           // snappier than before
+        let frequency  = Double.random(in: 300...520)
+        let duration   = 0.055
         let frameCount = AVAudioFrameCount(sampleRate * duration)
-        let addVibrato = Double.random(in: 0...1) < 0.4
+        let addVibrato = Double.random(in: 0...1) < 0.55
 
         guard let buffer = AVAudioPCMBuffer(pcmFormat: audioFormat, frameCapacity: frameCount),
               let channelData = buffer.floatChannelData else { return }
@@ -106,29 +106,31 @@ final class MumbleEngine {
             let t        = Double(frame) / sampleRate
             let progress = t / duration
 
-            // Snappier envelope: 5% attack, 70% sustain, 25% decay
+            // 10% soft attack, 55% sustain, 35% gentle decay
             let envelope: Float
-            if progress < 0.05 {
-                envelope = Float(progress / 0.05)
-            } else if progress > 0.75 {
-                envelope = Float((1.0 - progress) / 0.25)
+            if progress < 0.10 {
+                envelope = Float(progress / 0.10)
+            } else if progress > 0.65 {
+                envelope = Float((1.0 - progress) / 0.35)
             } else {
                 envelope = 1.0
             }
 
-            let vibratoOffset = addVibrato ? 20.0 * sin(2.0 * .pi * 7.0 * t) : 0.0
+            // Subtle vibrato: 6 Hz depth at 5 Hz rate — dreamy shimmer, not wobble
+            let vibratoOffset = addVibrato ? 6.0 * sin(2.0 * .pi * 5.0 * t) : 0.0
             let f = frequency + vibratoOffset
             let fundamental = sin(2.0 * .pi * f * t)
-            let harmonic    = 0.15 * sin(2.0 * .pi * f * 2.0 * t)  // bell shimmer
+            let harmonic2   = 0.12 * sin(2.0 * .pi * f * 2.0 * t)  // bell warmth
+            let harmonic3   = 0.04 * sin(2.0 * .pi * f * 3.0 * t)  // subtle depth
 
-            samples[frame] = Float(fundamental + harmonic) * vol * envelope
+            samples[frame] = Float(fundamental + harmonic2 + harmonic3) * vol * envelope
         }
 
         playerNode.scheduleBuffer(buffer, completionHandler: nil)
         if !playerNode.isPlaying { playerNode.play() }
     }
 
-    /// A sustained name-melody note with optional vibrato.
+    /// A sustained name-melody note with optional gentle vibrato.
     private func scheduleNameNote(frequency: Double, duration: Double, vibratoDepth: Double) {
         let sampleRate: Double = 44100
         let frameCount = AVAudioFrameCount(sampleRate * duration)
@@ -144,17 +146,15 @@ final class MumbleEngine {
             let t        = Double(frame) / sampleRate
             let progress = t / duration
 
-            // Soft attack (5%), long sustain, gentle tail (25%)
+            // 8% soft attack, exponential tail decay
             let envelope: Float
-            if progress < 0.05 {
-                envelope = Float(progress / 0.05)
-            } else if progress > 0.75 {
-                envelope = Float((1.0 - progress) / 0.25)
+            if progress < 0.08 {
+                envelope = Float(progress / 0.08)
             } else {
-                envelope = 1.0
+                envelope = Float(exp(-3.5 * (progress - 0.08)))
             }
 
-            let vibratoOffset = vibratoDepth * sin(2.0 * .pi * 6.5 * t)
+            let vibratoOffset = vibratoDepth * sin(2.0 * .pi * 5.0 * t)
             let f           = frequency + vibratoOffset
             let fundamental = sin(2.0 * .pi * f * t)
             let harmonic2   = 0.20 * sin(2.0 * .pi * f * 2.0 * t)  // bell quality

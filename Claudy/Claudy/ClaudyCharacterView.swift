@@ -9,10 +9,17 @@ struct ClaudyCharacterView: View {
     var irisOffset: CGPoint = .zero
     var tickleIntensity: TickleIntensity = .none
     var danceMove: DanceMove = .groove
+    /// True when WalkManager is walking toward a position to the left — flips sprite horizontally.
+    var isWalkingLeft: Bool = false
     /// Active accessory drawn above the face layer (ACC-02)
     var accessory: CharacterAccessory = .none
     /// Current character scale — passed down to AccessoryOverlayView so accessories scale correctly (ACC-04)
     var characterScale: CGFloat = 0.8
+    /// When true, only the face (eyes + mouth + blush) is drawn — body, arms,
+    /// feet, accessories, drop-shadow, gestures, and the wrapping ZStack chrome
+    /// are all suppressed. Used by `Claudy2DFaceOverlay` to layer a 2-D face on
+    /// top of the 3-D RealityKit body.
+    var faceOnly: Bool = false
     var onTap: () -> Void = {}
     var onDoubleTap: () -> Void = {}
     var onDragBegan: () -> Void = {}
@@ -53,7 +60,14 @@ struct ClaudyCharacterView: View {
     private let darkBrown  = Color(red: 0.102, green: 0.039, blue: 0.020) // #1a0a05
 
     var body: some View {
-        ZStack {
+        // Hybrid mode: render JUST the face for overlay on the 3-D body. Skips
+        // every body/arm/foot/shadow/dance-glow primitive and all gestures —
+        // ClaudyRealityView owns input + body motion underneath.
+        if faceOnly {
+            return AnyView(face)
+        }
+
+        return AnyView(ZStack {
             // Sleeping Zs
             if animationState == .sleeping {
                 sleepingZs.offset(x: CharacterGeometry.sleepingZsOffsetX, y: CharacterGeometry.sleepingZsOffsetY)
@@ -234,19 +248,37 @@ struct ClaudyCharacterView: View {
         }
         .onChange(of: tickleIntensity) { _, intensity in
             applyWiggle(intensity)
-        }
+        })
     }
 
-    // MARK: - Feet
+    // MARK: - Feet (v4.0 biped — two legs with walk cycle)
 
+    @ViewBuilder
     private var feet: some View {
-        ZStack {
-            ForEach(CharacterGeometry.footPositions, id: \.self) { footShape(at: $0) }
+        if animationState == .walking && !reduceMotion {
+            // Biped walk cycle: 12 fps via TimelineView, legs alternate using sin wave
+            TimelineView(.animation(minimumInterval: 1.0 / 12.0)) { timeline in
+                let phase = timeline.date.timeIntervalSinceReferenceDate * 4.0  // ~2 strides/sec
+                ZStack {
+                    bipedFoot(x: CharacterGeometry.footPositions[0],
+                              yOffset: CGFloat(sin(phase)) * 3.5)
+                    bipedFoot(x: CharacterGeometry.footPositions[1],
+                              yOffset: CGFloat(sin(phase + .pi)) * 3.5)
+                }
+                .frame(width: CharacterGeometry.feetFrameWidth, height: CharacterGeometry.feetFrameHeight)
+            }
+            .scaleEffect(x: isWalkingLeft ? -1 : 1, y: 1)  // mirror when walking left
+        } else {
+            // Idle / all other states — static biped stance
+            ZStack {
+                bipedFoot(x: CharacterGeometry.footPositions[0], yOffset: 0)
+                bipedFoot(x: CharacterGeometry.footPositions[1], yOffset: 0)
+            }
+            .frame(width: CharacterGeometry.feetFrameWidth, height: CharacterGeometry.feetFrameHeight)
         }
-        .frame(width: CharacterGeometry.feetFrameWidth, height: CharacterGeometry.feetFrameHeight)
     }
 
-    private func footShape(at x: CGFloat) -> some View {
+    private func bipedFoot(x: CGFloat, yOffset: CGFloat) -> some View {
         RoundedRectangle(cornerRadius: CharacterGeometry.footCorner)
             .fill(limbColor)
             .frame(width: CharacterGeometry.footWidth, height: CharacterGeometry.footHeight)
@@ -256,7 +288,7 @@ struct ClaudyCharacterView: View {
                     .frame(width: 12, height: 4)
                     .offset(y: 3)
             }
-            .offset(x: x)
+            .offset(x: x, y: yOffset)
     }
 
     // MARK: - Arms
@@ -519,13 +551,17 @@ struct ClaudyCharacterView: View {
     /// Pixar-style eye with iris tracking
     private func pixarEye(size: CGFloat) -> some View {
         ZStack {
-            // Sclera — very faint warm tint at edge for softness
+            // Sclera — collapses to a thin line on blink
             Circle()
                 .fill(Color.white)
                 .frame(width: size, height: isBlinking ? 2.5 : size)
                 .animation(.easeInOut(duration: 0.08), value: isBlinking)
 
-            if !isBlinking {
+            // Iris + catchlights fade in sync with the sclera so there's no
+            // "pure white flash" intermediate frame when the eye starts closing.
+            // Previously used `if !isBlinking` which removed these instantly
+            // while the sclera was still mid-animation (80ms of shiny white circle).
+            Group {
                 // Iris — slightly larger for a more expressive, doe-eyed look
                 Circle()
                     .fill(darkBrown)
@@ -544,6 +580,8 @@ struct ClaudyCharacterView: View {
                     .frame(width: size * CharacterGeometry.catchlightSecondaryRatio, height: size * CharacterGeometry.catchlightSecondaryRatio)
                     .offset(x: irisOffset.x - size * 0.14, y: irisOffset.y + size * 0.13)
             }
+            .opacity(isBlinking ? 0 : 1)
+            .animation(.easeInOut(duration: 0.08), value: isBlinking)
         }
         .animation(.easeOut(duration: 0.12), value: irisOffset.x)
         .animation(.easeOut(duration: 0.12), value: irisOffset.y)

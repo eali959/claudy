@@ -18,6 +18,12 @@ struct ScratchpadSheet: View {
                     .foregroundStyle(orange)
                 Text("Scratchpad")
                     .font(.system(size: 15, weight: .bold))
+                // V5.10 — show note count next to title for quick context
+                if !manager.notes.isEmpty {
+                    Text("(\(manager.notes.count))")
+                        .font(.system(size: 12, weight: .medium))
+                        .foregroundStyle(.secondary)
+                }
                 Spacer()
                 Button { isPresented = false } label: {
                     Image(systemName: "xmark.circle.fill")

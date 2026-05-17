@@ -30,13 +30,31 @@ struct PomodoroTimerBadge: View {
     }
 
     var body: some View {
+        animatedBadge
+            .accessibilityLabel(accessibilityLabel)
+            .accessibilityHint(accessibilityHint)
+    }
+
+    private var animatedBadge: some View {
+        badgeStack
+            .frame(width: 42, height: 42)
+            .scaleEffect(pulsing ? 1.04 : 1.0)
+            .animation(pulseAnimation, value: pulsing)
+            .onChange(of: manager.state) { _, newState in
+                pulsing = (newState == .running || newState == .complete)
+            }
+            .onAppear { pulsing = (manager.state == .running) }
+    }
+
+    /// V5.10 — Extracted from `body` to keep each closure under the
+    /// type-checker's complexity budget.
+    private var badgeStack: some View {
         ZStack {
             // Background track
             Circle()
                 .stroke(Color.white.opacity(0.15), lineWidth: 3)
                 .frame(width: 42, height: 42)
-
-            // Progress arc - full ring when idle/complete, progress when active
+            // Progress arc — full when idle/complete, partial when active
             Circle()
                 .trim(from: 0, to: arcTrim)
                 .stroke(arcColor, style: StrokeStyle(lineWidth: 3, lineCap: .round))
@@ -44,32 +62,13 @@ struct PomodoroTimerBadge: View {
                 .rotationEffect(.degrees(-90))
                 .animation(.linear(duration: 1), value: manager.progressFraction)
                 .animation(.easeInOut(duration: 0.4), value: manager.state)
-
             // Dark pill background
             Circle()
                 .fill(Color.black.opacity(0.58))
                 .frame(width: 34, height: 34)
-
             // Centre content per state
             centreContent
         }
-        .frame(width: 42, height: 42)
-        // Gentle pulse while running
-        .scaleEffect(pulsing ? 1.04 : 1.0)
-        .animation(
-            pulsing
-                ? .easeInOut(duration: 1.0).repeatForever(autoreverses: true)
-                : .spring(response: 0.3, dampingFraction: 0.7),
-            value: pulsing
-        )
-        .onChange(of: manager.state) { _, newState in
-            pulsing = (newState == .running)
-        }
-        .onAppear {
-            pulsing = (manager.state == .running)
-        }
-        .accessibilityLabel("Focus timer: \(manager.state == .complete ? "complete" : manager.displayTime)")
-        .accessibilityHint(accessibilityHint)
     }
 
     @ViewBuilder
@@ -98,10 +97,29 @@ struct PomodoroTimerBadge: View {
             }
 
         case .complete:
-            Image(systemName: "checkmark")
-                .font(.system(size: 12, weight: .bold))
+            // V5.10 — sealed checkmark, slightly larger than the old checkmark
+            // for a clear "you did it" moment.  Pulse comes from the body-level
+            // scaleEffect (which runs for both .running and .complete states).
+            Image(systemName: "checkmark.seal.fill")
+                .font(.system(size: 14, weight: .bold))
                 .foregroundStyle(Color.green)
         }
+    }
+
+    /// V5.10 — extracted to keep `body` under the type-checker's complexity budget.
+    private var pulseAnimation: Animation {
+        if pulsing {
+            return .easeInOut(duration: 1.0).repeatForever(autoreverses: true)
+        } else {
+            return .spring(response: 0.3, dampingFraction: 0.7)
+        }
+    }
+
+    /// V5.10 — extracted to a property so the SwiftUI type-checker doesn't
+    /// time out on the inline ternary it had before.
+    private var accessibilityLabel: String {
+        let state = manager.state == .complete ? "complete" : manager.displayTime
+        return "Focus timer: \(state)"
     }
 
     private var accessibilityHint: String {

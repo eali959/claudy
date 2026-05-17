@@ -3,10 +3,11 @@ import SwiftUI
 import OSLog
 
 /// Scripted demo mode for promotional screen recordings.
-/// Supports three variants:
+/// Supports four variants:
 ///   - .v1 — Original ~32-second sequence (Shift+Option+D or right-click → V1 Demo)
 ///   - .v2 — Extended ~55-second sequence with side labels (Shift+Option+V or right-click → V2 Demo)
 ///   - .v3 — v3.1 feature showcase ~56-second sequence (right-click → V3 Demo)
+///   - .v4 — ≤30-second social-media cut: sleep intro → accessories → BrainRot/chat → CTA
 ///
 /// All variants run from a single manager instance.
 @Observable
@@ -15,11 +16,20 @@ final class DemoModeManager {
 
     // MARK: - Demo variant
 
-    enum DemoVariant { case v1, v2, v3 }
+    enum DemoVariant { case v1, v2, v3, v4 }
 
     // MARK: - Observable state (drives UI in CharacterRootView / CharacterSceneView)
 
     var isRunning = false
+
+    /// V4 — when true, ALL non-essential overlays are suppressed
+    /// (chat panel, ambient bubbles, settings sheet, context menus).
+    /// Demo controllers must respect this so the demo runs uninterrupted.
+    var overlaysSuppressed = false
+
+    /// V4 — when true, the matrix-rain glitch overlay is rendered over
+    /// the entire character window.  Used during the 2D→3D transition.
+    var showMatrixGlitch = false
 
     /// Floating annotation shown to the right of Claud-y during V2 scenes. Nil during V1 and when not running.
     var sideLabel: SideLabel? = nil
@@ -44,6 +54,7 @@ final class DemoModeManager {
     private weak var windowManager:  WindowManager?
 
     private var savedMode: BehaviorMode = .normal
+    private var savedAccessory: CharacterAccessory = .none
 
     /// Which demo variant is currently running (drives the DEMO pill label).
     var activeVariant: DemoVariant? = nil
@@ -65,6 +76,14 @@ final class DemoModeManager {
     }
 
     private func setupShortcutMonitors() {
+        // V5.10 — Demo keyboard shortcuts are OPT-IN.  Registering global
+        // keyboard monitors triggers the macOS Input Monitoring permission
+        // prompt; we don't want that scaring new users at launch when they
+        // haven't asked for keyboard shortcuts.  Demo can still be triggered
+        // from menu / Help — keyboard shortcut is just a power-user extra.
+        guard UserDefaults.standard.bool(forKey: DefaultsKeys.demoShortcutsEnabled) else {
+            return
+        }
         // V1: Hold Shift+Option+D for 1 second
         guard v1ShortcutMonitor == nil else { return }
         v1ShortcutMonitor = NSEvent.addGlobalMonitorForEvents(matching: [.keyDown, .keyUp]) { [weak self] event in
@@ -125,9 +144,17 @@ final class DemoModeManager {
             logger.warning("Demo start called but not ready - isRunning=\(self.isRunning), character=\(self.character != nil), chat=\(self.chat != nil)")
             return
         }
-        let variantName = variant == .v1 ? "V1" : variant == .v2 ? "V2" : "V3"
+        let variantName: String = {
+            switch variant {
+            case .v1: return "V1"
+            case .v2: return "V2"
+            case .v3: return "V3"
+            case .v4: return "V4"
+            }
+        }()
         logger.info("Demo mode starting (\(variantName))")
-        if variant == .v2 || variant == .v3 { savedMode = character.behaviorModeManager.currentMode }
+        if variant != .v1 { savedMode = character.behaviorModeManager.currentMode }
+        savedAccessory = CharacterAccessory.active
         activeVariant = variant
         isRunning = true
         stopInterruptMonitor()
@@ -140,6 +167,7 @@ final class DemoModeManager {
             case .v1: await self.runV1Sequence(character: character, chat: chat)
             case .v2: await self.runV2Sequence(character: character, chat: chat)
             case .v3: await self.runV3Sequence(character: character, chat: chat)
+            case .v4: await self.runV4Sequence(character: character, chat: chat)
             }
             if self.isRunning { self.stop() }
         }
@@ -158,9 +186,12 @@ final class DemoModeManager {
         character?.setState(.idle)
         chat?.removeDemoMessages()
         character?.behaviorModeManager.activate(savedMode)
+        CharacterAccessory.active = savedAccessory
         withAnimation(.spring(response: 0.4, dampingFraction: 0.8)) { sideLabel = nil }
         labelPanel?.orderOut(nil)
         activeVariant = nil
+        overlaysSuppressed = false
+        showMatrixGlitch = false
 
         isRunning = false
         logger.info("Demo mode stopped")
@@ -653,7 +684,7 @@ final class DemoModeManager {
         guard await wait(0.4) else { return }
 
         // ── Scene 4 — Accessories (19.3s) ────────────────────────────────────
-        showLabel("6 Accessories", items: ["Glasses", "Tinted Sunnies", "Top Hat", "Cap Forward", "Cap Backward", "None"], active: "None")
+        showLabel("Accessories", items: ["Glasses", "Tinted Sunnies", "Top Hat", "Cinema 3D", "Santa", "None"], active: "None")
         SoundManager.shared.play(.bubblePop)
         character.showBubbleDirect("I got new hats. Multiple.", duration: 3.5)
         guard await wait(1.0) else { return }
@@ -665,8 +696,8 @@ final class DemoModeManager {
         highlightItem("Tinted Sunnies")
         CharacterAccessory.active = .tintedSunnies
         guard await wait(1.0) else { return }
-        highlightItem("Cap Backward")
-        CharacterAccessory.active = .capBackward
+        highlightItem("Cinema 3D")
+        CharacterAccessory.active = .cinema3DGlasses
         guard await wait(1.0) else { return }
         highlightItem("None")
         CharacterAccessory.active = .none
@@ -768,6 +799,131 @@ final class DemoModeManager {
     }
 
     // MARK: - Shared helpers
+
+    // MARK: - V4 Demo sequence (≤30 seconds)
+    //
+    // Four tight acts — impactful, cute, no dead time.
+    //
+    //   Act 1 — Wake-up      (0.0–4.0s)  sleeping→ZZZ→wave→"Oh! You caught me napping."
+    //   Act 2 — Accessories  (4.0–11.5s) hat → cinema 3D → santa, each with a wit line
+    //   Act 3 — Personality  (11.5–21.5s) BrainRot headbang → quick chat exchange
+    //   Act 4 — Sleep→CTA    (21.5–28s)  nap callback → wake → confetti → "Right-click me."
+    //
+    // Stays in 2D — no RealityKit load delay, accessories shine immediately.
+    private func runV4Sequence(character: CharacterViewModel, chat: ChatViewModel) async {
+        // Suppress ambient overlays so nothing interrupts choreography.
+        overlaysSuppressed = true
+
+        // ── Setup: 2D mode, character starts asleep so ZZZ overlay is the
+        //    very first thing the viewer sees — maximum cute-factor from frame 1.
+        UserDefaults.standard.set(false, forKey: DefaultsKeys.use3DMode)
+        CharacterAccessory.active = .none
+        character.setState(.sleeping)
+        guard await wait(0.9) else { return }   // ZZZ bubbles now visible
+
+        // ── ACT 1 — Wake-up (0.9-4.2s) ──────────────────────────────────────
+        character.setState(.idle)
+        character.wave()
+        SoundManager.shared.play(.bubblePop)
+        character.showBubbleDirect("Oh! You caught me napping.", duration: 2.6)
+        look(character, x: 6, y: -3)
+        guard await wait(0.9) else { return }
+        lookCenter(character)
+        guard await wait(2.1) else { return }
+
+        // ── ACT 2 — Accessory parade (4.2-11.4s, ~2.4s each) ────────────────
+
+        // Heisenberg hat — deadpan wit
+        CharacterAccessory.active = .heisenbergHat
+        character.beSurprised()
+        SoundManager.shared.play(.bubblePop)
+        character.showBubbleDirect("Very method.", duration: 2.0)
+        guard await wait(2.4) else { return }
+
+        // Cinema 3D glasses — celebratory
+        CharacterAccessory.active = .cinema3DGlasses
+        character.setState(.celebrating, duration: 0.8)
+        SoundManager.shared.play(.bubblePop)
+        character.showBubbleDirect("The future is vivid.", duration: 2.0)
+        guard await wait(2.4) else { return }
+
+        // Santa hat — self-aware
+        CharacterAccessory.active = .santaHat
+        character.setState(.dancing)
+        SoundManager.shared.play(.bubblePop)
+        character.showBubbleDirect("Gifted. Obviously.", duration: 2.0)
+        guard await wait(2.4) else { return }
+
+        // Clear and settle before Act 3
+        CharacterAccessory.active = .none
+        character.setState(.idle)
+        guard await wait(0.3) else { return }
+
+        // ── ACT 3 — BrainRot + chat wit (11.4-21.5s) ────────────────────────
+
+        // BrainRot headbang moment — pure unhinged energy
+        character.behaviorModeManager.activate(.brainRot)
+        character.showConfetti = false          // suppress brainRot's internal confetti
+        character.setState(.headbanging)
+        SoundManager.shared.play(.bubblePop)
+        character.showBubbleDirect("bestie ur code is BUSSIN no cap 🔥", duration: 3.0)
+        guard await wait(3.5) else { return }
+        character.behaviorModeManager.activate(.normal)
+        character.setState(.idle)
+
+        // Quick chat exchange — the wit lands fastest in two lines
+        look(character, x: 0, y: 8)
+        guard await wait(0.25) else { return }
+        withAnimation(.spring(response: 0.35, dampingFraction: 0.8)) { chat.isOpen = true }
+        SoundManager.shared.play(.chatOpen)
+        lookCenter(character)
+        guard await wait(0.6) else { return }
+
+        chat.injectMessage("why am I like this", role: .user)
+        guard await wait(0.5) else { return }
+        character.setThinking()
+        look(character, x: -5, y: -5)
+        guard await wait(1.3) else { return }
+
+        chat.injectMessage("Passion. Also: you need sleep.", role: .assistant)
+        character.setTalking()
+        lookCenter(character)
+        guard await wait(0.4) else { return }
+        character.celebrate()
+        guard await wait(2.2) else { return }
+        character.stopTalking()
+
+        withAnimation(.spring(response: 0.35, dampingFraction: 0.8)) { chat.isOpen = false }
+        guard await wait(0.4) else { return }
+
+        // ── ACT 4 — Sleep callback + CTA (21.5-28s) ──────────────────────────
+        // Callbacks the opening — "you need sleep" → actually naps → wakes →
+        // confetti. The loop feels intentional and adorable.
+        character.setState(.sleeping)
+        guard await wait(1.8) else { return }
+
+        // Wake-and-burst
+        character.setState(.idle)
+        character.wave()
+        character.triggerConfetti()
+        SoundManager.shared.play(.celebrate)
+        character.showBubbleDirect("Right-click me. I dare you. ✨", duration: 4.0)
+        look(character, x: 7, y: -2)
+        guard await wait(0.9) else { return }
+        lookCenter(character)
+        guard await wait(1.0) else { return }
+
+        // Slow double blink — warmest possible sign-off
+        character.isBlinking = true
+        guard await wait(0.35) else { return }
+        character.isBlinking = false
+        guard await wait(0.45) else { return }
+        character.isBlinking = true
+        guard await wait(0.35) else { return }
+        character.isBlinking = false
+        guard await wait(1.0) else { return }
+        // stop() is called automatically by the Task completion guard in start()
+    }
 
     private func look(_ character: CharacterViewModel, x: CGFloat, y: CGFloat) {
         withAnimation(.easeInOut(duration: 0.25)) {

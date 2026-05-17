@@ -125,6 +125,7 @@ enum CharacterAnimationState: String, Sendable {
     case yawn           // half-closed heavy eyes, wide open mouth, slow bob
     case hiccup         // sudden surprised eyes, small O, snappy fast bob
     case walking        // gentle side-sway walk cycle, standard eyes
+    case whoaTwirl      // V4 — 360° feet-planted twirl with arms-up "Whoa!"
 
     // MARK: - AnimationConfig (ANIM-01 / ANIM-02)
 
@@ -226,6 +227,8 @@ enum CharacterAnimationState: String, Sendable {
             return AnimationConfig(bobDuration: 0.3, bobAmplitude: -18, eyeShape: .wideSurprised, mouthShape: .tinyOpen)
         case .walking:
             return AnimationConfig(bobDuration: 0.4, bobAmplitude: -8, wiggleEnabled: true, wiggleAmount: 4, wiggleDuration: 0.4, eyeShape: .pixar, mouthShape: .default)
+        case .whoaTwirl:
+            return AnimationConfig(bobDuration: 1.4, bobAmplitude: -2, eyeShape: .wideSurprised, mouthShape: .wideOpen)
         }
     }
 
@@ -276,6 +279,7 @@ enum CharacterAnimationState: String, Sendable {
         case .yawn:            return "Yawning"
         case .hiccup:          return "Hiccuping"
         case .walking:         return "Walking"
+        case .whoaTwirl:       return "Whoa twirl"
         }
     }
 }

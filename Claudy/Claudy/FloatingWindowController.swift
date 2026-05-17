@@ -43,6 +43,9 @@ final class FloatingWindowController: NSWindowController {
         super.init(window: panel)
 
         wm.restorePosition()
+        // Bind the character panel to the voice overlay so it can position
+        // itself directly below Claud-y when invoked.
+        VoiceOverlayController.shared.bindCharacterPanel(panel)
         logger.info("FloatingWindow ready - size \(WindowManager.chatWidth)×\(fullHeight)")
     }
 

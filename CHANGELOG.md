@@ -2,6 +2,231 @@
 
 ---
 
+## v4.0.0 — 3D Claud-y, accessories, twirl, voice mode — 2026-05-17
+
+> Claud-y is now a fully expressive 3D character with accessories, idle micro-behaviours, and a purpose-built floating voice overlay. Visual quality matched to the 2D version. Demo mode rebuilt for the V4 launch.
+
+### V5.10–V5.11 — Final V4 polish + privacy ethos round (release-ready)
+
+> Comprehensive end-to-end pass before release. Permission prompts deferred until users opt-in, voice-mode equaliser respects state, animation library expanded, response pools nearly doubled, optional local-save feature with per-data-type toggles, security + privacy review.
+
+#### First-run UX — no scary permission prompts at launch
+- **`GlobalHotkeyManager` defaults OFF for new installs.** Registering `addGlobalMonitorForEvents(.keyDown)` for ⌘⇧Space triggers the macOS Input Monitoring permission prompt — a confusing experience for new users. Users can opt-in via Settings → General. Existing users with it already enabled keep their preference.
+- **`KeyboardMonitor` is now opt-in.** Same Input Monitoring concern. New "Keyboard reactions" toggle in Settings → General controls typing-burst / undo-streak / Caps Lock detection. Default OFF. Runtime toggle via `claudyKeyboardReactionsToggled` notification — no app restart needed.
+- **Demo keyboard shortcuts opt-in.** Shift+Option+D / Shift+Option+V hold-to-trigger demos require Input Monitoring. Now controlled by "Demo keyboard shortcuts" toggle. Demo can still be started from Help and right-click menu.
+- **`WeatherContextMonitor` opt-in.** Was triggering a Location permission prompt 90 s after launch. Now requires "Weather comments" toggle in Settings → Behaviour. Default OFF.
+
+**Net effect:** new users get zero unexpected system permission prompts on first launch. Every prompt is now tied to an explicit user action.
+
+#### Voice mode polish (V5.10)
+- **Equaliser only animates when audio is being captured.** Previously the wave bars wiggled randomly via `Float.random` jitter even when voice mode was off — visually suggesting always-on audio. Now bars decay to flat (zero) unless `isVoiceModeActive AND (isListening OR isSpeaking)`.
+- **Mic button pulse only fires while listening.** The scaling repeat-forever animation no longer plays when idle / thinking / speaking — only during active mic capture.
+- **Wave bars start flat (0.0).** Previously initialised to 0.2 — visible at rest. Now invisible at rest.
+
+#### Animation polish (V5.10)
+- **Iris tracking permanently disabled** (with explanation). Per-eye rotation tracking had recurring axis-alignment bugs that pushed pupils to the sclera edge ("wall-eyed" look). The rig-level head yaw/pitch already gives Claudy a "looking at you" feel; pupils now welded to forward-gaze. No code path can move them off-centre.
+- **`microLookAround` rebuilt as head turn**, not eye rotation. Previously rotated eye entities directly — same wall-eyed risk as iris tracking.
+- **4 new idle micro-behaviours** added (was 8, now 12):
+  - **Yawn** — slow open-mouth + body squash + close. Reads as "sleepy / relaxed".
+  - **Scratch head** — left arm raises + head tilts. "Puzzled / thinking" without leaving idle.
+  - **Double take** — quick tilt right, snap back, tilt right again. "Wait, did I see that?"
+  - **Peek** — Claudy ducks down then pops back up. Playful curiosity.
+- Idle micro frequency increased: 8–12 s → **6–10 s** for richer ambient life.
+
+#### Response pool nearly doubled (V5.11)
+- **`ReactionLibrary.json`** went from **728 → 1320 lines** of Companion-voice content (+592 lines, **+81 %**). Every category received fresh, voice-matched entries. Other language files (`_ar`, `_de`, `_es`, `_fr`) untouched (per-user preference for English-only expansion).
+
+#### Optional local-save feature (V5.11)
+- **New `ChatHistoryStore`** persists chat messages to `~/Library/Application Support/Claudy/chat_history.json` when enabled. **Off by default**. Restored on app launch. "Clear saved chat history" button removes the file.
+- **Per-data-type toggles in Settings → Privacy & Storage**:
+  - Chat history (NEW, default OFF)
+  - Scratchpad notes (default ON, was always-on)
+  - Tamagotchi state (default ON, was always-on)
+  - Focus stats (default ON, was always-on)
+  - Alarms / reminders (default ON, was always-on)
+- `ScratchpadManager.save()` now respects the toggle — opt-out users get session-only notes.
+
+#### UI surface polish (V5.10)
+- **Pomodoro complete state** — sealed checkmark with subtle pulse celebration (was plain checkmark).
+- **Scratchpad sheet** — note count shown in header (e.g. "Scratchpad (12)").
+- `ScratchpadManager.clearAllNotes()` added for the bulk delete confirmation flow.
+
+#### Bug fixes (V5.10)
+- **`ChatViewModel.announcePersonalityChange`** Task made explicit `@MainActor [weak self]` — eliminates ambiguity in Swift concurrency inheritance.
+- **`PomodoroTimerBadge` body** broken into smaller computed views to satisfy SwiftUI's type-check budget.
+
+#### Security + privacy review (V5.11)
+- **Network endpoints whitelisted**: `api.anthropic.com`, `api.openai.com`, `generativelanguage.googleapis.com`, `api.deepseek.com`, `api.spotify.com` (only when authenticated), `api.open-meteo.com` (only when weather enabled), `localhost:11434/1234` (Ollama / LM Studio).
+- **No plain HTTP** except `localhost` (correct — local-only, never leaves the device).
+- **No hardcoded secrets** — only placeholder strings in `KeychainService.keyPlaceholder`.
+- **Zero force-unwraps / `try!` / `as!`** in app code.
+- **Keychain reads gated** to user actions only (field focus + "Load saved key" button + actual API calls). No eager reads.
+- **All user data on-device by default** — chat opt-in, weather opt-in, location opt-in, mic opt-in, speech opt-in.
+
+### V5.2 — final 3D polish round (resolves all reported eye/mouth/body anomalies)
+
+> Six interlocking root-cause fixes for 3D Claud-y. Each one alone wasn't enough — together they fix every reported symptom: eyes going huge or invisible, mouth stuck open or shut, body drifting in slow 360° spins, smile flashing huge during transitions.
+
+- **Eye blink-scale wrapper architecture.** Each eye is now wrapped in a dedicated `eyeBlinkScalerL/R` entity inserted between the original parent and the USDZ eye entity. The wrapper handles SCALE (blink, eye-widen). The original eye handles ROTATION (iris tracking, recentre). **Root cause fixed:** previously five different functions (`applyBlink`, `performEyeWiden`, `applyMouseTracking`, `recentreEyesIfCursorIdle`, `refreshEyeAxes`) all called `move(to:)` on the same entity. RealityKit cancels in-flight `move(to:)` calls when a new one fires on the same entity, so they perpetually cancelled each other mid-animation, leaving eyes stuck at half-blink (looked like "eyes closed and won't reopen") or stuck at scale 1.18 (looked like "eyes go huge and stay huge"). Two separate entities = no collision, ever.
+- **`setBodyTask(_:)` helper replaces 16 raw `bodyTask = Task {…}` reassignments.** Swift Tasks are NOT auto-cancelled when their handle variable is overwritten. So every `performJolt`, `performCelebrate`, `performSway`, `performBackflip`, etc. was leaving the previous body animation Task running as a zombie, fighting the new one via concurrent `body.move(to:)` calls. The helper does `bodyTask?.cancel(); bodyTask = Task {…}` atomically so only one body loop is ever running. **Eliminates erratic body rotation drift and slow 360° spins.**
+- **Phoneme-driven lip-sync matching 2D Claudy.** Implemented the same 16-step phoneme weight pattern (`[0.05, 0.15, 0.45, 0.65, 0.85, …]`) that 2D Claudy uses, ticked at 90ms intervals (~11 phonemes/sec), driving BOTH width (16…25 pt) AND height (3…17 pt) of the open-mouth ellipse. 70ms easeInOut between phonemes. Loop starts on `setMouthShape(.talkingSync)`, stops cleanly when shape leaves talkingSync. **Mouth now actually opens and closes naturally during talking — not a frozen oval.** TTS word-boundary `pulseMouth()` layers a brief peak (0.9) on top when real speech is driving, providing speech accent.
+- **Critically damped mouth-shape spring (`dampingFraction: 1.0`).** Previous `0.72` damping caused brief overshoots during expression transitions — going from `default` (16 pt) to `bigSmile` (22 pt) momentarily hit ~28 pt before settling. **Eliminates the "smile width gets huge and creepy" flash.**
+- **Killed the per-frame mouth re-projection feedback loop.** `applyProps()` (called from RealityView's `update:` closure) was writing `@State` vars `mouth2DY` and `mouth2DTrackX` every frame, which triggered SwiftUI body re-renders, which re-fired `update:`, which fired `applyProps` again — a continuous re-render loop at 60+ fps that destabilised every other animation timing. Mouth position is now projected ONCE in `finaliseAfterAdd` from the resting world position. Body sway is small (±7°) so the static projection looks visually correct.
+- **Removed horizontal mouth tracking (`mouth2DTrackX`).** Was contributing to mouth wobble across the face during body sway. Mouth now stays centered horizontally; expression-specific offsets (smirk's `offX: 3`) still work via `mouth2DOffX`.
+- **`recentreEyesIfCursorIdle` defers `@State` writes via Task.** Same SwiftUI rule: cannot mutate `@State` from inside `update:` closure. The eye-recentre's `lastTrackNX/Y = 0` writes are now deferred to the next main-actor tick.
+
+**Net result:** zero warnings, zero errors, eyes stay round and stable, mouth lip-syncs naturally during talking, body holds its rotation, smile transitions are snap-clean.
+
+### Accessory visual overhaul — gold wire glasses, wide Heisenberg brim, rounder cap dome (2D + 3D parity)
+
+**Gold wire-frame glasses (`.glasses` + `.tintedSunnies`).**
+- 3D: New `glassesGoldPBR` material — polished metallic gold (metallic 1.0, roughness 0.10, warm gold tint). Frame wire halved (`r×0.05 → r×0.030`). Perfectly circular lenses — both eyes same `r×0.30` radius. Straight bridge replaced with an **arched nose bridge**: two gold box-segments angle down from each lens's inner edge to a shared low-point at the nose, forming a proper U-arch (`archDipZ = r×0.055`). Arch orientation computed via `simd_quatf(from:to:)` for exact alignment.
+- 2D: Gold frame color (`0.90, 0.70, 0.20`). Lenses now `Circle()` (was `RoundedRectangle`) — identical diameter for both eyes. Arched bridge rendered as two `Rectangle` arms each rotated `±atan2(4, 10) ≈ 21.8°`, meeting at a 4pt nose dip.
+
+**Heisenberg hat wide-brim rebuild.**
+- 3D: Brim radius `r×1.05 → r×1.42` (much wider, clearly pork-pie). Crown split into two stacked cylinders (`r×0.62` base + `r×0.56` top) giving a genuine inward taper. Total crown height shortened `r×0.30 → r×0.24`. Pinch indent updated to match narrowed top radius. Matte black felt impression kept (`hatBlackPBR`, roughness 0.55).
+- 2D: Brim widened `62 → 84 * s`. Crown shortened to `24 * s` (was 30). Top-edge shading stripe (`hatShade 0.60 opacity`) implies the crown's tapered indent without a custom shape. Grosgrain band stays.
+
+**Baseball cap rounder dome + prominent brim.**
+- 3D: Dome flatness `0.40 → 0.60` (correct rounded cap profile). Added `sweatband` ring cylinder at base. Brim extended to 7 segments (was 5), reach `r×0.85 → r×0.98`, width `r×1.05 → r×1.12`. Button moved flush with dome apex.
+- 2D: Dome `54×30 → 58×40` — matches real cap proportions. Brim reach `44 → 50 * s`. Three subtle panel-seam `Capsule` lines (`1.2 * s` wide) radiating across the dome for fabric detail. Backward cap brim enlarged `34 → 40 * s`, correctly peeking behind.
+
+### Final V4.0 release pass — living character + bug fixes + .app deliverable
+
+**Issue 1 — Cinema 3D glasses, clean H-frame rebuild.** Replaced the puffy-rectangle frame with a proper 5-strip H-shape: top bar, bottom bar, outer-left edge, outer-right edge, slim nose-bridge strip. Frame strip thickness halved (`r×0.05 → r×0.025`). Sharp cardboard corners (`cornerRadius r×0.06 → r×0.02`). Saturated cyan (`0.92, 0.95, α 0.45`) and red (`1.0, 0.08, 0.05, α 0.45`) lens tints. Subtle 0.05 rad temple bow (was 0.09 — overshooting). Matches the canonical cardboard 3D-glasses reference photo.
+
+**Issue 2 — Demo twirl, strict phased animation.** Eliminated the LERP-mismatch artifact where concurrent body rotation + limb interpolation made arms/legs visually merge with the body. New phase rule: **zero concurrent limb-and-body animation**. 10-phase timeline: arm pose → settle → blink → 4× (rotation → step interstitial → step reset). Body Y-bob removed (was compounding the issue). Total runtime ~4.3s — deliberate, not rushed.
+
+**Issue 3 — Double-click chat regression FIXED.** Migrated click handling from NSView (`_ClickableOverlayView.mouseDown`) to SwiftUI native `.onTapGesture(count: 2)` + `.onTapGesture(count: 1)` + `.simultaneousGesture(DragGesture(minDistance: 5))`. The NSView shim now only handles `window.makeKey()`. Native count-2 deferral implements the click-promotion pattern correctly; the previous approach was being intercepted by SwiftUI's parent gesture chain.
+
+**Issue 4 — Pupils stay centred after accessory swap.** New `refreshEyeAxes()` re-runs the same axis-discovery logic used at startup (camera-forward, up, right vectors via `convert(direction:from: nil)`), re-computes pupil base positions, smooth-snaps pupils back, and resets the iris-tracking throttle. Called automatically 50ms after every `updateAccessory(_:)` call. Fixes the "stuck pupil after putting glasses on" bug.
+
+**Issue 5 — Living, breathing character (ambient life pyramid):**
+- **Always-on ambient task** (`startAmbientLife()`) runs three concurrent loops for the entire app lifetime — never cancelled by state changes:
+  - Iris saccades: ±0.0005m random offsets every 0.7-1.4s
+  - Mouth micro-drift: brief `vibeSmile` flash every 6-10s when mouth is at default
+- **Voice listening breathe**: when `voiceCharacterState == .listening` AND voice mode is active, body Y oscillates ±0.015m on a 3.0s cycle. Started/stopped via `startVoiceBreathe()` / `stopVoiceBreathe()`.
+- **Anticipation prep frames**: `.surprised`/`.celebrating` states now run a 60ms body squash (`scale 1.04, 1.04, 0.95`) BEFORE the main reaction. Classic animation principle — "the prep before the action".
+- **Demo timing rebalance**: Scene 1 trimmed `3.0 → 2.2s`; Scene 2 reveal — bubble fires AFTER the (now 4.3s phased) twirl completes, not during; Scene 4b voice extended `3.8 → 5.0s`; Scene 9 carousel per-item `1.7 → 2.3s` and **Santa hat added** to the carousel.
+
+**Issue 6 — Accessory polish.** Round-glasses ring now built from 24 box-segments (was 16) for smoother circular silhouette. All accessory anchor offsets verified consistent.
+
+**Issue 7 — Local `.app` deliverable.** Signed `Claudy-v4.0-Local.zip` (96 MB) at the project root. Ad-hoc signed (no Apple notarization) — first launch may need right-click → Open to bypass Gatekeeper. Subsequent launches work normally.
+
+
+- **Pupil sticking after fast mouse moves.** Reduced iris yaw amplitude (0.45 → 0.30) and pitch (0.40 → 0.28) so pupils can never reach the eye-sphere silhouette edge. Re-centre idle threshold lowered from 5s → 2s. Added a force-tracking-update path: when pupils have drifted >0.005m from their target base, the next applyMouseTracking runs even if the throttle gate would normally skip — fixes the "stuck pupil after fast sweep" bug.
+- **Double-click chat regression.** `_ClickableOverlayView.mouseDown` now defers single-tap by 250ms via a `DispatchWorkItem`. If a second click arrives within that window, the pending work item is cancelled and `onDoubleTap` fires instead. Stops calling `super.mouseDown(with:)` since we've fully handled the gesture.
+- **Arm-body gap during animations.** Arm pivot moved OUTWARD (`halfY * 0.95 → × 1.02`) so the inner edge of the arm sphere stays touching the body wall through any rotation. Wave amplitudes trimmed (-1.45 → -0.65 max), dance armOut 0.55 → 0.45, breakdance flares 0.85 → 0.65 — peak swings now stay close to the body silhouette.
+- **Round glasses (`.glasses` + `.tintedSunnies`)** rebuilt with a proper torus-style ring rim (16 box-segments around the lens edge), translucent disc lens just in front, bridge piece, and temple arms extending back. PBR plastic frame material picks up studio lighting properly.
+- **Cinema 3D glasses** matched to the canonical cardboard reference photo: rectangular with thin white border (frame border tightened ×2.0 → ×1.0), saturated cyan/red lens tints (alpha 0.45), bridge shrunk to a small piece between lenses, temple arms bowed outward by ~5° as in the reference.
+- **Cap visor** rebuilt with a curved profile — 5 thin overlapping segments at varying pitch/Z-dip create a smooth baseball-brim arc (no more flat ramp). Added a small button on top of the dome for cap detail. PBR cap material.
+- **Heisenberg pork-pie pinch.** Added a slightly smaller indented disc on top of the crown so the hat reads as a proper pork-pie not a flat-top cylinder. PBR black + slightly-grey grosgrain band.
+- **NEW: Santa Hat accessory.** `.santaHat` case in both 2D and 3D:
+  - 2D: SwiftUI Path-based cone with sideways droop, white fluffy band rectangle, pom-pom circle with highlight, gradient overlay
+  - 3D: 6 stacked cylinders for the cone (procedural since RealityKit has no cone primitive), white fluffy base band, pom-pom sphere on the tip, ~12° forward droop + 5° sideways kink for that classic Santa hat flop
+  - Velvet PBR red (`#C8202E`) + fluffy white materials
+  - Wired into all picker UIs automatically via `CharacterAccessory.allCases`
+
+### Deferred-items round (10 fixes)
+- **3D thinking dots overlay.** Three bouncing terra-cotta dots float above 3D Claud-y while chat is mid-stream. Mirrors the 2D character's `.thinkingDots` eye state without swapping USDZ pupil materials at runtime. Fades in/out with a `.scale + .opacity` transition.
+- **3D confetti burst.** Lightweight pure-SwiftUI confetti (28 pieces, mix of rectangles + circles, terra-cotta + accent palette) rains from above the character on `.celebrating` / `.happyBounce` / `.excited`. Triggered by the existing `triggerConfetti()` flow with a new `confettiTriggerID` so SwiftUI re-creates the burst on every fire.
+- **Heart-shape eyes for `.loveEyes`.** Pupils tinted bright red (`#F22634`) during the love state via a runtime `setPupilColor(_:)` swap. Restores to black via `cancelAllAnimations()`.
+- **Far-cursor iris re-centre.** When the cursor has been stationary for >5s, pupils drift back to their base position over 0.40s. Polled from `applyProps()` (RealityView's update tick) so it works even when the mouse isn't moving.
+- **Twirl Y-bob + eye-close mid-spin.** Body subtly lifts (+0.04) on odd quarter-turns, dips (-0.02) on even — breaks up the rigid-pole-spin look. Eyes close at quarter 2 (apex) and snap open at the start of quarter 3 — reads as "Claud-y bracing for the spin".
+- **Demo Mode voice scene.** New 4s scene 4b inserted between Local LLM and Pomodoro: shows "Talk to me — voice mode 🎙" with Claud-y in the listening pose. Scene 6 BrainRot trimmed from 6.5s → 4.5s to make room.
+- **Settings search bar.** Live filter at the top of Settings — type "voice", "ollama", "pomodoro", etc. and only matching sections render. Each section has a keyword vocabulary so the search is robust.
+- **Help search bar + replay-V4-demo button.** Search filters help rows by title or body match (case-insensitive). The "Replay V4 demo" button right next to the search field triggers the demo from inside Help.
+- **Status-bar voice indicator.** When voice mode is active, the menu bar drop-down shows "🎙 Voice mode active" with a waveform icon between the Mode header and the Switchers section. Refreshed each time the menu opens.
+- **Pupil halo removed.** The 1.05× iris halo from the previous polish round was creating a "double-pupil" visual artifact at common viewing angles. Removed entirely — single pupil with the catchlight is cleaner.
+
+### Polish pass (final, pre-release)
+- **Eyes ↔ 2D parity.** Catchlight moved to upper-RIGHT (Pixar / 2D convention) and bumped from 0.13× → 0.18× eye radius. Added a SECOND smaller "moisture" dot in the lower-left for that classic doll-eye wet feel.
+- **Pupil depth.** Pupil is now two stacked unlit spheres — pure-black core + slightly-lighter dark-brown halo at 1.05× — gives subtle iris-like depth without changing silhouette.
+- **Body material.** Clearcoat lowered (0.35 → 0.25), roughness raised (0.42 → 0.48). Reads as painted clay, not plastic.
+- **Lighting refined.** Key 1900, fill 850 (warmer), rim BUMPED to 1100 (cool blue silhouette glow — single biggest contributor to the 2D-style outline feel), bounce warmer + brighter (220 → 280).
+- **Mouth.** Switched to PhysicallyBasedMaterial with a slight clearcoat for moisture. Deeper warm red so it reads as an interior, not just a flat painted line.
+- **Idle breathe staggered.** Arms cycle at 2.2s, legs offset by 0.85s on a slower 2.6s cycle. Body no longer feels mechanical. Leg amp halved (0.06 → 0.03) so the weight shift is gentle, not a march.
+- **8 idle micro-behaviors** (was 4). Added: look-around (eye-sweep), sigh (Y compress), glance + smirk, double blink. Picked at random every 8-12s during idle.
+- **Surprise eye-widen.** `.surprised`/`.alert`/`.nervous`/`.hiccup` now scale eyes 1.0 → 1.18 → 1.0 over 0.32s on top of the body jolt.
+- **Right-click menu reorganised** into clear visual groups: Primary actions (Chat, Talk to Claud-y) → Appearance (2D/3D, Accessory, Size) → Behaviour (Personality, Mode) → AI (Cloud API, Local LLM) → Tamagotchi → Tools → Settings/Help → Quit. Consistent SF Symbol icons across every entry.
+- **Voice overlay live transcript.** While listening, the panel shows what Claud-y is hearing live in italic — confirms the mic is actually picking up your voice (was the source of "is this even working?").
+- **Mouse-tracking timestamp** captured for the upcoming "give up after 5s idle" iris re-centre.
+
+### Final polish round
+- **TTS-driven mouth lip-sync everywhere.** New `pulseMouth()` method in Claudy3DView subscribes to `.claudyVoiceMouthPulse` (fired on every TTS word boundary). Mouth briefly opens then closes per word, regardless of whether speech was triggered by voice mode, auto-speak replies, or a manual call.
+- **Glossier surface.** PBR roughness 0.55 → 0.42, specular 0.55 → 0.75, clearcoat 0.18 → 0.35. Body now reads as glazed clay / Pixar toy, not flat matte.
+- **Voice mode actually works end-to-end.** Tap mic in overlay → `VoiceModeManager.startListeningSession()` opens the AVAudioEngine + SFSpeechRecognizer pipeline → tap again → `stopListeningAndSubmit()` posts the transcript via `.claudyVoiceTranscriptReady` → CharacterRootView routes it through chat → AI replies (cloud or local) → on streaming complete, `VoiceManager.shared.speak(reply)` plays TTS with lip-sync. Works on both Cloud API and Local LLM providers.
+- **State machine fix** — when no mic / no TTS / no AI in flight, voice mode shows "Listening" (inviting next tap), not "Thinking" (looked frozen).
+- **Twirl re-animated.** Four 90° steps (predictable quaternion path, no over-the-top swing), arms locked at T-pose throughout (1.4 rad clamp lifted to 1.6), legs hard-snapped to rest. Slow 2.5s total — reads as deliberate "whoa".
+- **Demo Mode** opens with 2D Claud-y already wearing cinema 3D glasses (no jarring 3D→2D→3D flash before the matrix glitch).
+- **Hat geometry** tuned to fit the tight viewport — pork-pie crown short and sunk into the head silhouette so the brim and crown both stay visible. Heisenberg hat is BLACK (Walter White canon).
+- **Cap geometry** rebuilt — half-dome on top, baseball-cap brim attached at the brow line (not inside the dome), gentle downward tilt for proper visor curve, brim extends past the front face.
+- **Glasses** — switched lenses from boxes (square) to cylinder discs (true round). Lens depth fully separated from frame depth (no z-fighting shimmer). Tint dropped to 0.40 alpha so eyes/pupils show clearly through.
+- **Iris pitch direction fixed** — was inverted (mouse-up was making pupils look down). Amplitudes increased so vertical tracking is clearly visible. Throttle gate tightened so small mouse motions still register.
+
+### Polish round (post-initial-V4)
+- **PBR materials.** Replaced SimpleMaterial with PhysicallyBasedMaterial for body and limbs — adds a subtle clearcoat layer (0.18) and tuned specular (0.55) for that "glazed clay" look. Stops 3D Claud-y from looking washed-out vs the 2D version.
+- **Pixar-style pupil catchlights.** Each eye gets a tiny white sphere on the upper-left of the pupil's surface — the single biggest detail for "alive" eyes.
+- **Accessory orientation FIXED.** All accessories were laid out in Y-up world coordinates but the character's anchor lives in Z-up local space, so hats sat sideways and visors floated in the middle of the head. Rewrote all accessory factories to use Z-up consistently. Hats now sit on top of the head, glasses on the face, temple arms pointing back along Y.
+- **Right-click menu split.** "Cloud API" and "Local LLM" are now SEPARATE menu sections (was one combined "AI Provider" submenu). "Talk to Claud-y…" promoted to a top-level menu item — the preferred entry to voice mode.
+- **Floating voice overlay.** New `VoiceOverlayController` + `VoiceOverlayPanel.swift` — a compact docked floating panel that sits directly BELOW Claud-y when voice mode is active. Pulsing mic button, animated waveform bars, status caption. Replaces the old full-sheet voice UI.
+- **Listening / speaking poses for the character.** When voice mode enters listening state, Claud-y switches to `.alert` (wide focused eyes); when speaking, `.talking` (mouth animates per TTS word boundary). Driven by a new `claudyVoiceStateChanged` notification.
+- **Real lip-sync.** `VoiceModeManager.mouthPulse` now driven by `AVSpeechSynthesizer`'s `willSpeakRangeOfSpeechString` word-boundary callback (peak then exponential decay over ~180ms). Replaces the previous sine-wave approximation.
+- **3D upgrades for backflip, breakdance, loveEyes.** All three previously fell back to body-only animations. Now: backflip is a real 360° forward flip around world X with arm/leg tuck; breakdance is a continuous Y-axis spin with alternating limb flares; loveEyes is a smitten sway with arms-presented pose.
+- **Matrix glitch overlay** (`MatrixGlitchOverlay.swift`). Procedural SwiftUI: green character columns scrolling, scan lines, chromatic aberration pulses. Used during the V4 demo's 2D→3D transition. No textures, no Metal shaders, ~80 lines.
+- **Demo Mode V4 refresh.** New scene 2 actually does the 2D→matrix-glitch→3D→whoaTwirl sequence the V4 narrative was always supposed to have. `overlaysSuppressed` flag set during demo so chat panels / settings sheets can't interrupt.
+- **In-app Help v4.0 section** added describing all the above for users.
+
+### Highlights
+- **3D character (Claudy3DView).** Pre-segmented USDZ rendered via RealityKit. 8 USDZ parts auto-coloured (terra-cotta body `#9f4124`, darker limbs `#791c16`), procedural pupils placed via deferred-tick camera-forward axis discovery, mouth animated via per-shape transform morphing.
+- **Soft 4-light studio rig** (key + fill + rim + floor bounce) tuned to match the 2D character's lit/shadow ratio.
+- **Mouse tracking — same-screen + multi-screen.** Adds local NSEvent monitor in addition to global, picks the screen the cursor is actually on via `NSScreen.screens.first(where: contains)` not `NSScreen.main`. Throttled (delta gate) to keep CPU low.
+- **Iris tracking via deferred-axis discovery.** Pupil sphere is biased 25% toward the face midline so the gaze reads as natural rather than wall-eyed. Pupils use UnlitMaterial — no specular halo, no white-ring artifact.
+- **Accessory system in 3D.** New `ClaudyAccessory3D` factory builds procedural geometry for all 7 accessories. The `cinema3DGlasses` accessory is now CLASSIC RECTANGULAR (white cardboard frame, cyan + red anaglyph lenses, temple arms). All 2D accessories ship in 3D too — full parity.
+- **Whoa twirl animation (`.whoaTwirl`).** Plants feet, raises arms in Y, rotates body 360° around world Y over 1.4s, opens mouth wide. Used as the centrepiece of the V4 demo and available as a triggerable state.
+- **Idle micro-behaviours.** Every 8-12s during `.idle` Claud-y picks one of: head shake, small jump, arm stretch, slow nod. Makes the character feel alive without being noisy.
+- **LimbRig system.** Math-based pivot rotation for arms/legs (no `setParent(preservingWorldTransform:)` drift). Idle breathes both arms AND legs (visible weight-shift). Walking syncs leg/arm swing in opposite phase. Exercising / celebrating / dancing have their own multi-limb dispatchers.
+- **Mouth = single-line dark orange.** Replaces the chocolate-brown mouth that read as a separate object. Now matches the body palette.
+- **VoiceModeManager.** New singleton coordinates voice exchange UX:
+  - States: off / listening / thinking / speaking
+  - Mouth-pulse stub (sine-wave approximation; will upgrade to mic-amplitude tap when AVAudioEngine metering is wired)
+  - Push-to-talk hotkey (default ⌘⇧V, configurable)
+  - Local-only privacy toggle (`VoiceModeLocalOnly`)
+- **Demo Mode V4** rebuilt with overlay-suppression flag (`overlaysSuppressed`) so chat panels, settings sheets, and ambient bubbles do NOT interrupt the demo. Companion Remotion script (`claudy_v4_demo.script.md`) is shipped as production-ready.
+- **Menu refactor.** Three-axis status header at the top: AI · Personality · Mode. Removes the previous confusion between "API mode" and "Companion mode" — they are independent axes now clearly labelled.
+
+### Visual fidelity
+- Body colour deepened from washed-out terracotta to richer `#9f4124` matching 2D.
+- Limb colour (`#791c16`) matches 2D `#A84020` palette for proper two-tone read.
+- Material roughness raised to 0.80 so the character reads as matte clay, not plastic.
+- Lighting intensities lowered (key 1100, fill 750, rim 380, bounce 180) for studio-soft gradient shadows.
+
+### Performance
+- Mouse tracking + iris tracking throttled with delta gates (no per-frame `move()` queueing).
+- Pupil meshes generated once at startup, never replaced after axis discovery.
+- Limb angles clamped to ±0.9 rad so arms/legs can never swing far enough to visually detach from the body.
+- 60fps stable on M-series Macs with full 4-light rig.
+
+### Honest limitations
+- VoiceModeManager mouth pulse is a sine approximation — actual mic-amplitude tap requires AVAudioEngine metering hookup which is in the next release.
+- 3D backflip / breakdance / loveEyes are still using their previous body-only animations — full 3D upgrades are deferred.
+- Demo Mode V4 timing matches the Remotion script but the in-app version doesn't yet pre-flight the matrix-glitch shader (uses a simplified white-flash transition instead).
+
+### Files added
+- `Claudy/Claudy/ClaudyAccessory3D.swift` — accessory factory
+- `Claudy/Claudy/VoiceModeManager.swift` — voice mode coordinator
+- `RENDERER_PARITY.md` — 2D vs 3D feature audit
+- `claudy_v4_demo.script.md` — Remotion video script
+- `MICO_RESEARCH.md` — voice-assistant design research
+
+### Files materially changed
+- `Claudy/Claudy/Claudy3DView.swift` — accessories wired, whoa twirl, idle micros, axis discovery, multi-screen tracking, throttling, lighting + colour tuning
+- `Claudy/Claudy/CharacterAnimationState.swift` — `.whoaTwirl` state added
+- `Claudy/Claudy/AppDelegate.swift` — three-axis menu header, refresh on open
+- `Claudy/Claudy/DemoModeManager.swift` — `overlaysSuppressed` flag
+
+---
+
 ## v3.0.0 — The Deep One
 
 > Claud-y grew a soul. v3.0 is about depth — Tamagotchi needs, expanded animation life, ten languages, personality blending, a richer chat experience, and SwiftData foundations that make everything more real. The orange creature on your screen is no longer just watching you. It has feelings. (Simulated ones. But still.)

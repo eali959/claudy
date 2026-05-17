@@ -63,7 +63,7 @@ actor ClaudeAPIService {
     nonisolated private let apiVersion = "2023-06-01"
     static let defaultModel = "claude-haiku-4-5-20251001"
 
-    /// True when an API key is stored for the currently selected provider.
+    /// True when the currently selected provider is usable (has a key, or is a local provider).
     nonisolated var hasAPIKey: Bool { KeychainService.has(for: APIProvider.selected) }
 
     /// True when any API key exists (used for companion/API mode toggle).
@@ -88,8 +88,81 @@ actor ClaudeAPIService {
                     let resolvedModel   = await MainActor.run { priority.model }
                     let resolvedMaxToks = await MainActor.run { priority.maxTokens }
                     let provider        = await MainActor.run { APIProvider.selected }
-                    let apiKey          = try KeychainService.load(for: provider)
 
+                    // Local providers (Ollama, LM Studio) don't require a Keychain key.
+                    // Cloud providers require one — throw .noAPIKey if missing.
+                    let apiKey: String
+                    if provider.isLocal {
+                        apiKey = ""
+                    } else {
+                        apiKey = try KeychainService.load(for: provider)
+                    }
+
+                    // Route Ollama and LM Studio to their dedicated service paths
+                    // (they stream differently from SSE-based cloud providers).
+                    // On failure (server down, refused), automatically fall
+                    // back to the first cloud provider with a stored key.
+                    if provider == .ollama {
+                        let ollama = OllamaService()
+                        let model  = resolvedModel.isEmpty ? "gemma4:e2b" : resolvedModel
+                        do {
+                            for try await token in ollama.streamChat(
+                                model: model,
+                                systemPrompt: systemPrompt,
+                                messages: messages
+                            ) {
+                                continuation.yield(token)
+                            }
+                            continuation.finish()
+                            return
+                        } catch {
+                            await self.handleLocalFallback(
+                                from: .ollama, error: error,
+                                continuation: continuation,
+                                messages: messages, systemPrompt: systemPrompt,
+                                model: resolvedModel, maxTokens: resolvedMaxToks
+                            )
+                            return
+                        }
+                    }
+
+                    if provider == .lmStudio || provider == .deepseek {
+                        let baseURL: URL
+                        let key: String?
+                        if provider == .lmStudio {
+                            baseURL = URL(string: "http://localhost:1234/v1")!
+                            key = nil
+                        } else {
+                            baseURL = URL(string: "https://api.deepseek.com/v1")!
+                            key = apiKey
+                        }
+                        let svc = OpenAICompatibleService(baseURL: baseURL, apiKey: key)
+                        do {
+                            for try await token in svc.streamChat(
+                                model: resolvedModel,
+                                systemPrompt: systemPrompt,
+                                messages: messages,
+                                maxTokens: resolvedMaxToks
+                            ) {
+                                continuation.yield(token)
+                            }
+                            continuation.finish()
+                            return
+                        } catch {
+                            if provider == .lmStudio {
+                                await self.handleLocalFallback(
+                                    from: .lmStudio, error: error,
+                                    continuation: continuation,
+                                    messages: messages, systemPrompt: systemPrompt,
+                                    model: resolvedModel, maxTokens: resolvedMaxToks
+                                )
+                                return
+                            }
+                            throw error
+                        }
+                    }
+
+                    // Standard cloud providers (Claude, OpenAI, Gemini)
                     var request: URLRequest
                     switch provider {
                     case .claude:
@@ -104,6 +177,8 @@ actor ClaudeAPIService {
                         request = try await self.buildGeminiRequest(
                             apiKey: apiKey, model: resolvedModel, maxTokens: resolvedMaxToks,
                             messages: messages, systemPrompt: systemPrompt)
+                    default:
+                        throw ClaudeAPIError.noAPIKey  // unreachable (local/compat handled above)
                     }
 
                     let (bytes, response) = try await URLSession.shared.bytes(for: request)
@@ -136,6 +211,8 @@ actor ClaudeAPIService {
                             text = await MainActor.run { Self.parseOpenAIChunk(data) }
                         case .gemini:
                             text = await MainActor.run { Self.parseGeminiChunk(data) }
+                        default:
+                            text = nil
                         }
                         if let t = text { continuation.yield(t) }
                     }
@@ -283,6 +360,68 @@ actor ClaudeAPIService {
         let message = ChatMessage(role: .user, content: context)
         return streamResponse(messages: [message], systemPrompt: systemPrompt)
     }
+
+    // MARK: - Local provider fallback
+
+    /// Posts a notice + transparently re-runs the request through the
+    /// first cloud provider that has a stored API key. If no cloud
+    /// fallback is available, surfaces a friendly error to the chat
+    /// stream instead of crashing.
+    fileprivate func handleLocalFallback(
+        from local: APIProvider,
+        error: Error,
+        continuation: AsyncThrowingStream<String, Error>.Continuation,
+        messages: [ChatMessage],
+        systemPrompt: String,
+        model: String,
+        maxTokens: Int
+    ) async {
+        logger.warning("Local provider \(local.rawValue) failed: \(error). Trying cloud fallback.")
+
+        // Find first cloud provider with a stored Keychain key
+        let candidates: [APIProvider] = [.claude, .openai, .gemini, .deepseek]
+        let fallback = candidates.first { KeychainService.has(for: $0) }
+
+        guard let cloud = fallback else {
+            // No cloud fallback configured — surface a friendly message
+            let providerName = local == .ollama ? "Ollama" : "LM Studio"
+            continuation.yield("\(providerName) isn't running and no cloud key is set. Open Settings → AI to add an API key, or start \(providerName).")
+            continuation.finish()
+            return
+        }
+
+        // Notify UI so we can show a "switched to X" bubble
+        await MainActor.run {
+            NotificationCenter.default.post(
+                name: .claudyLocalFallback,
+                object: nil,
+                userInfo: [
+                    "from": local.rawValue,
+                    "to":   cloud.rawValue
+                ]
+            )
+            APIProvider.selected = cloud
+        }
+
+        // Re-issue request through normal pipeline — APIProvider.selected
+        // is now the cloud fallback so streamResponse routes correctly.
+        do {
+            for try await token in self.streamResponse(
+                messages: messages, systemPrompt: systemPrompt
+            ) {
+                continuation.yield(token)
+            }
+            continuation.finish()
+        } catch {
+            continuation.finish(throwing: error)
+        }
+    }
+}
+
+extension Notification.Name {
+    /// Posted when a local LLM fails and we transparently fall back to a
+    /// cloud provider. UI shows a brief "now using X" bubble.
+    static let claudyLocalFallback = Notification.Name("claudyLocalFallback")
 }
 
 /// Errors that `ClaudeAPIService` can throw to callers.

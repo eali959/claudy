@@ -30,9 +30,14 @@ final class GlobalHotkeyManager {
     // MARK: - Lifecycle
 
     private init() {
-        // Default on for new installs
+        // V5.10 — Default OFF for new installs.  Registering a global key
+        // monitor (`addGlobalMonitorForEvents` for `.keyDown`) triggers the
+        // macOS Input Monitoring permission prompt on first launch — scary
+        // and unexpected for new users.  They can now opt-in via Settings
+        // → General → "Global hotkey (⌘⇧Space)".  Existing users who already
+        // had it enabled keep their setting.
         if UserDefaults.standard.object(forKey: DefaultsKeys.globalHotkeyEnabled) == nil {
-            UserDefaults.standard.set(true, forKey: DefaultsKeys.globalHotkeyEnabled)
+            UserDefaults.standard.set(false, forKey: DefaultsKeys.globalHotkeyEnabled)
         }
         refresh()
     }

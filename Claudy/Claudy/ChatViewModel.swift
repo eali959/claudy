@@ -95,6 +95,10 @@ final class ChatViewModel {
         let saved = UserDefaults.standard.string(forKey: DefaultsKeys.chatMode) ?? ""
         chatMode = ChatMode(rawValue: saved) ?? .companion
 
+        // V5.11 — Restore persisted chat history if the user opted in.
+        // Off by default; ChatHistoryStore returns [] when disabled.
+        messages = ChatHistoryStore.shared.load()
+
         NotificationCenter.default.addObserver(
             forName: .claudyLanguageChanged,
             object: nil,
@@ -119,6 +123,7 @@ final class ChatViewModel {
 
         inputText = ""
         messages.append(ChatMessage(role: .user, content: text))
+        persistMessagesIfNeeded()   // V5.11
         NotificationCenter.default.post(name: .claudyChatSendTapped, object: nil)
 
         if isAPIMode {
@@ -150,6 +155,7 @@ final class ChatViewModel {
         let response = LocalChatResponder.shared.respond(to: input, personality: personality)
         isTyping = false
         messages.append(ChatMessage(role: .assistant, content: response))
+        persistMessagesIfNeeded()   // V5.11
     }
 
     // MARK: - Streaming reply (API key present)
@@ -197,6 +203,7 @@ final class ChatViewModel {
         isTyping = false
         isStreaming = false
         PersonalityManager.shared.isStreaming = false  // unlock blend slider
+        persistMessagesIfNeeded()   // V5.11
 
         // Post-stream ambient reactions (local, no extra API calls)
         if let lastMsg = messages.last(where: { $0.role == .assistant }), !lastMsg.content.isEmpty {
@@ -209,6 +216,8 @@ final class ChatViewModel {
             if wordCount > 300 {
                 NotificationCenter.default.post(name: .claudyAPILongResponse, object: nil)
             }
+            // Expression cue from text content — drives 3D character emoting
+            ExpressionTagger.tag(text: lastMsg.content)
         }
     }
 
@@ -218,10 +227,12 @@ final class ChatViewModel {
         NotificationCenter.default.post(name: .claudyPersonalitySwitched, object: nil)
         guard isOpen else { return }
         let line = LocalChatResponder.shared.arrivalMessage(for: mode)
-        // Brief pause so it feels like a character stepping in, not a system event
-        Task {
+        // Brief pause so it feels like a character stepping in, not a system event.
+        // V5.10 — explicit @MainActor on the Task so messages.append always
+        // runs on the main actor regardless of Swift inheritance rules.
+        Task { @MainActor [weak self] in
             try? await Task.sleep(for: .milliseconds(350))
-            messages.append(ChatMessage(role: .assistant, content: line))
+            self?.messages.append(ChatMessage(role: .assistant, content: line))
         }
     }
 
@@ -229,6 +240,15 @@ final class ChatViewModel {
         cancel()
         messages = []
         contextTrimNotified = false
+        // V5.11 — also clear the persisted file if persistence is enabled.
+        ChatHistoryStore.shared.save([])
+    }
+
+    /// V5.11 — Persist current messages if the user has opted in.  Called
+    /// by `send()`, `streamReply()`, `localReply(to:)` after each append.
+    /// Idempotent: write is a no-op when persistence is disabled.
+    func persistMessagesIfNeeded() {
+        ChatHistoryStore.shared.save(messages)
     }
 
     // MARK: - Context trimming

@@ -90,15 +90,66 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
         button.image = icon ?? makeMenuBarIcon()
         button.imageScaling = .scaleProportionallyDown
         button.toolTip = "Claud-y"
-        statusItem?.menu = buildMenu()
+        let m = buildMenu()
+        m.delegate = self     // refresh provider/mode header on open
+        statusItem?.menu = m
     }
 
     private func buildMenu() -> NSMenu {
         let menu = NSMenu()
 
-        // Personality submenu
+        // ── V4 STATUS HEADER ────────────────────────────────────────────────
+        // Three independent axes shown at the top so the user can see at a
+        // glance which AI is active, which personality, and which behaviour
+        // mode.  These are NOT the same thing — Provider = which AI talks,
+        // Personality = how it talks, Behaviour Mode = what it focuses on.
+        let provider = APIProvider.selected
+        let aiItem = NSMenuItem(
+            title: "AI: \(provider.displayName) · \(provider.isLocal ? "On-device" : "Cloud")",
+            action: nil, keyEquivalent: ""
+        )
+        aiItem.image = NSImage(systemSymbolName: provider.icon, accessibilityDescription: nil)
+        aiItem.isEnabled = false
+        menu.addItem(aiItem)
+
+        let personalityName = PersonalityManager.shared.currentMode.displayName
+        let personalityHeader = NSMenuItem(
+            title: "Personality: \(personalityName)",
+            action: nil, keyEquivalent: ""
+        )
+        personalityHeader.image = NSImage(systemSymbolName: "person.crop.circle", accessibilityDescription: nil)
+        personalityHeader.isEnabled = false
+        menu.addItem(personalityHeader)
+
+        // Behaviour mode — only show if BehaviorModeManager is available.
+        // Read directly from UserDefaults to avoid coupling.
+        let behaviorRaw = UserDefaults.standard.string(forKey: "BehaviorMode") ?? "normal"
+        let behaviorHeader = NSMenuItem(
+            title: "Mode: \(behaviorRaw.capitalized)",
+            action: nil, keyEquivalent: ""
+        )
+        behaviorHeader.image = NSImage(systemSymbolName: "slider.horizontal.3", accessibilityDescription: nil)
+        behaviorHeader.isEnabled = false
+
+        // V4 polish — live activity indicators (demo running / voice mode active)
+        if VoiceModeManager.shared.isVoiceModeActive {
+            let voiceItem = NSMenuItem(
+                title: "🎙 Voice mode active",
+                action: nil, keyEquivalent: ""
+            )
+            voiceItem.image = NSImage(systemSymbolName: "waveform.circle.fill",
+                                       accessibilityDescription: nil)
+            voiceItem.isEnabled = false
+            menu.addItem(voiceItem)
+        }
+        menu.addItem(behaviorHeader)
+
+        menu.addItem(.separator())
+
+        // ── SWITCHERS ───────────────────────────────────────────────────────
+        // Personality submenu (full picker)
         let personalityMenu = NSMenu()
-        personalityMenu.delegate = self          // refreshes checkmarks on open
+        personalityMenu.delegate = self
         let pm = PersonalityManager.shared
         for mode in PersonalityMode.allCases {
             let item = NSMenuItem(
@@ -112,13 +163,17 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
             personalityMenu.addItem(item)
         }
         personalitySubmenu = personalityMenu
-        let personalityItem = NSMenuItem(title: "Personality", action: nil, keyEquivalent: "")
+        let personalityItem = NSMenuItem(title: "Switch Personality", action: nil, keyEquivalent: "")
         personalityItem.submenu = personalityMenu
         menu.addItem(personalityItem)
 
+        // Note: AI Provider switcher and Behaviour Mode switcher are reachable
+        // via Settings… (avoids three deeply nested submenus in the menu bar).
+
         menu.addItem(.separator())
 
-        let toggleItem = NSMenuItem(title: "Show / Hide Claud-y", action: #selector(toggleCharacter), keyEquivalent: "")
+        let toggleItem = NSMenuItem(title: "Show / Hide Claud-y", action: #selector(toggleCharacter), keyEquivalent: " ")
+        toggleItem.keyEquivalentModifierMask = [.command, .shift]
         toggleItem.target = self
         menu.addItem(toggleItem)
 
@@ -127,6 +182,18 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
         let settingsItem = NSMenuItem(title: "Settings…", action: #selector(openSettings), keyEquivalent: ",")
         settingsItem.target = self
         menu.addItem(settingsItem)
+
+        // Profile export / import
+        let profileMenu = NSMenu()
+        let exportItem = NSMenuItem(title: "Export Profile…", action: #selector(exportProfile), keyEquivalent: "")
+        exportItem.target = self
+        profileMenu.addItem(exportItem)
+        let importItem = NSMenuItem(title: "Import Profile…", action: #selector(importProfile), keyEquivalent: "")
+        importItem.target = self
+        profileMenu.addItem(importItem)
+        let profileParent = NSMenuItem(title: "Profile", action: nil, keyEquivalent: "")
+        profileParent.submenu = profileMenu
+        menu.addItem(profileParent)
 
         menu.addItem(.separator())
 
@@ -163,11 +230,20 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
         // AppKit guarantees this is called on the main thread.
         // @preconcurrency on NSMenuDelegate lets us keep this @MainActor-isolated
         // so we can access personalitySubmenu without any Sendability issues.
-        guard menu === personalitySubmenu else { return }
-        let current = PersonalityManager.shared.currentMode
-        for item in menu.items {
-            guard let raw = item.representedObject as? String else { continue }
-            item.state = (raw == current.rawValue) ? .on : .off
+        if menu === personalitySubmenu {
+            let current = PersonalityManager.shared.currentMode
+            for item in menu.items {
+                guard let raw = item.representedObject as? String else { continue }
+                item.state = (raw == current.rawValue) ? .on : .off
+            }
+            return
+        }
+        // Main status menu — rebuild to refresh the Provider/Mode header
+        // since the user may have switched providers since last open.
+        if menu === statusItem?.menu {
+            let fresh = buildMenu()
+            fresh.delegate = self
+            statusItem?.menu = fresh
         }
     }
 
@@ -247,6 +323,19 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
         NSApp.setActivationPolicy(.regular)
         NSApp.activate(ignoringOtherApps: true)
         settingsWindow?.makeKeyAndOrderFront(nil)
+    }
+
+    @objc private func exportProfile() {
+        PersonalityExporter().exportCurrentProfile()
+    }
+
+    @objc private func importProfile() {
+        PersonalityExporter().importProfile { profile in
+            guard let profile = profile else { return }
+            if let mode = PersonalityMode(rawValue: profile.primaryMode) {
+                PersonalityManager.shared.currentMode = mode
+            }
+        }
     }
 
     #if DEBUG

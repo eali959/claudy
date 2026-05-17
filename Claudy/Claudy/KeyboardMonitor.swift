@@ -28,7 +28,30 @@ final class KeyboardMonitor {
 
     init(viewModel: CharacterViewModel) {
         self.viewModel = viewModel
-        startMonitoring()
+        // V5.10 — Only register the global keyboard monitor if the user has
+        // explicitly opted into keyboard reactions.  Default is OFF for new
+        // installs (Input Monitoring permission would be requested otherwise).
+        if UserDefaults.standard.bool(forKey: DefaultsKeys.keyboardReactionsEnabled) {
+            startMonitoring()
+        }
+        // Listen for runtime toggle changes so the user can switch this on
+        // without restarting the app.
+        NotificationCenter.default.addObserver(
+            forName: .claudyKeyboardReactionsToggled, object: nil, queue: .main
+        ) { [weak self] _ in
+            Task { @MainActor [weak self] in self?.handleEnabledChange() }
+        }
+    }
+
+    @MainActor
+    private func handleEnabledChange() {
+        let enabled = UserDefaults.standard.bool(forKey: DefaultsKeys.keyboardReactionsEnabled)
+        if enabled && keyDownMonitor == nil {
+            startMonitoring()
+        } else if !enabled && keyDownMonitor != nil {
+            if let km = keyDownMonitor { NSEvent.removeMonitor(km); keyDownMonitor = nil }
+            if let fm = flagsMonitor   { NSEvent.removeMonitor(fm); flagsMonitor   = nil }
+        }
     }
 
     deinit {

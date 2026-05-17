@@ -21,6 +21,7 @@ struct CharacterSceneView: View {
     let onShowDonate: () -> Void
     let onShowScratchpad: () -> Void
     @Environment(WindowManager.self) private var windowManager
+    @AppStorage(DefaultsKeys.use3DMode) private var use3DMode: Bool = true
 
     var body: some View {
         ZStack(alignment: .bottom) {
@@ -52,21 +53,95 @@ struct CharacterSceneView: View {
 
                     // Character
                     ZStack {
-                        ClaudyCharacterView(
-                            animationState:  characterViewModel.animationState,
-                            isBlinking:      characterViewModel.isBlinking,
-                            irisOffset:      characterViewModel.irisOffset,
-                            tickleIntensity: characterViewModel.tickleIntensity,
-                            danceMove:       characterViewModel.danceModeManager.currentMove,
-                            accessory:       CharacterAccessory.active,
-                            characterScale:  windowManager.characterScale,
-                            onTap:           onTap,
-                            onDoubleTap:     onDoubleTap,
-                            onDragBegan:     onDragBegan,
-                            onDragChanged:   onDragChanged,
-                            onDragEnded:     onDragEnded
-                        )
-                        .frame(width: WindowManager.characterSize, height: WindowManager.characterSize)
+                        // 3D or 2D character
+                        Group {
+                        if use3DMode {
+                            // All-3-D character: torso loaded from USDZ + procedurally
+                            // built arms, legs, eyes, and mouth (see Claudy3DView).
+                            // No SwiftUI face overlay — the eyes and mouth are
+                            // RealityKit primitives attached to the torso.
+                            ClaudyRealityView(
+                                animationState: characterViewModel.animationState,
+                                isBlinking: characterViewModel.effectiveBlinking,
+                                isHeldClosedEyes: characterViewModel.isHeldClosedEyes,
+                                irisOffset: characterViewModel.irisOffset,
+                                tickleIntensity: characterViewModel.tickleIntensity,
+                                danceMove: characterViewModel.danceModeManager.currentMove,
+                                accessory: CharacterAccessory.active,
+                                characterScale: windowManager.characterScale,
+                                isHovered: characterViewModel.isHovered,
+                                hunger: characterViewModel.tamagotchiManager.hunger,
+                                happiness: characterViewModel.tamagotchiManager.happiness,
+                                energy: characterViewModel.tamagotchiManager.energy,
+                                isTyping: chatViewModel.isTyping,
+                                isSpeaking: chatViewModel.isStreaming,
+                                focusMode: characterViewModel.behaviorModeManager.currentMode,
+                                weatherCondition: characterViewModel.weatherCondition,
+                                spotifyPlaying: characterViewModel.spotifyPlaying,
+                                spotifyGenre: characterViewModel.spotifyGenre,
+                                pomodoroState: characterViewModel.pomodoroManager.state,
+                                onTap: onTap,
+                                onDoubleTap: onDoubleTap
+                            )
+                            .frame(width: WindowManager.characterSize, height: WindowManager.characterSize)
+                            // V4 FINAL — SwiftUI-native click handling.  Native
+                            // count-2 deferral implements the click promotion
+                            // pattern correctly; previous NSView approach was
+                            // intercepted by the parent DragGesture, breaking
+                            // double-click → chat in 3D mode.
+                            .contentShape(Rectangle())
+                            .onTapGesture(count: 2) { onDoubleTap() }
+                            .onTapGesture(count: 1) { onTap() }
+                            .simultaneousGesture(
+                                DragGesture(minimumDistance: 5, coordinateSpace: .global)
+                                    .onChanged { _ in onDragBegan(); onDragChanged(.zero) }
+                                    .onEnded { _ in onDragEnded() }
+                            )
+                        } else {
+                            ClaudyCharacterView(
+                                animationState:  characterViewModel.animationState,
+                                isBlinking:      characterViewModel.effectiveBlinking,
+                                irisOffset:      characterViewModel.irisOffset,
+                                tickleIntensity: characterViewModel.tickleIntensity,
+                                danceMove:       characterViewModel.danceModeManager.currentMove,
+                                accessory:       CharacterAccessory.active,
+                                characterScale:  windowManager.characterScale,
+                                onTap:           onTap,
+                                onDoubleTap:     onDoubleTap,
+                                onDragBegan:     onDragBegan,
+                                onDragChanged:   onDragChanged,
+                                onDragEnded:     onDragEnded
+                            )
+                            .frame(width: WindowManager.characterSize, height: WindowManager.characterSize)
+                        } // end else (2D mode)
+                        } // end Group
+                        // V4 polish — 3D-mode-only overlays (thinking dots, confetti).
+                        // 2D character has its own equivalents inside ClaudyCharacterView.
+                        .overlay(alignment: .top) {
+                            if use3DMode && chatViewModel.isTyping {
+                                ThinkingDotsOverlay3D()
+                                    .offset(y: -6)
+                                    .transition(.scale.combined(with: .opacity))
+                            }
+                        }
+                        // Sleep ZZZ overlay — both 2D and 3D, floats top-right of head.
+                        .overlay(alignment: .topTrailing) {
+                            if characterViewModel.animationState == .sleeping {
+                                SleepZZZOverlay()
+                                    .offset(x: 8, y: 10)
+                                    .transition(.opacity.combined(with: .scale(scale: 0.7, anchor: .bottomLeading)))
+                                    .allowsHitTesting(false)
+                            }
+                        }
+                        .animation(.easeInOut(duration: 0.5), value: characterViewModel.animationState == .sleeping)
+                        .overlay {
+                            if use3DMode && characterViewModel.showConfetti {
+                                ConfettiBurst3D()
+                                    .id("confetti-3d-\(characterViewModel.confettiTriggerID)")
+                                    .allowsHitTesting(false)
+                            }
+                        }
+                        .animation(.easeInOut(duration: 0.20), value: chatViewModel.isTyping)
                         .scaleEffect(windowManager.characterScale)
                         .opacity(characterOpacity)
                         .accessibilityLabel("Claud-y")
@@ -236,6 +311,7 @@ private struct DemoPill: View {
             case .v1: return "V1 DEMO"
             case .v2: return "V2 DEMO"
             case .v3: return "V3.1 DEMO"
+            case .v4: return "V4 DEMO"
             case nil: return "DEMO"
             }
         }()

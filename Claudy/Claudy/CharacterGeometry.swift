@@ -26,14 +26,14 @@ struct CharacterGeometry {
     static let characterFrameWidth:  CGFloat = 130
     static let characterFrameHeight: CGFloat = 150
 
-    // MARK: - Feet
+    // MARK: - Feet (v4.0: two-leg biped — was four legs)
     static let feetGroupOffsetY:    CGFloat = 44
     static let feetFrameWidth:      CGFloat = 90
-    static let feetFrameHeight:     CGFloat = 17
-    static let footWidth:           CGFloat = 18
-    static let footHeight:          CGFloat = 17
-    static let footCorner:          CGFloat = 6
-    static let footPositions:       [CGFloat] = [-28, -8, 8, 28]
+    static let feetFrameHeight:     CGFloat = 20
+    static let footWidth:           CGFloat = 22   // slightly wider for biped stance
+    static let footHeight:          CGFloat = 20
+    static let footCorner:          CGFloat = 7
+    static let footPositions:       [CGFloat] = [-16, 16]   // two legs: left, right
 
     // MARK: - Arms
     static let armWidth:            CGFloat = 14

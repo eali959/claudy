@@ -38,11 +38,13 @@ final class WindowManager {
         }
 
         /// Scale applied to ClaudyCharacterView (relative to the panel's fixed frame).
+        /// V5.1 — bumped up across all three presets; Claudy was reading too small,
+        /// especially in 3D where the camera framing leaves more headroom.
         var scale: CGFloat {
             switch self {
-            case .small:  return 0.60
-            case .medium: return 0.80
-            case .large:  return 1.00
+            case .small:  return 0.85
+            case .medium: return 1.08
+            case .large:  return 1.30
             }
         }
     }

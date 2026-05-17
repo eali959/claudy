@@ -44,6 +44,13 @@ struct GeneralSettingsSection: View {
                 case .gemini:
                     Text("Gemini 2.0 Flash — fast").tag("gemini-2.0-flash")
                     Text("Gemini 1.5 Pro — smart").tag("gemini-1.5-pro")
+                case .deepseek:
+                    Text("DeepSeek Chat").tag("deepseek-chat")
+                    Text("DeepSeek Reasoner").tag("deepseek-reasoner")
+                case .ollama, .lmStudio:
+                    // Model list is dynamic — managed in ProviderSettingsSection
+                    Text(activeProvider.defaultModel.isEmpty ? "Select in Provider settings" : activeProvider.defaultModel)
+                        .tag(activeProvider.defaultModel)
                 }
             }
             .frame(minHeight: 44)
@@ -61,7 +68,27 @@ struct GeneralSettingsSection: View {
                 set: { GlobalHotkeyManager.shared.isEnabled = $0 }
             ))
             .frame(minHeight: 44)
-            Text("Open or close the Claud-y chat from any app. Disable if it conflicts with another shortcut.")
+            Text("Open or close the Claud-y chat from any app. macOS will ask once for Input Monitoring permission.")
+                .font(.caption).foregroundStyle(.secondary)
+
+            // V5.10 — opt-in toggles for the two other Input-Monitoring features.
+            Toggle("Keyboard reactions", isOn: Binding(
+                get: { UserDefaults.standard.bool(forKey: DefaultsKeys.keyboardReactionsEnabled) },
+                set: { newValue in
+                    UserDefaults.standard.set(newValue, forKey: DefaultsKeys.keyboardReactionsEnabled)
+                    NotificationCenter.default.post(name: .claudyKeyboardReactionsToggled, object: nil)
+                }
+            ))
+            .frame(minHeight: 44)
+            Text("Claud-y reacts to typing bursts, undo streaks, and Caps Lock. Requires Input Monitoring permission.")
+                .font(.caption).foregroundStyle(.secondary)
+
+            Toggle("Demo keyboard shortcuts", isOn: Binding(
+                get: { UserDefaults.standard.bool(forKey: DefaultsKeys.demoShortcutsEnabled) },
+                set: { UserDefaults.standard.set($0, forKey: DefaultsKeys.demoShortcutsEnabled) }
+            ))
+            .frame(minHeight: 44)
+            Text("Hold Shift+Option+D for V1 demo, Shift+Option+V for V4 demo. You can also start demos from Help. Requires Input Monitoring permission. Restart Claud-y after toggling.")
                 .font(.caption).foregroundStyle(.secondary)
         } header: {
             Label("General", systemImage: "gearshape.fill")
